@@ -1,0 +1,391 @@
+{
+  "createdAt": "2025-09-03T09:05:31.873Z",
+  "updatedAt": "2025-09-16T19:33:47.000Z",
+  "id": "44jW8dYVqM5LoF3X",
+  "name": "backup workflows",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "400c349a-6694-4ebc-8cc8-4b36b30cdd05",
+              "name": "folderName",
+              "value": "=Backup_{{ $now.format('yyyy-MM-dd') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "755ffce8-1530-4549-aedb-15673b0156f8",
+      "name": "Set Variables",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -800,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "2cf66ae1-ea56-4b65-b1e3-011b7b9281bf",
+      "name": "Split Workflows",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        272
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "workflow-content",
+              "name": "nodes",
+              "value": "={{ JSON.stringify($json, null, 2) }}",
+              "type": "string"
+            },
+            {
+              "id": "workflow-filename",
+              "name": "fileName",
+              "value": "={{ $json.name }}.json",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e7324bf9-9a1f-43c1-b9b6-0834ed164ab2",
+      "name": "Prepare File Content",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "ritz7support",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "backup",
+          "mode": "list",
+          "cachedResultName": "backup",
+          "cachedResultUrl": "https://github.com/manu9986/backup"
+        },
+        "filePath": "={{ $('Set Variables').item.json.folderName }}/{{ $('Prepare File Content').item.json.fileName }}\n",
+        "fileContent": "={{ $json.data }}",
+        "commitMessage": "={{ $now.setZone('Asia/Kolkata').format('yyyy-MM-dd T') }} Backup completed"
+      },
+      "id": "d6d3d179-3a29-471a-a977-93a2100b857d",
+      "name": "Upload to GitHub",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        544,
+        496
+      ],
+      "webhookId": "20f36eee-6bfe-4264-9490-d76d5c1ef46d",
+      "alwaysOutputData": false,
+      "notesInFlow": true,
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "i8iTLik7poFqHLS3",
+          "name": "Support-Ritz7"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "nodes",
+        "options": {
+          "fileName": "={{ $json.fileName }}"
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        96,
+        416
+      ],
+      "id": "bc93f539-679f-4e2f-be01-a63bb8469f1e",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1mQEuTxNLWgEaZM_qLFChXuoAvfwgOK6Eh_GJf_g-FEw",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mQEuTxNLWgEaZM_qLFChXuoAvfwgOK6Eh_GJf_g-FEw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1913844540,
+          "mode": "list",
+          "cachedResultName": "Sheet10",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mQEuTxNLWgEaZM_qLFChXuoAvfwgOK6Eh_GJf_g-FEw/edit#gid=1913844540"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Error Message": "={{ $json.error }}",
+            "File Name": "={{ $('Prepare File Content').item.json.fileName }}",
+            "Folder Name": "={{ $('Set Variables').item.json.folderName }}",
+            "DateTime": "={{ $('Set Variables').item.json.folderName }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "DateTime",
+              "displayName": "DateTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Folder Name",
+              "displayName": "Folder Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "File Name",
+              "displayName": "File Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Error Message",
+              "displayName": "Error Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        848,
+        592
+      ],
+      "id": "bc7e0ce7-2de1-4858-a683-34b1741c9d82",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3W2kb1yqrQaJru75",
+          "name": "support@ritz7.com"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        272
+      ],
+      "id": "18fc62ea-3b1c-4dd4-bc46-4d5266242f48",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "returnAll": false,
+        "limit": 10,
+        "filters": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        272
+      ],
+      "id": "31f18ce6-6dbb-435a-bc19-e605015b151e",
+      "name": "Get many workflows",
+      "credentials": {
+        "n8nApi": {
+          "id": "LREHCuAW7UjBNIUw",
+          "name": "n8n account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        320,
+        416
+      ],
+      "id": "e1d8d3cc-1090-4bfa-9014-9f862a1e4757",
+      "name": "Extract from File"
+    }
+  ],
+  "connections": {
+    "Set Variables": {
+      "main": [
+        [
+          {
+            "node": "Get many workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Workflows": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Prepare File Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare File Content": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload to GitHub": {
+      "main": [
+        [
+          {
+            "node": "Split Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Split Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many workflows": {
+      "main": [
+        [
+          {
+            "node": "Split Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Upload to GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "a69a4028-272c-44d5-841d-3f68ffe4a540",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-03T09:05:31.877Z",
+      "updatedAt": "2025-09-03T09:05:31.877Z",
+      "role": "workflow:owner",
+      "workflowId": "44jW8dYVqM5LoF3X",
+      "projectId": "yyDWytJdzKNmkW82"
+    }
+  ],
+  "tags": []
+}
