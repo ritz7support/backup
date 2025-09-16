@@ -1,0 +1,146 @@
+{
+  "createdAt": "2025-09-01T04:31:24.730Z",
+  "updatedAt": "2025-09-01T06:11:06.000Z",
+  "id": "4p6e1sM2gi8Zdwjo",
+  "name": "Testing Compression",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -544,
+        -96
+      ],
+      "id": "01312eea-07d7-41ce-a1f6-b553c743d149",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "sendTo": "ritesh@ritz7.com",
+        "subject": "Testing 30 MB",
+        "emailType": "text",
+        "message": "Testing",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        48,
+        -80
+      ],
+      "id": "49f7cf01-0447-4a20-b49d-01a84fa27411",
+      "name": "Send a message",
+      "webhookId": "1ab404c7-fbf2-4bbe-90cd-6c615c8a2b8f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "ekUZTBAlOBU1R1u3",
+          "name": "anoop_gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Test",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "File",
+              "fieldType": "file",
+              "multipleFiles": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -544,
+        96
+      ],
+      "id": "8f3b1731-5c1f-4c3a-b2bd-fe66ed3882f9",
+      "name": "On form submission",
+      "webhookId": "c5b32a65-8b10-4576-9ea8-d0934bb25f0e"
+    },
+    {
+      "parameters": {
+        "operation": "compress",
+        "binaryPropertyName": "File",
+        "outputFormat": "gzip",
+        "fileName": "Compressed"
+      },
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        -272,
+        64
+      ],
+      "id": "6f101b5d-b593-45d7-aee3-ba67de2ea670",
+      "name": "Compression"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Compression",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compression": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "8509395c-bf91-47da-a39a-b8e03e0f8d67",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-01T04:31:24.735Z",
+      "updatedAt": "2025-09-01T04:31:24.735Z",
+      "role": "workflow:owner",
+      "workflowId": "4p6e1sM2gi8Zdwjo",
+      "projectId": "yyDWytJdzKNmkW82"
+    }
+  ],
+  "tags": []
+}
