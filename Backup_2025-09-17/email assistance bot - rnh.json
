@@ -1,0 +1,526 @@
+{
+  "createdAt": "2025-09-16T15:24:58.973Z",
+  "updatedAt": "2025-09-16T17:13:23.000Z",
+  "id": "5UXCsMKzvPauZOpd",
+  "name": "email assistance bot - rnh",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -448,
+        96
+      ],
+      "id": "8781533c-7821-46b7-93f2-f7bd50dbaeb2",
+      "name": "Telegram Trigger",
+      "webhookId": "e6ded15e-114d-44eb-a20a-3225e8be8eb9",
+      "credentials": {
+        "telegramApi": {
+          "id": "t71UBChM6wzX1TOW",
+          "name": "Ritz"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Get many messages in Gmail and if the user ask to search for category make it capital letters and match it categories for example it should be CATEGORY_PROMOTIONS for promotions like wise for othes also convert to this ",
+        "operation": "getAll",
+        "limit": 3,
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "filters": {
+          "labelIds": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Label_Names_or_IDs', ``, 'string') }}",
+          "sender": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Sender', ``, 'string') }}"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        32,
+        320
+      ],
+      "id": "1022311b-bb51-4602-8915-b122c3445f0e",
+      "name": "Get many messages in Gmail",
+      "webhookId": "af24f3a5-d047-4d40-8678-b86a3b878729",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QfIYvKuX7jALkol2",
+          "name": "Ritesh-P"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d7447d39-3162-4b62-8dd0-c0445a492381",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        96
+      ],
+      "id": "1e93d72f-47e3-4341-a099-852d8b9d22de",
+      "name": "success"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.response }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1584,
+        96
+      ],
+      "id": "8d2773e2-cbf9-4a89-8f32-76a25058dd61",
+      "name": "Send a text message",
+      "webhookId": "4faeb180-da45-4497-aaea-408b82e69781",
+      "credentials": {
+        "telegramApi": {
+          "id": "t71UBChM6wzX1TOW",
+          "name": "Ritz"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.original_message || $json.message.text || $json.text }}\n",
+        "options": {
+          "systemMessage": "=# Email Management Assistant\nYou are a professional email management assistant. All emails must be formatted professionally in HTML and signed off as \"Best regards,\" followed by the sender's name.\n\n## Available Tools\n- **Send Email**: Send emails to recipients\n- **Create Draft**: Create email drafts for review\n- **Get Emails**: Retrieve emails from inbox\n- **Get Labels**: Retrieve available email labels\n- **Mark Unread**: Mark emails as unread (requires message ID)\n- **Label Email**: Apply labels to emails (requires message ID and label ID)\n- **Email Reply**: Reply to emails (requires message ID)\n- **Get Mail By Name**: Search Gmail for all email addresses and messages related to a given person’s name or partial name\n\n## Instructions\n- Always maintain a professional tone and formatting in all email content.\n- Use HTML formatting for email content.\n- When marking emails as unread or labeling emails, first use \"Get Emails\" to obtain the message ID.\n- When applying labels, use \"Get Labels\" to get the correct label ID.\n- **When asked to send an email to a person by name (not a direct email address):**\n   1. You MUST IMMEDIATELY use the **Get Mail By Name** tool to search Gmail for all addresses/messages related to that name before replying.\n   2. List all matching possible addresses for the user to select in your FIRST reply—do NOT ask the user for the email first.\n   3. If more than one address is found, send the user a numbered list and request them to select the recipient.\n   4. Wait for the user's reply with their selection before sending the email.\n   5. If only one address matches, confirm with the user before sending.\n   6. Never send an email until the user has explicitly confirmed the correct recipient address.  \n- Be dynamic: apply this workflow to any name or recipient provided—never assume or hardcode.\n- Do NOT ask for the email address until you have searched and found zero possible addresses.\n- Current date/time: {{ $now }}\n\n## Response Format\nProvide clear confirmation of actions taken and any relevant details about the email operations performed. Always state the exact recipient email address used in each send/draft/reply confirmation.\n\nWhen confirming an email address with the user:\n\nAlways remember the user’s original requested message, and use that content as the \"Message\" field when calling the Send Email tool.\n\nIf a Subject is not explicitly provided by the user:\n\nAnalyze the message content and generate an appropriate subject automatically that reflects the core intent or topic of the message.\n\nIf the content is too vague to determine a meaningful subject, fall back to the default subject \"New Message\".\n\nand while sending the email at last just add my name so that receiver can understand from whom the mail is sent from that mean Manoj \n\nDO NOT INCLUDE ANY UNSUPPORTED HTML TAG\nDO NOT INCLUDE ANGULAR BRACKETS\n"
+        }
+      },
+      "id": "77ba6241-aa79-4873-be7f-6f16bf7cd8b2",
+      "name": "Email Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        288,
+        96
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "“Sends an email to the specified address with the subject and message provided by the user. Message should be the full email body as described in the user’s original request.” and while sending the mail at ending please mention the sender actual name (hari krishna) ",
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', `recipient email address`, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `email subject line`, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        416,
+        320
+      ],
+      "id": "1ce06a04-df08-47cf-a202-94e7b6de6d31",
+      "name": "Send Email",
+      "webhookId": "8e22e48f-3825-40d5-ab69-9fa18ab0c845",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QfIYvKuX7jALkol2",
+          "name": "Ritesh-P"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $fromAI(\"ID\",\"the message ID\") }}",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        320
+      ],
+      "id": "b5b70a0e-ff4b-41aa-a007-6b9546bd3971",
+      "name": "Email Reply",
+      "webhookId": "ff59b7f8-8b2c-46c3-a2bc-d2c154e0fc1d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QfIYvKuX7jALkol2",
+          "name": "Ritesh-P"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $fromAI(\"ID\",\"the ID of the message\") }}",
+        "labelIds": "={{ $fromAI(\"labelID\") }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        800,
+        320
+      ],
+      "id": "1efd0f3d-ea17-48c6-a076-5e2e0e4f5b15",
+      "name": "Label Emails",
+      "webhookId": "1b49e3f2-7619-4d01-8687-9681620a43d2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QfIYvKuX7jALkol2",
+          "name": "Ritesh-P"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $fromAI(\"subject\") }}",
+        "emailType": "html",
+        "message": "={{ $fromAI(\"emailBody\") }}",
+        "options": {
+          "sendTo": "={{ $fromAI(\"emailAddress\") }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        320
+      ],
+      "id": "848464da-57de-4a8c-8079-67864b6546e3",
+      "name": "Create Draft",
+      "webhookId": "57ca180b-06e6-4013-a64e-086ad021fec0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QfIYvKuX7jALkol2",
+          "name": "Ritesh-P"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        160,
+        320
+      ],
+      "id": "3d75851e-8950-424b-b06f-c93595fb0daf",
+      "name": "Get Labels",
+      "webhookId": "80763c00-6294-4301-b1d7-fce16717fba7",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QfIYvKuX7jALkol2",
+          "name": "Ritesh-P"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsUnread",
+        "messageId": "={{ $fromAI(\"Message_ID\",``,'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        288,
+        320
+      ],
+      "id": "6d1dfd7f-6baf-4549-adcf-df9f407eec0b",
+      "name": "Mark Unread",
+      "webhookId": "d7e63e20-1c62-406d-9b30-6e981651f8b0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QfIYvKuX7jALkol2",
+          "name": "Ritesh-P"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Search Gmail for all email addresses and messages related to the provided person’s name or partial name. Use this tool whenever you need to find possible email addresses for a user-provided name. Always run this tool FIRST when the user requests to send email to someone by name.",
+        "operation": "getAll",
+        "returnAll": true,
+        "filters": {
+          "q": "={{ $('extract sender').item.json.sender_query }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        928,
+        320
+      ],
+      "id": "0cd6563d-5fe5-4d66-b20b-8ccdf1dcfcb1",
+      "name": "get mail",
+      "webhookId": "1cc68f2d-e11a-4888-bbe2-418bcbe4c810",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "QfIYvKuX7jALkol2",
+          "name": "Ritesh-P"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        320
+      ],
+      "id": "735708aa-3d37-4bc5-9c62-8f2e18eca754",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "instructions": "output REMOVE ANY ANGULAR BRACKETS AS IT IS NOT SUPPORTED HTML TG FOR TELEGRAM \n",
+        "codeGeneratedForPrompt": "output REMOVE ANY ANGULAR BRACKETS AS IT IS NOT SUPPORTED HTML TG FOR TELEGRAM \n",
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  const output = item?.json?.output;\n  const cleanedOutput = output.replace(/<.*?>/g, \"\");\n  item.json.output = cleanedOutput;\n  return item;\n});\nreturn updatedItems;\n"
+      },
+      "type": "n8n-nodes-base.aiTransform",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        96
+      ],
+      "id": "4f93105f-0261-4078-b981-84c8b57f75eb",
+      "name": "AI Transform"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        320
+      ],
+      "id": "e8f96d0c-5c86-426b-b48c-0f39f791c50d",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "CW6nOsDoAKhKGS2m",
+          "name": "OpenAi account 5"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many messages in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "success": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Agent": {
+      "main": [
+        [
+          {
+            "node": "AI Transform",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Labels": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Unread": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Reply": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Draft": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Label Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get mail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Transform": {
+      "main": [
+        [
+          {
+            "node": "success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "edcce1b7-c1bf-479d-ba65-80e6bd3c28d2",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "createdAt": "2025-09-16T15:24:58.976Z",
+      "updatedAt": "2025-09-16T15:24:58.976Z",
+      "role": "workflow:owner",
+      "workflowId": "5UXCsMKzvPauZOpd",
+      "projectId": "yyDWytJdzKNmkW82"
+    }
+  ],
+  "tags": []
+}
