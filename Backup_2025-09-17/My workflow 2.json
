@@ -1,0 +1,224 @@
+{
+  "createdAt": "2025-07-08T10:32:17.124Z",
+  "updatedAt": "2025-08-31T16:06:50.000Z",
+  "id": "6FGoNtopAeM6NDXk",
+  "name": "My workflow 2",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -110
+      ],
+      "id": "90d36d56-e9fa-4068-8cdb-a45fd1763aed",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "resource": "list",
+        "operation": "get",
+        "site": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.microsoftSharePoint",
+      "typeVersion": 1,
+      "position": [
+        220,
+        -110
+      ],
+      "id": "c40e31fc-2046-41fb-b8ad-cff060a13492",
+      "name": "Get list"
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        440,
+        -185
+      ],
+      "id": "6d0f3aa2-c357-4e3e-8efd-ff43c9ff6135",
+      "name": "Send message and wait for response",
+      "webhookId": "1c7cee36-43e3-4d2d-96fd-0ba58056752e",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "IPPDgz7YMlObL898",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": {
+          "__rl": true,
+          "mode": "id",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -260
+      ],
+      "id": "b88ce76d-6f11-4317-903f-5dae0e3d402b",
+      "name": "Reply to a message",
+      "webhookId": "f846ed86-2de5-48bb-be81-05d2ad0a4e36",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "IPPDgz7YMlObL898",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        880,
+        -110
+      ],
+      "id": "ff5d7e7f-d4af-4bc6-a180-a7a750f6ea40",
+      "name": "Create sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vdf71LKm5piveG95",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "messageAttachment",
+        "messageId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        -110
+      ],
+      "id": "3ac44d8c-c702-4ec6-9215-9e97151b9574",
+      "name": "Add an attachment",
+      "webhookId": "ff2931e7-910e-4656-9260-c8309389b52e",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "IPPDgz7YMlObL898",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get list",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get list": {
+      "main": [
+        [
+          {
+            "node": "Send message and wait for response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message and wait for response": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message": {
+      "main": [
+        [
+          {
+            "node": "Create sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create sheet": {
+      "main": [
+        [
+          {
+            "node": "Add an attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "15d5d36d-39cf-4ae6-8340-d804f3cf8fe4",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-07-08T10:32:17.126Z",
+      "updatedAt": "2025-07-08T10:32:17.126Z",
+      "role": "workflow:owner",
+      "workflowId": "6FGoNtopAeM6NDXk",
+      "projectId": "6Znejjxk88DHflIg"
+    }
+  ],
+  "tags": []
+}
