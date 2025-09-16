@@ -1,0 +1,395 @@
+{
+  "createdAt": "2025-09-03T06:03:06.717Z",
+  "updatedAt": "2025-09-03T06:13:59.000Z",
+  "id": "5Fwnw5wCa18oWxin",
+  "name": "SEO based YT Video Description Writeri",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        160
+      ],
+      "id": "f6f11e3a-d71a-4ecd-bf83-a9dda44f53b4",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "CW6nOsDoAKhKGS2m",
+          "name": "OpenAi account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1CuLbiyCoFMbRRikF_GUpXfGkFY3mTH7zLZLfbZKoBRc",
+          "mode": "list",
+          "cachedResultName": "youtube database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CuLbiyCoFMbRRikF_GUpXfGkFY3mTH7zLZLfbZKoBRc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1580661013,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CuLbiyCoFMbRRikF_GUpXfGkFY3mTH7zLZLfbZKoBRc/edit#gid=1580661013"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Yes"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -96,
+        0
+      ],
+      "id": "2563dd33-a33e-4b32-a053-ef3bbb14fb38",
+      "name": "Get Transcription of the YT Video",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "vdf71LKm5piveG95",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert YouTube video description writer.\nI will give you a video transcript or script. \nWrite the final output in the following exact structure:\n\n1. Opening line:\n“Welcome to Day [X] of 1000-days No-Code AI Challenge\n ” — followed by a short, engaging hook that tells viewers the big takeaway of this video.\n\n2. Intro paragraph (2–3 sentences):\nExplain the main topic and why it matters. Mention the core tools/skills covered. Keep it exciting and benefit-driven.\n\n3. “In this tutorial, you’ll learn:” checklist:\nUse ✔ icons (not bullets or dashes) for 5–8 key learnings from the video, starting each point with “How to…” or action verbs. Keep each point short and specific.\n\n4. Benefits paragraph:\nStart with “By the end of this video…” and clearly explain what the viewer will be able to do and why it’s useful. Mention possible use cases.\n\n5. Resource Links block:\n\nTry n8N Free: https://n8n.io\n\nJoin WhatsApp Group:   https://chat.whatsapp.com/FhzbbwTsZW3Gbhwi2hxL9S\nCommunity Webpage:  https://abcd.ritz7.com/\n\n  \nFollow on Social Media:  \nInstagram: https://www.instagram.com/ritz7talksigsh=Nm1tcXJzYmt2cHRh\nLinkedIn: https://www.linkedin.com/in/ritztalks/\nTwitter: https://x.com/RitzTalks/\n\n\nReplace placeholders with real links from transcript/context.\n\n6. Closing CTA paragraph:\nA motivational subscription message, starting with “📌 Subscribe and Let’s Build Together:” and ending with an inspiring statement.\n\n7. Hashtags block:\nAdd 3–5 relevant hashtags from the transcript for SEO.\n\nTone Guidelines:\n\nKeep it warm, confident, and human\n\nUse plain language, short sentences, and direct reader address (“you”)\n\nNaturally include keywords from transcript for SEO\n\nHere is the transcript: {{ $json.transcription }}\n\nits not NAN its N8N \nalso the day is x+246\n",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        224,
+        0
+      ],
+      "id": "a80aa836-9a13-41c5-820f-3265d8391861",
+      "name": "Write the Description"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1CuLbiyCoFMbRRikF_GUpXfGkFY3mTH7zLZLfbZKoBRc",
+          "mode": "list",
+          "cachedResultName": "youtube database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CuLbiyCoFMbRRikF_GUpXfGkFY3mTH7zLZLfbZKoBRc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1580661013,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CuLbiyCoFMbRRikF_GUpXfGkFY3mTH7zLZLfbZKoBRc/edit#gid=1580661013"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Description": "={{ $json.text }}",
+            "Status": "Yes"
+          },
+          "matchingColumns": [
+            "Status"
+          ],
+          "schema": [
+            {
+              "id": "video url",
+              "displayName": "video url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "transcription",
+              "displayName": "transcription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Readable date",
+              "displayName": "Readable date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Readable time",
+              "displayName": "Readable time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Day of week",
+              "displayName": "Day of week",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Year",
+              "displayName": "Year",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Month",
+              "displayName": "Month",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Day of month",
+              "displayName": "Day of month",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Hour",
+              "displayName": "Hour",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Minute",
+              "displayName": "Minute",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Second",
+              "displayName": "Second",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Timezone",
+              "displayName": "Timezone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        800,
+        0
+      ],
+      "id": "0cd667af-650c-4fe4-b45a-79a13e2fe59f",
+      "name": "Save YT Video Description",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "91PTenG1NpYBsYhB",
+          "name": "Sagar G-Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## YT Video Description Writer: \n1. **Schedule Trigger** - Start the workflow.\n2. **Google Sheet Node** - Get the YT Video Transcription.\n3. **Open AI Model** - Transform the YT Video Transcription into SEO based Description.\n4. **Google SHeet Node 2** - Save the YT Description in the Google sheet.\n\n\n🔧 Make sure your Google Sheets credentials are configured! 😊",
+        "height": 772,
+        "width": 1440,
+        "color": 5
+      },
+      "name": "Workflow Overview",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -416,
+        -384
+      ],
+      "id": "b90dbc1c-ae99-4c0f-89f0-22a91bd972e1",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -352,
+        0
+      ],
+      "id": "70da7094-5ddc-4b40-928e-4313a2ca6b39",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Write the Description",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Transcription of the YT Video": {
+      "main": [
+        [
+          {
+            "node": "Write the Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write the Description": {
+      "main": [
+        [
+          {
+            "node": "Save YT Video Description",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Transcription of the YT Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "5b41f0ca-0873-4d2b-b171-b999501b2cf7",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "createdAt": "2025-09-03T06:03:06.722Z",
+      "updatedAt": "2025-09-03T06:03:06.722Z",
+      "role": "workflow:owner",
+      "workflowId": "5Fwnw5wCa18oWxin",
+      "projectId": "yyDWytJdzKNmkW82"
+    }
+  ],
+  "tags": []
+}
