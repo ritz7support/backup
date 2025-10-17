@@ -19,7 +19,11 @@ export default function LandingPage() {
       <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-8 w-8 text-purple-600" />
+            <img 
+              src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/2ftx37lf_white-blackbackground.png" 
+              alt="ABCD Logo" 
+              className="h-10 w-10"
+            />
             <span className="text-2xl font-bold gradient-text">ABCD</span>
           </div>
           <div className="flex gap-3">
