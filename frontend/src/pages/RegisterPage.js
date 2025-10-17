@@ -102,7 +102,25 @@ export default function RegisterPage() {
           </div>
 
           <h2 className="text-3xl font-bold mb-2">Create Account</h2>
-          <p className="text-gray-600 mb-8">Start building with no-code today</p>
+          <p className="text-gray-600 mb-8">
+            {inviteToken ? (
+              validatingInvite ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Validating invite...
+                </span>
+              ) : inviteValid ? (
+                <span className="flex items-center gap-2 text-green-600">
+                  <Link2 className="h-4 w-4" />
+                  You've been invited as {inviteRole.replace('_', ' ')}
+                </span>
+              ) : (
+                <span className="text-red-600">Invalid or expired invite link</span>
+              )
+            ) : (
+              "Start building with no-code today"
+            )}
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-4" data-testid="register-form">
             <div>
