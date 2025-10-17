@@ -122,14 +122,24 @@ class SpaceGroup(BaseModel):
 class Space(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    space_group_id: str
     name: str
     description: Optional[str] = None
+    space_group_id: str
     icon: Optional[str] = None
-    is_public: bool = False
-    requires_membership: bool = False
     order: int = 0
+    is_pinned: bool = False
+    visibility: str = "public"  # public, private, secret
+    requires_payment: bool = False
+    member_count: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class SpaceMembership(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    space_id: str
+    user_id: str
+    status: str = "member"  # pending, member
+    joined_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Post(BaseModel):
     model_config = ConfigDict(extra="ignore")
