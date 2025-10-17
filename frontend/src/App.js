@@ -9,6 +9,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import SpaceView from './pages/SpaceView';
+import PostDetailPage from './pages/PostDetailPage';
 import EventsPage from './pages/EventsPage';
 import MembersPage from './pages/MembersPage';
 import ProfilePage from './pages/ProfilePage';
