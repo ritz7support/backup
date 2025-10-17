@@ -130,6 +130,10 @@ export default function EventsPage() {
           </div>
 
           <nav className="flex gap-8">
+            <Link to="/dashboard" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors" data-testid="nav-home">
+              <Home className="h-5 w-5" />
+              Home
+            </Link>
             <Link to="/events" className="text-white font-medium flex items-center gap-2" data-testid="nav-events">
               <Calendar className="h-5 w-5" />
               Events
