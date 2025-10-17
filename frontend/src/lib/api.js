@@ -82,6 +82,15 @@ export const adminAPI = {
   deleteMember: (userId) => api.delete(`/admin/members/${userId}`),
 };
 
+// Posts API
+export const postsAPI = {
+  getSpacePosts: (spaceId, skip = 0, limit = 20) => api.get(`/spaces/${spaceId}/posts`, { params: { skip, limit } }),
+  createPost: (data) => api.post('/posts', data),
+  reactToPost: (postId, emoji) => api.post(`/posts/${postId}/react`, null, { params: { emoji } }),
+  getComments: (postId) => api.get(`/posts/${postId}/comments`),
+  addComment: (postId, content) => api.post(`/posts/${postId}/comments`, { content }),
+};
+
 // Invites API
 export const invitesAPI = {
   generateInvite: (role) => api.post('/invites/generate', null, { params: { role } }),
