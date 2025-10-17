@@ -97,9 +97,9 @@ export default function PostDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading post...</div>
-      </div>
+              <div className={`p-6 rounded-lg flex items-center justify-center ${loading ? 'min-h-[400px]' : ''}`}>
+                <div className="text-lg">Loading post...</div>
+              </div>
     );
   }
 
