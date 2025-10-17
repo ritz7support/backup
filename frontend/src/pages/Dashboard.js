@@ -77,10 +77,6 @@ export default function Dashboard() {
               <Home className="h-5 w-5" />
               Home
             </Link>
-            <Link to="/events" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors" data-testid="nav-events">
-              <Calendar className="h-5 w-5" />
-              Events
-            </Link>
             <Link to="/members" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors" data-testid="nav-members">
               <Users className="h-5 w-5" />
               Members
