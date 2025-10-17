@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Sidebar from '../components/Sidebar';
 import ComingSoonPage from './ComingSoonPage';
+import IntroductionFeed from './IntroductionFeed';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
@@ -67,6 +68,20 @@ export default function SpaceView() {
       </div>
     );
   }
+
+  // Render IntroductionFeed for introductions space
+  const renderSpaceContent = () => {
+    if (spaceId === 'introductions') {
+      return <IntroductionFeed />;
+    }
+    
+    return (
+      <ComingSoonPage 
+        title={getSpaceTitle()}
+        description="This space is being prepared with exciting content. Check back soon!" 
+      />
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F3F4F6' }}>
@@ -146,11 +161,8 @@ export default function SpaceView() {
       {/* Main Layout */}
       <div className="flex flex-1 min-h-0">
         <Sidebar spaceGroups={spaceGroups} spaces={spaces} />
-        <main className="flex-1">
-          <ComingSoonPage 
-            title={getSpaceTitle()}
-            description="This space is being prepared with exciting content. Check back soon!" 
-          />
+        <main className="flex-1 overflow-y-auto">
+          {renderSpaceContent()}
         </main>
       </div>
     </div>
