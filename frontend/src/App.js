@@ -12,6 +12,7 @@ import SpaceView from './pages/SpaceView';
 import EventsPage from './pages/EventsPage';
 import MembersPage from './pages/MembersPage';
 import ProfilePage from './pages/ProfilePage';
+import AdminSpacesPage from './pages/AdminSpacesPage';
 import DMsPage from './pages/DMsPage';
 import PricingPage from './pages/PricingPage';
 import PaymentSuccess from './pages/PaymentSuccess';
