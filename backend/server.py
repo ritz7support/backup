@@ -1,0 +1,957 @@
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Response, Depends, Header
+from fastapi.responses import JSONResponse
+from dotenv import load_dotenv
+from starlette.middleware.cors import CORSMiddleware
+from motor.motor_asyncio import AsyncIOMotorClient
+import os
+import logging
+from pathlib import Path
+from pydantic import BaseModel, Field, ConfigDict, EmailStr
+from typing import List, Optional, Dict, Any
+import uuid
+from datetime import datetime, timezone, timedelta
+import razorpay
+from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
+import bcrypt
+from urllib.parse import urlencode
+import httpx
+
+ROOT_DIR = Path(__file__).parent
+load_dotenv(ROOT_DIR / '.env')
+
+# MongoDB connection
+mongo_url = os.environ['MONGO_URL']
+client = AsyncIOMotorClient(mongo_url)
+db = client[os.environ['DB_NAME']]
+
+# Payment gateway clients
+razorpay_client = razorpay.Client(auth=(os.environ.get('RAZORPAY_KEY_ID', 'test_key'), os.environ.get('RAZORPAY_KEY_SECRET', 'test_secret')))
+
+# Create the main app
+app = FastAPI()
+api_router = APIRouter(prefix="/api")
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# ==================== MODELS ====================
+
+# User Models
+class User(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    email: EmailStr
+    name: str
+    picture: Optional[str] = None
+    password_hash: Optional[str] = None
+    role: str = "learner"  # learner, mentor, business_owner, admin
+    bio: Optional[str] = None
+    skills: List[str] = []
+    learning_goals: Optional[str] = None
+    location: Optional[str] = None
+    linkedin: Optional[str] = None
+    is_founding_member: bool = False
+    badges: List[str] = []
+    membership_tier: str = "free"  # free, paid
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class UserSession(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    user_id: str
+    session_token: str
+    expires_at: datetime
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class UserCreate(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+    role: str = "learner"
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
+# Subscription Models
+class Subscription(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    plan: str  # monthly_inr, yearly_inr, monthly_usd, yearly_usd
+    amount: float
+    currency: str  # INR, USD
+    payment_gateway: str  # razorpay, stripe
+    status: str  # active, cancelled, expired
+    starts_at: datetime
+    ends_at: datetime
+    auto_renew: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PaymentTransaction(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    subscription_id: Optional[str] = None
+    amount: float
+    currency: str
+    payment_gateway: str
+    gateway_payment_id: Optional[str] = None
+    gateway_order_id: Optional[str] = None
+    session_id: Optional[str] = None
+    status: str  # pending, completed, failed
+    metadata: Optional[Dict[str, Any]] = {}
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Space Models
+class SpaceGroup(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    order: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Space(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    space_group_id: str
+    name: str
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    is_public: bool = False
+    requires_membership: bool = False
+    order: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Post(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    space_id: str
+    author_id: str
+    title: Optional[str] = None
+    content: str
+    images: List[str] = []
+    links: List[str] = []
+    tags: List[str] = []
+    is_pinned: bool = False
+    reactions: Dict[str, List[str]] = {}  # {emoji: [user_ids]}
+    comment_count: int = 0
+    view_count: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class Comment(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    post_id: str
+    author_id: str
+    content: str
+    parent_comment_id: Optional[str] = None
+    reactions: Dict[str, List[str]] = {}
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Event Models
+class Event(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    description: Optional[str] = None
+    space_id: Optional[str] = None
+    host_id: str
+    event_type: str = "live_session"  # live_session, q_and_a, workshop
+    start_time: datetime
+    end_time: datetime
+    is_recurring: bool = False
+    recurrence_pattern: Optional[str] = None
+    tags: List[str] = []
+    max_attendees: Optional[int] = None
+    rsvp_list: List[str] = []
+    recording_url: Optional[str] = None
+    requires_membership: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# DM Models
+class DirectMessage(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    sender_id: str
+    receiver_id: str
+    content: str
+    is_read: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Notification Models
+class Notification(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    type: str  # comment, reaction, tag, event_invite, dm
+    title: str
+    message: str
+    link: Optional[str] = None
+    is_read: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Feature Request Models
+class FeatureRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    author_id: str
+    title: str
+    description: str
+    category: str
+    status: str = "pending"  # pending, under_review, planned, completed, rejected
+    votes: List[str] = []  # user_ids who voted
+    vote_count: int = 0
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# ==================== AUTH HELPER ====================
+
+async def get_current_user(request: Request, authorization: Optional[str] = Header(None)) -> Optional[User]:
+    """Get current user from session token (cookie or Authorization header)"""
+    session_token = None
+    
+    # Try cookie first
+    session_token = request.cookies.get("session_token")
+    
+    # Fallback to Authorization header
+    if not session_token and authorization:
+        if authorization.startswith("Bearer "):
+            session_token = authorization[7:]
+        else:
+            session_token = authorization
+    
+    if not session_token:
+        return None
+    
+    # Check session in database
+    session = await db.user_sessions.find_one({"session_token": session_token})
+    if not session or datetime.fromisoformat(session['expires_at']) < datetime.now(timezone.utc):
+        return None
+    
+    # Get user
+    user_doc = await db.users.find_one({"id": session['user_id']})
+    if not user_doc:
+        return None
+    
+    return User(**user_doc)
+
+async def require_auth(request: Request, authorization: Optional[str] = Header(None)) -> User:
+    """Require authentication, raise 401 if not authenticated"""
+    user = await get_current_user(request, authorization)
+    if not user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    return user
+
+# ==================== AUTH ENDPOINTS ====================
+
+@api_router.post("/auth/register")
+async def register(user_data: UserCreate):
+    """Register new user with email/password"""
+    # Check if user exists
+    existing_user = await db.users.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Check founding member status (first 100 users)
+    user_count = await db.users.count_documents({})
+    is_founding = user_count < 100
+    
+    # Hash password
+    password_hash = bcrypt.hashpw(user_data.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    # Create user
+    user = User(
+        email=user_data.email,
+        name=user_data.name,
+        role=user_data.role,
+        password_hash=password_hash,
+        is_founding_member=is_founding,
+        badges=["🎉 Founding 100"] if is_founding else []
+    )
+    
+    user_dict = user.model_dump()
+    user_dict['created_at'] = user_dict['created_at'].isoformat()
+    await db.users.insert_one(user_dict)
+    
+    # Create session
+    session_token = str(uuid.uuid4())
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    session = UserSession(
+        user_id=user.id,
+        session_token=session_token,
+        expires_at=expires_at
+    )
+    session_dict = session.model_dump()
+    session_dict['created_at'] = session_dict['created_at'].isoformat()
+    session_dict['expires_at'] = session_dict['expires_at'].isoformat()
+    await db.user_sessions.insert_one(session_dict)
+    
+    return {"user": user, "session_token": session_token}
+
+@api_router.post("/auth/login")
+async def login(credentials: UserLogin, response: Response):
+    """Login with email/password"""
+    user_doc = await db.users.find_one({"email": credentials.email})
+    if not user_doc:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Verify password
+    if not user_doc.get('password_hash'):
+        raise HTTPException(status_code=401, detail="Password login not available for this account")
+    
+    if not bcrypt.checkpw(credentials.password.encode('utf-8'), user_doc['password_hash'].encode('utf-8')):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Create session
+    session_token = str(uuid.uuid4())
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    session = UserSession(
+        user_id=user_doc['id'],
+        session_token=session_token,
+        expires_at=expires_at
+    )
+    session_dict = session.model_dump()
+    session_dict['created_at'] = session_dict['created_at'].isoformat()
+    session_dict['expires_at'] = session_dict['expires_at'].isoformat()
+    await db.user_sessions.insert_one(session_dict)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7*24*60*60,
+        path="/"
+    )
+    
+    user = User(**user_doc)
+    return {"user": user, "session_token": session_token}
+
+@api_router.get("/auth/google")
+async def google_auth(redirect_url: str):
+    """Redirect to Google OAuth"""
+    auth_url = f"https://auth.emergentagent.com/?redirect={redirect_url}"
+    return {"auth_url": auth_url}
+
+@api_router.post("/auth/session")
+async def process_session(request: Request, x_session_id: str = Header(..., alias="X-Session-ID")):
+    """Process Google OAuth session and create user session"""
+    # Call Emergent auth endpoint
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(
+                "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
+                headers={"X-Session-ID": x_session_id}
+            )
+            response.raise_for_status()
+            oauth_data = response.json()
+        except Exception as e:
+            logger.error(f"OAuth error: {e}")
+            raise HTTPException(status_code=400, detail="Invalid session ID")
+    
+    # Check if user exists
+    user_doc = await db.users.find_one({"email": oauth_data['email']})
+    
+    # Check founding member status
+    user_count = await db.users.count_documents({})
+    is_founding = user_count < 100
+    
+    if not user_doc:
+        # Create new user
+        user = User(
+            email=oauth_data['email'],
+            name=oauth_data['name'],
+            picture=oauth_data.get('picture'),
+            is_founding_member=is_founding,
+            badges=["🎉 Founding 100"] if is_founding else []
+        )
+        user_dict = user.model_dump()
+        user_dict['created_at'] = user_dict['created_at'].isoformat()
+        await db.users.insert_one(user_dict)
+        user_id = user.id
+    else:
+        user_id = user_doc['id']
+    
+    # Create session
+    session_token = oauth_data['session_token']
+    expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+    session = UserSession(
+        user_id=user_id,
+        session_token=session_token,
+        expires_at=expires_at
+    )
+    session_dict = session.model_dump()
+    session_dict['created_at'] = session_dict['created_at'].isoformat()
+    session_dict['expires_at'] = session_dict['expires_at'].isoformat()
+    await db.user_sessions.insert_one(session_dict)
+    
+    return {"session_token": session_token, "user_id": user_id}
+
+@api_router.get("/auth/me")
+async def get_me(user: User = Depends(require_auth)):
+    """Get current user"""
+    return user
+
+@api_router.post("/auth/logout")
+async def logout(request: Request, response: Response):
+    """Logout user"""
+    session_token = request.cookies.get("session_token")
+    if session_token:
+        await db.user_sessions.delete_one({"session_token": session_token})
+        response.delete_cookie(key="session_token", path="/")
+    return {"message": "Logged out"}
+
+# ==================== PAYMENT ENDPOINTS ====================
+
+PRICING = {
+    "monthly_inr": {"amount": 99.0, "currency": "INR", "gateway": "razorpay"},
+    "yearly_inr": {"amount": 999.0, "currency": "INR", "gateway": "razorpay"},
+    "monthly_usd": {"amount": 5.0, "currency": "USD", "gateway": "stripe"},
+    "yearly_usd": {"amount": 49.0, "currency": "USD", "gateway": "stripe"}
+}
+
+@api_router.post("/payments/create-order")
+async def create_payment_order(request: Request, plan: str, user: User = Depends(require_auth)):
+    """Create payment order (Razorpay or Stripe)"""
+    if plan not in PRICING:
+        raise HTTPException(status_code=400, detail="Invalid plan")
+    
+    plan_info = PRICING[plan]
+    
+    if plan_info['gateway'] == 'razorpay':
+        # Razorpay order
+        try:
+            amount_paise = int(plan_info['amount'] * 100)
+            order_data = {
+                "amount": amount_paise,
+                "currency": plan_info['currency'],
+                "payment_capture": 1
+            }
+            razor_order = razorpay_client.order.create(data=order_data)
+            
+            # Create transaction record
+            transaction = PaymentTransaction(
+                user_id=user.id,
+                amount=plan_info['amount'],
+                currency=plan_info['currency'],
+                payment_gateway='razorpay',
+                gateway_order_id=razor_order['id'],
+                status='pending',
+                metadata={"plan": plan}
+            )
+            trans_dict = transaction.model_dump()
+            trans_dict['created_at'] = trans_dict['created_at'].isoformat()
+            await db.payment_transactions.insert_one(trans_dict)
+            
+            return {
+                "order_id": razor_order['id'],
+                "amount": plan_info['amount'],
+                "currency": plan_info['currency'],
+                "key_id": os.environ.get('RAZORPAY_KEY_ID', 'test_key')
+            }
+        except Exception as e:
+            logger.error(f"Razorpay error: {e}")
+            raise HTTPException(status_code=500, detail="Payment gateway error")
+    
+    elif plan_info['gateway'] == 'stripe':
+        # Stripe checkout
+        try:
+            body = await request.json()
+            origin_url = body.get('origin_url', str(request.base_url))
+            
+            success_url = f"{origin_url}payment-success?session_id={{CHECKOUT_SESSION_ID}}"
+            cancel_url = f"{origin_url}pricing"
+            
+            stripe_api_key = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
+            webhook_url = f"{origin_url}api/webhook/stripe"
+            stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
+            
+            checkout_request = CheckoutSessionRequest(
+                amount=plan_info['amount'],
+                currency=plan_info['currency'].lower(),
+                success_url=success_url,
+                cancel_url=cancel_url,
+                metadata={"plan": plan, "user_id": user.id}
+            )
+            
+            session = await stripe_checkout.create_checkout_session(checkout_request)
+            
+            # Create transaction record
+            transaction = PaymentTransaction(
+                user_id=user.id,
+                amount=plan_info['amount'],
+                currency=plan_info['currency'],
+                payment_gateway='stripe',
+                session_id=session.session_id,
+                status='pending',
+                metadata={"plan": plan}
+            )
+            trans_dict = transaction.model_dump()
+            trans_dict['created_at'] = trans_dict['created_at'].isoformat()
+            await db.payment_transactions.insert_one(trans_dict)
+            
+            return {"url": session.url, "session_id": session.session_id}
+        except Exception as e:
+            logger.error(f"Stripe error: {e}")
+            raise HTTPException(status_code=500, detail="Payment gateway error")
+
+@api_router.get("/payments/status/{session_id}")
+async def check_payment_status(session_id: str, user: User = Depends(require_auth)):
+    """Check Stripe payment status"""
+    try:
+        stripe_api_key = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
+        webhook_url = f"{os.environ.get('BACKEND_URL', '')}/api/webhook/stripe"
+        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
+        
+        status = await stripe_checkout.get_checkout_status(session_id)
+        
+        # Update transaction
+        transaction = await db.payment_transactions.find_one({"session_id": session_id, "user_id": user.id})
+        if transaction and transaction['status'] == 'pending' and status.payment_status == 'paid':
+            await db.payment_transactions.update_one(
+                {"id": transaction['id']},
+                {"$set": {"status": "completed"}}
+            )
+            
+            # Create subscription
+            plan = transaction['metadata'].get('plan')
+            plan_info = PRICING.get(plan)
+            if plan_info:
+                duration_days = 365 if 'yearly' in plan else 30
+                subscription = Subscription(
+                    user_id=user.id,
+                    plan=plan,
+                    amount=plan_info['amount'],
+                    currency=plan_info['currency'],
+                    payment_gateway=plan_info['gateway'],
+                    status='active',
+                    starts_at=datetime.now(timezone.utc),
+                    ends_at=datetime.now(timezone.utc) + timedelta(days=duration_days)
+                )
+                sub_dict = subscription.model_dump()
+                sub_dict['created_at'] = sub_dict['created_at'].isoformat()
+                sub_dict['starts_at'] = sub_dict['starts_at'].isoformat()
+                sub_dict['ends_at'] = sub_dict['ends_at'].isoformat()
+                await db.subscriptions.insert_one(sub_dict)
+                
+                # Update user membership
+                await db.users.update_one({"id": user.id}, {"$set": {"membership_tier": "paid"}})
+        
+        return status
+    except Exception as e:
+        logger.error(f"Payment status error: {e}")
+        raise HTTPException(status_code=500, detail="Error checking payment status")
+
+@api_router.post("/webhook/razorpay")
+async def razorpay_webhook(request: Request):
+    """Handle Razorpay webhooks"""
+    payload = await request.body()
+    signature = request.headers.get('X-Razorpay-Signature', '')
+    
+    try:
+        razorpay_client.utility.verify_webhook_signature(
+            payload.decode(),
+            signature,
+            os.environ.get('RAZORPAY_WEBHOOK_SECRET', '')
+        )
+    except Exception as e:
+        logger.error(f"Webhook verification failed: {e}")
+        raise HTTPException(status_code=400, detail="Invalid signature")
+    
+    # Process webhook
+    data = await request.json()
+    logger.info(f"Razorpay webhook: {data}")
+    
+    return {"status": "processed"}
+
+@api_router.post("/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhooks"""
+    payload = await request.body()
+    signature = request.headers.get('Stripe-Signature', '')
+    
+    try:
+        stripe_api_key = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
+        webhook_url = f"{os.environ.get('BACKEND_URL', '')}/api/webhook/stripe"
+        stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
+        
+        webhook_response = await stripe_checkout.handle_webhook(payload, signature)
+        logger.info(f"Stripe webhook: {webhook_response}")
+        
+        return {"status": "processed"}
+    except Exception as e:
+        logger.error(f"Stripe webhook error: {e}")
+        raise HTTPException(status_code=400, detail="Webhook processing failed")
+
+# ==================== SPACE ENDPOINTS ====================
+
+@api_router.get("/space-groups")
+async def get_space_groups():
+    """Get all space groups"""
+    groups = await db.space_groups.find({}, {"_id": 0}).sort("order", 1).to_list(100)
+    return groups
+
+@api_router.get("/spaces")
+async def get_spaces(space_group_id: Optional[str] = None):
+    """Get all spaces or by group"""
+    query = {"space_group_id": space_group_id} if space_group_id else {}
+    spaces = await db.spaces.find(query, {"_id": 0}).sort("order", 1).to_list(100)
+    return spaces
+
+@api_router.get("/spaces/{space_id}/posts")
+async def get_space_posts(space_id: str, skip: int = 0, limit: int = 20):
+    """Get posts in a space"""
+    posts = await db.posts.find({"space_id": space_id}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Enrich with author info
+    for post in posts:
+        author = await db.users.find_one({"id": post['author_id']}, {"_id": 0, "name": 1, "picture": 1, "badges": 1})
+        post['author'] = author
+    
+    return posts
+
+@api_router.post("/posts")
+async def create_post(request: Request, user: User = Depends(require_auth)):
+    """Create a new post"""
+    data = await request.json()
+    
+    post = Post(
+        space_id=data['space_id'],
+        author_id=user.id,
+        title=data.get('title'),
+        content=data['content'],
+        images=data.get('images', []),
+        links=data.get('links', []),
+        tags=data.get('tags', [])
+    )
+    
+    post_dict = post.model_dump()
+    post_dict['created_at'] = post_dict['created_at'].isoformat()
+    post_dict['updated_at'] = post_dict['updated_at'].isoformat()
+    await db.posts.insert_one(post_dict)
+    
+    return post
+
+@api_router.post("/posts/{post_id}/react")
+async def react_to_post(post_id: str, emoji: str, user: User = Depends(require_auth)):
+    """Add reaction to post"""
+    post = await db.posts.find_one({"id": post_id})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    reactions = post.get('reactions', {})
+    if emoji not in reactions:
+        reactions[emoji] = []
+    
+    if user.id in reactions[emoji]:
+        reactions[emoji].remove(user.id)
+    else:
+        reactions[emoji].append(user.id)
+    
+    await db.posts.update_one({"id": post_id}, {"$set": {"reactions": reactions}})
+    return {"reactions": reactions}
+
+@api_router.post("/posts/{post_id}/comments")
+async def add_comment(post_id: str, request: Request, user: User = Depends(require_auth)):
+    """Add comment to post"""
+    data = await request.json()
+    
+    comment = Comment(
+        post_id=post_id,
+        author_id=user.id,
+        content=data['content'],
+        parent_comment_id=data.get('parent_comment_id')
+    )
+    
+    comment_dict = comment.model_dump()
+    comment_dict['created_at'] = comment_dict['created_at'].isoformat()
+    await db.comments.insert_one(comment_dict)
+    
+    # Update comment count
+    await db.posts.update_one({"id": post_id}, {"$inc": {"comment_count": 1}})
+    
+    return comment
+
+@api_router.get("/posts/{post_id}/comments")
+async def get_comments(post_id: str):
+    """Get comments for a post"""
+    comments = await db.comments.find({"post_id": post_id}, {"_id": 0}).sort("created_at", 1).to_list(100)
+    
+    # Enrich with author info
+    for comment in comments:
+        author = await db.users.find_one({"id": comment['author_id']}, {"_id": 0, "name": 1, "picture": 1})
+        comment['author'] = author
+    
+    return comments
+
+# ==================== EVENT ENDPOINTS ====================
+
+@api_router.get("/events")
+async def get_events(upcoming: bool = True):
+    """Get events"""
+    now = datetime.now(timezone.utc).isoformat()
+    query = {"start_time": {"$gte": now}} if upcoming else {}
+    events = await db.events.find(query, {"_id": 0}).sort("start_time", 1).to_list(100)
+    return events
+
+@api_router.post("/events")
+async def create_event(request: Request, user: User = Depends(require_auth)):
+    """Create new event"""
+    data = await request.json()
+    
+    event = Event(
+        title=data['title'],
+        description=data.get('description'),
+        space_id=data.get('space_id'),
+        host_id=user.id,
+        event_type=data.get('event_type', 'live_session'),
+        start_time=datetime.fromisoformat(data['start_time']),
+        end_time=datetime.fromisoformat(data['end_time']),
+        tags=data.get('tags', []),
+        requires_membership=data.get('requires_membership', False)
+    )
+    
+    event_dict = event.model_dump()
+    event_dict['created_at'] = event_dict['created_at'].isoformat()
+    event_dict['start_time'] = event_dict['start_time'].isoformat()
+    event_dict['end_time'] = event_dict['end_time'].isoformat()
+    await db.events.insert_one(event_dict)
+    
+    return event
+
+@api_router.post("/events/{event_id}/rsvp")
+async def rsvp_event(event_id: str, user: User = Depends(require_auth)):
+    """RSVP to event"""
+    event = await db.events.find_one({"id": event_id})
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    rsvp_list = event.get('rsvp_list', [])
+    if user.id in rsvp_list:
+        rsvp_list.remove(user.id)
+    else:
+        rsvp_list.append(user.id)
+    
+    await db.events.update_one({"id": event_id}, {"$set": {"rsvp_list": rsvp_list}})
+    return {"rsvp_list": rsvp_list}
+
+# ==================== MEMBER ENDPOINTS ====================
+
+@api_router.get("/members")
+async def get_members(search: Optional[str] = None, skip: int = 0, limit: int = 50):
+    """Get member directory"""
+    query = {}
+    if search:
+        query = {"$or": [
+            {"name": {"$regex": search, "$options": "i"}},
+            {"email": {"$regex": search, "$options": "i"}},
+            {"skills": {"$regex": search, "$options": "i"}}
+        ]}
+    
+    members = await db.users.find(query, {"_id": 0, "password_hash": 0}).skip(skip).limit(limit).to_list(limit)
+    return members
+
+@api_router.get("/members/{user_id}")
+async def get_member(user_id: str):
+    """Get member profile"""
+    member = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    return member
+
+@api_router.put("/members/profile")
+async def update_profile(request: Request, user: User = Depends(require_auth)):
+    """Update user profile"""
+    data = await request.json()
+    
+    update_fields = {}
+    allowed_fields = ['name', 'bio', 'skills', 'learning_goals', 'location', 'linkedin', 'picture']
+    for field in allowed_fields:
+        if field in data:
+            update_fields[field] = data[field]
+    
+    if update_fields:
+        await db.users.update_one({"id": user.id}, {"$set": update_fields})
+    
+    return {"message": "Profile updated"}
+
+# ==================== DM ENDPOINTS ====================
+
+@api_router.get("/dms")
+async def get_dms(user: User = Depends(require_auth)):
+    """Get DM conversations"""
+    dms = await db.direct_messages.find({
+        "$or": [{"sender_id": user.id}, {"receiver_id": user.id}]
+    }, {"_id": 0}).sort("created_at", -1).limit(100).to_list(100)
+    
+    return dms
+
+@api_router.post("/dms")
+async def send_dm(request: Request, user: User = Depends(require_auth)):
+    """Send direct message"""
+    data = await request.json()
+    
+    dm = DirectMessage(
+        sender_id=user.id,
+        receiver_id=data['receiver_id'],
+        content=data['content']
+    )
+    
+    dm_dict = dm.model_dump()
+    dm_dict['created_at'] = dm_dict['created_at'].isoformat()
+    await db.direct_messages.insert_one(dm_dict)
+    
+    # Create notification
+    notification = Notification(
+        user_id=data['receiver_id'],
+        type='dm',
+        title='New Message',
+        message=f"{user.name} sent you a message",
+        link=f"/dms/{user.id}"
+    )
+    notif_dict = notification.model_dump()
+    notif_dict['created_at'] = notif_dict['created_at'].isoformat()
+    await db.notifications.insert_one(notif_dict)
+    
+    return dm
+
+# ==================== NOTIFICATION ENDPOINTS ====================
+
+@api_router.get("/notifications")
+async def get_notifications(user: User = Depends(require_auth)):
+    """Get user notifications"""
+    notifications = await db.notifications.find({"user_id": user.id}, {"_id": 0}).sort("created_at", -1).limit(50).to_list(50)
+    return notifications
+
+@api_router.put("/notifications/{notification_id}/read")
+async def mark_notification_read(notification_id: str, user: User = Depends(require_auth)):
+    """Mark notification as read"""
+    await db.notifications.update_one(
+        {"id": notification_id, "user_id": user.id},
+        {"$set": {"is_read": True}}
+    )
+    return {"message": "Marked as read"}
+
+# ==================== FEATURE REQUEST ENDPOINTS ====================
+
+@api_router.get("/feature-requests")
+async def get_feature_requests(sort: str = "votes"):
+    """Get feature requests"""
+    sort_field = "vote_count" if sort == "votes" else "created_at"
+    requests = await db.feature_requests.find({}, {"_id": 0}).sort(sort_field, -1).to_list(100)
+    
+    # Enrich with author info
+    for req in requests:
+        author = await db.users.find_one({"id": req['author_id']}, {"_id": 0, "name": 1, "picture": 1})
+        req['author'] = author
+    
+    return requests
+
+@api_router.post("/feature-requests")
+async def create_feature_request(request: Request, user: User = Depends(require_auth)):
+    """Create feature request"""
+    data = await request.json()
+    
+    feature_req = FeatureRequest(
+        author_id=user.id,
+        title=data['title'],
+        description=data['description'],
+        category=data.get('category', 'general')
+    )
+    
+    req_dict = feature_req.model_dump()
+    req_dict['created_at'] = req_dict['created_at'].isoformat()
+    await db.feature_requests.insert_one(req_dict)
+    
+    return feature_req
+
+@api_router.post("/feature-requests/{request_id}/vote")
+async def vote_feature_request(request_id: str, user: User = Depends(require_auth)):
+    """Vote on feature request"""
+    feature_req = await db.feature_requests.find_one({"id": request_id})
+    if not feature_req:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    votes = feature_req.get('votes', [])
+    if user.id in votes:
+        votes.remove(user.id)
+    else:
+        votes.append(user.id)
+    
+    await db.feature_requests.update_one(
+        {"id": request_id},
+        {"$set": {"votes": votes, "vote_count": len(votes)}}
+    )
+    
+    return {"votes": len(votes)}
+
+# ==================== ADMIN ENDPOINTS ====================
+
+@api_router.post("/admin/space-groups")
+async def create_space_group(request: Request, user: User = Depends(require_auth)):
+    """Create space group (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    group = SpaceGroup(**data)
+    
+    group_dict = group.model_dump()
+    group_dict['created_at'] = group_dict['created_at'].isoformat()
+    await db.space_groups.insert_one(group_dict)
+    
+    return group
+
+@api_router.post("/admin/spaces")
+async def create_space(request: Request, user: User = Depends(require_auth)):
+    """Create space (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    space = Space(**data)
+    
+    space_dict = space.model_dump()
+    space_dict['created_at'] = space_dict['created_at'].isoformat()
+    await db.spaces.insert_one(space_dict)
+    
+    return space
+
+@api_router.get("/admin/analytics")
+async def get_analytics(user: User = Depends(require_auth)):
+    """Get platform analytics (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    total_users = await db.users.count_documents({})
+    paid_users = await db.users.count_documents({"membership_tier": "paid"})
+    total_posts = await db.posts.count_documents({})
+    total_events = await db.events.count_documents({})
+    
+    return {
+        "total_users": total_users,
+        "paid_users": paid_users,
+        "total_posts": total_posts,
+        "total_events": total_events
+    }
+
+# Include router
+app.include_router(api_router)
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+@app.on_event("shutdown")
+async def shutdown_db_client():
+    client.close()
