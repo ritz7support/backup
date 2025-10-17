@@ -35,6 +35,8 @@ export const spacesAPI = {
 export const eventsAPI = {
   getEvents: (upcoming = true) => api.get('/events', { params: { upcoming } }),
   createEvent: (data) => api.post('/events', data),
+  updateEvent: (eventId, data) => api.put(`/events/${eventId}`, data),
+  deleteEvent: (eventId) => api.delete(`/events/${eventId}`),
   rsvpEvent: (eventId) => api.post(`/events/${eventId}/rsvp`),
 };
 
