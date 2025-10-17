@@ -488,7 +488,12 @@ async def generate_invite_link(role: str, user: User = Depends(require_auth)):
         expires_at=datetime.now(timezone.utc) + timedelta(days=7)
     )
     
-    await db.invite_tokens.insert_one(invite.model_dump())
+    # Convert to dict and handle datetime serialization
+    invite_dict = invite.model_dump()
+    invite_dict['expires_at'] = invite_dict['expires_at'].isoformat()
+    invite_dict['created_at'] = invite_dict['created_at'].isoformat()
+    
+    await db.invite_tokens.insert_one(invite_dict)
     
     return {
         "token": invite.token,
