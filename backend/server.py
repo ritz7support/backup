@@ -130,6 +130,7 @@ class Space(BaseModel):
     is_pinned: bool = False
     visibility: str = "public"  # public, private, secret
     requires_payment: bool = False
+    auto_join: bool = False  # Auto-join users when they register
     member_count: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
