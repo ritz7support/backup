@@ -3,7 +3,7 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Button } from './ui/button';
-import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Smile } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Smile, X } from 'lucide-react';
 import { useState, useRef } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 
@@ -11,6 +11,7 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
+  const [uploadedImages, setUploadedImages] = useState([]);
   const fileInputRef = useRef(null);
 
   const editor = useEditor({
