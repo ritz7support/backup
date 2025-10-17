@@ -307,9 +307,11 @@ export default function IntroductionFeed() {
               </div>
 
               {/* Post Content */}
-              <p className="mb-4 whitespace-pre-wrap" style={{ color: '#3B3B3B' }}>
-                {post.content}
-              </p>
+              <div 
+                className="mb-4 prose max-w-none" 
+                style={{ color: '#3B3B3B' }}
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
 
               {/* Post Actions */}
               <div className="flex items-center gap-4 pt-3 border-t" style={{ borderColor: '#E5E7EB' }}>
