@@ -48,6 +48,7 @@ function App() {
             <Route path="/events" element={<PrivateRoute><EventsPage /></PrivateRoute>} />
             <Route path="/members" element={<PrivateRoute><MembersPage /></PrivateRoute>} />
             <Route path="/profile/:userId" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+            <Route path="/admin/spaces" element={<PrivateRoute><AdminSpacesPage /></PrivateRoute>} />
             <Route path="/dms" element={<PrivateRoute><DMsPage /></PrivateRoute>} />
           </Routes>
           <Toaster />
