@@ -341,6 +341,8 @@ export default function IntroductionFeed() {
           ))
         )}
       </div>
+        </>
+      )}
 
       {/* Comments Dialog */}
       <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
