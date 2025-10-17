@@ -179,7 +179,11 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-purple-600" />
+              <img 
+                src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/2ftx37lf_white-blackbackground.png" 
+                alt="ABCD Logo" 
+                className="h-8 w-8"
+              />
               <span className="font-bold gradient-text">ABCD Community</span>
             </div>
             <p className="text-gray-600 text-sm">© 2025 ABCD. All rights reserved.</p>
