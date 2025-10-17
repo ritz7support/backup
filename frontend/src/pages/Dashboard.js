@@ -61,7 +61,15 @@ export default function Dashboard() {
       {/* Top Navigation */}
       <header className="border-b sticky top-0 z-50" style={{ backgroundColor: '#011328', borderColor: '#022955' }}>
         <div className="px-6 py-3 flex justify-between items-center">
-          <div className="w-10"></div>
+          <div className="flex items-center">
+            <Link to="/dashboard">
+              <img 
+                src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/2ftx37lf_white-blackbackground.png" 
+                alt="ABCD" 
+                className="h-10 w-10"
+              />
+            </Link>
+          </div>
 
           <nav className="flex gap-8">
             <Link to="/events" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors" data-testid="nav-events">
