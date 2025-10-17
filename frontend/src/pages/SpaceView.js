@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Sidebar from '../components/Sidebar';
 import ComingSoonPage from './ComingSoonPage';
-import IntroductionFeed from './IntroductionFeed';
+import SpaceFeed from '../components/SpaceFeed';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
