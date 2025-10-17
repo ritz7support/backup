@@ -213,28 +213,6 @@ class FeatureRequest(BaseModel):
     vote_count: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-# Post Models (for spaces like Introduction)
-class Post(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    space_id: str  # e.g., "introductions"
-    author_id: str
-    content: str
-    images: List[str] = []  # image URLs
-    reactions: dict = {}  # {emoji: [user_ids]}
-    reaction_count: int = 0
-    comment_count: int = 0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: Optional[datetime] = None
-
-class Comment(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    post_id: str
-    author_id: str
-    content: str
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
 # Invite Models
 class InviteToken(BaseModel):
     model_config = ConfigDict(extra="ignore")
