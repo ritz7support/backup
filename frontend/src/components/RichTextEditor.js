@@ -95,10 +95,8 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
       const imageId = Date.now().toString();
       setUploadedImages(prev => [...prev, { id: imageId, src: base64, name: file.name }]);
       
-      // Insert image into editor with a unique id
-      editor.chain().focus().insertContent(
-        `<img src="${base64}" alt="${file.name}" data-image-id="${imageId}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0;" />`
-      ).run();
+      // Use TipTap's setImage command instead of insertContent
+      editor.chain().focus().setImage({ src: base64, alt: file.name }).run();
     };
     reader.readAsDataURL(file);
     
@@ -107,17 +105,27 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
   };
 
   const handleRemoveImage = (imageId) => {
-    // Remove from uploaded images
+    // Remove from uploaded images preview
+    const imageToRemove = uploadedImages.find(img => img.id === imageId);
     setUploadedImages(prev => prev.filter(img => img.id !== imageId));
     
-    // Remove from editor content
-    const currentContent = editor.getHTML();
-    const updatedContent = currentContent.replace(
-      new RegExp(`<img[^>]*data-image-id="${imageId}"[^>]*>`, 'g'),
-      ''
-    );
-    editor.commands.setContent(updatedContent);
-    onChange(updatedContent);
+    // Remove the image from editor by finding and deleting the image node
+    if (imageToRemove && editor) {
+      const { state } = editor;
+      const { doc } = state;
+      let imagePos = null;
+      
+      doc.descendants((node, pos) => {
+        if (node.type.name === 'image' && node.attrs.src === imageToRemove.src) {
+          imagePos = pos;
+          return false;
+        }
+      });
+      
+      if (imagePos !== null) {
+        editor.chain().focus().deleteRange({ from: imagePos, to: imagePos + 1 }).run();
+      }
+    }
   };
 
   if (!editor) {
