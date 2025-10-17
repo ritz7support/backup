@@ -130,7 +130,7 @@ export default function PostDetailPage() {
             className="mb-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to {space?.name || 'Space'}
+            Back to {getSpaceName()}
           </Button>
         </div>
       </div>
