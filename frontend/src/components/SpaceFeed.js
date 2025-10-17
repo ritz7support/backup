@@ -117,24 +117,6 @@ export default function SpaceFeed({ spaceId }) {
     navigate(`/space/${spaceId}/post/${post.id}`);
   };
 
-  const handleAddComment = async (e) => {
-    e.preventDefault();
-    if (!commentContent.trim() || !selectedPost) return;
-
-    try {
-      await postsAPI.addComment(selectedPost.id, commentContent);
-      setCommentContent('');
-      
-      const { data } = await postsAPI.getComments(selectedPost.id);
-      setComments(data);
-      
-      loadPosts();
-      toast.success('Comment added!');
-    } catch (error) {
-      toast.error('Failed to add comment');
-    }
-  };
-
   const getReactionCount = (reactions) => {
     if (!reactions || typeof reactions !== 'object') return 0;
     return Object.values(reactions).flat().length;
