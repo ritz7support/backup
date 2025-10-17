@@ -245,7 +245,20 @@ export default function EventsPage() {
                 <p style={{ color: '#3B3B3B' }}>Join live sessions, workshops, and community events</p>
               </div>
               {user?.role === 'admin' && (
-                <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+                <Dialog open={createDialogOpen} onOpenChange={(open) => {
+                  setCreateDialogOpen(open);
+                  if (!open) {
+                    setEditingEvent(null);
+                    setFormData({
+                      title: '',
+                      description: '',
+                      event_type: 'live_session',
+                      start_time: '',
+                      end_time: '',
+                      requires_membership: false
+                    });
+                  }
+                }}>
                   <DialogTrigger asChild>
                     <Button style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }} data-testid="create-event-btn">
                       <Plus className="h-5 w-5 mr-2" />
@@ -254,7 +267,7 @@ export default function EventsPage() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Create New Event</DialogTitle>
+                      <DialogTitle>{editingEvent ? 'Edit Event' : 'Create New Event'}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreateEvent} className="space-y-4">
                       <div>
@@ -297,6 +310,7 @@ export default function EventsPage() {
                             value={formData.start_time}
                             onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
                             required
+                            onClick={(e) => e.target.showPicker && e.target.showPicker()}
                           />
                         </div>
                         <div>
@@ -305,8 +319,10 @@ export default function EventsPage() {
                             id="end_time"
                             type="datetime-local"
                             value={formData.end_time}
+                            min={formData.start_time}
                             onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                             required
+                            onClick={(e) => e.target.showPicker && e.target.showPicker()}
                           />
                         </div>
                       </div>
@@ -319,9 +335,23 @@ export default function EventsPage() {
                         />
                         <Label htmlFor="requires_membership">Requires paid membership</Label>
                       </div>
-                      <Button type="submit" className="w-full" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}>
-                        Create Event
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button type="submit" className="flex-1" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}>
+                          {editingEvent ? 'Update Event' : 'Create Event'}
+                        </Button>
+                        {editingEvent && (
+                          <Button 
+                            type="button" 
+                            variant="destructive" 
+                            onClick={() => {
+                              setCreateDialogOpen(false);
+                              handleDeleteEvent(editingEvent.id);
+                            }}
+                          >
+                            Delete
+                          </Button>
+                        )}
+                      </div>
                     </form>
                   </DialogContent>
                 </Dialog>
