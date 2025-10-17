@@ -61,31 +61,30 @@ export default function Dashboard() {
       {/* Top Navigation */}
       <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
         <div className="px-6 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-8">
-            <Link to="/dashboard" className="flex items-center gap-2">
+          <div className="flex items-center">
+            <Link to="/dashboard" className="flex items-center">
               <img 
                 src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/white-blackbackground.png" 
                 alt="ABCD Logo" 
                 className="h-10 w-10 bg-white rounded-lg p-1"
               />
-              <span className="text-2xl font-bold text-white">ABCD</span>
             </Link>
-
-            <nav className="hidden md:flex gap-6">
-              <Link to="/events" className="text-gray-300 hover:text-white font-medium flex items-center gap-2" data-testid="nav-events">
-                <Calendar className="h-5 w-5" />
-                Events
-              </Link>
-              <Link to="/members" className="text-gray-300 hover:text-white font-medium flex items-center gap-2" data-testid="nav-members">
-                <Users className="h-5 w-5" />
-                Members
-              </Link>
-              <Link to="/dms" className="text-gray-300 hover:text-white font-medium flex items-center gap-2" data-testid="nav-dms">
-                <MessageCircle className="h-5 w-5" />
-                Messages
-              </Link>
-            </nav>
           </div>
+
+          <nav className="flex gap-8">
+            <Link to="/events" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors" data-testid="nav-events">
+              <Calendar className="h-5 w-5" />
+              Events
+            </Link>
+            <Link to="/members" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors" data-testid="nav-members">
+              <Users className="h-5 w-5" />
+              Members
+            </Link>
+            <Link to="/dms" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors" data-testid="nav-dms">
+              <MessageCircle className="h-5 w-5" />
+              Messages
+            </Link>
+          </nav>
 
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white hover:bg-gray-800" data-testid="notifications-btn">
