@@ -545,7 +545,12 @@ async def admin_create_user(user_data: UserCreate, user: User = Depends(require_
     await db.users.insert_one(user_dict)
     
     return {
-        "user": new_user,
+        "user": {
+            "id": new_user.id,
+            "name": new_user.name,
+            "email": new_user.email,
+            "role": new_user.role
+        },
         "message": f"User {user_data.name} created successfully"
     }
 
