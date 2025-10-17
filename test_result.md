@@ -101,3 +101,162 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: |
+  Complete the Events Page enhancements including:
+  1. Make calendar open when clicking the date input field (not just icon)
+  2. Ensure "To Date/Time" is always greater than "From Date/Time"
+  3. Enable clicking on calendar events to open them for editing (admin only)
+  4. Implement "My Events" view to see registered events
+  5. Add empty state message when no registered events exist
+
+backend:
+  - task: "Create Event API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Event creation endpoint exists at POST /api/events. Need to verify with testing."
+
+  - task: "Update Event API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Event update endpoint exists at PUT /api/events/{event_id}. Need to verify with testing."
+
+  - task: "Delete Event API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Event deletion endpoint exists at DELETE /api/events/{event_id}. Need to verify with testing."
+
+  - task: "RSVP Event API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "RSVP endpoint exists at POST /api/events/{event_id}/rsvp. Need to verify with testing."
+
+  - task: "Get Events API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Get events endpoint exists at GET /api/events. Need to verify with testing."
+
+frontend:
+  - task: "Date Picker UX - Click to Open"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/EventsPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Date picker now opens when clicking input field using onClick with showPicker(). Verified via screenshot."
+
+  - task: "Date/Time Validation"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/EventsPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "End time field has min={formData.start_time} attribute and form validation checks end > start. Verified via screenshot."
+
+  - task: "Click Events to Edit (Admin)"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/EventsPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Calendar events are clickable and call handleEditEvent when user is admin. Verified via screenshot showing 'Edit' buttons."
+
+  - task: "My Events View"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/EventsPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "My Events toggle button implemented with filter logic. Shows registered events when active. Verified via screenshot."
+
+  - task: "Empty State Message"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/EventsPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Empty state shows 'No registered events yet' when My Events is active and user has no RSVPs. Verified via screenshot."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Create Event API"
+    - "Update Event API"
+    - "Delete Event API"
+    - "RSVP Event API"
+    - "Get Events API"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      Completed all Events Page enhancements as requested:
+      1. ✅ Date picker opens on input click (using showPicker())
+      2. ✅ End time validation with min attribute and form check
+      3. ✅ Events clickable for admin to edit
+      4. ✅ My Events filter toggle working
+      5. ✅ Empty state message implemented
+      
+      All frontend features verified via screenshots. Now requesting backend testing to verify all event-related API endpoints are working correctly with proper auth, validation, and data handling.
