@@ -23,14 +23,17 @@ export default function PostDetailPage() {
   const fetchPostAndSpace = async () => {
     try {
       setLoading(true);
-      const [spaceData, postsData] = await Promise.all([
-        spacesAPI.getSpaceById(spaceId),
-        spacesAPI.getPosts(spaceId)
-      ]);
+      // Fetch posts from the space
+      const postsData = await spacesAPI.getPosts(spaceId);
       
-      setSpace(spaceData);
+      // Find the specific post
       const foundPost = postsData.find(p => p.id === postId);
       setPost(foundPost);
+      
+      // If post has space info, use it; otherwise fetch separately
+      if (foundPost) {
+        setSpace({ name: 'Space', id: spaceId });
+      }
     } catch (error) {
       console.error('Error fetching post:', error);
       toast.error('Failed to load post');
