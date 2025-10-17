@@ -23,7 +23,7 @@ export default function Sidebar({ spaceGroups, spaces }) {
   };
 
   return (
-    <div className="w-64 bg-white border-r h-full overflow-y-auto" data-testid="sidebar">
+    <div className="w-64 bg-gray-900 text-gray-100 h-full overflow-y-auto" data-testid="sidebar">
       <div className="p-4 space-y-6">
         {spaceGroups.map((group) => {
           const groupSpaces = getSpacesByGroup(group.id);
