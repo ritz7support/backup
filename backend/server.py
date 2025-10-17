@@ -440,6 +440,66 @@ async def logout(request: Request, response: Response):
         response.delete_cookie(key="session_token", path="/")
     return {"message": "Logged out"}
 
+# ==================== INVITE ENDPOINTS ====================
+
+@api_router.post("/invites/generate")
+async def generate_invite_link(role: str, user: User = Depends(require_auth)):
+    """Generate an invite link with specific role (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can generate invite links")
+    
+    if role not in ['admin', 'mentor', 'business_owner', 'learner']:
+        raise HTTPException(status_code=400, detail="Invalid role")
+    
+    # Create invite token that expires in 7 days
+    invite = InviteToken(
+        role=role,
+        created_by=user.id,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=7)
+    )
+    
+    await db.invite_tokens.insert_one(invite.model_dump())
+    
+    return {
+        "token": invite.token,
+        "role": invite.role,
+        "expires_at": invite.expires_at.isoformat()
+    }
+
+@api_router.get("/invites/validate/{token}")
+async def validate_invite_token(token: str):
+    """Validate an invite token"""
+    invite = await db.invite_tokens.find_one({"token": token}, {"_id": 0})
+    
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invalid invite link")
+    
+    invite_obj = InviteToken(**invite)
+    
+    if invite_obj.used:
+        raise HTTPException(status_code=400, detail="This invite link has already been used")
+    
+    if datetime.now(timezone.utc) > invite_obj.expires_at:
+        raise HTTPException(status_code=400, detail="This invite link has expired")
+    
+    return {
+        "valid": True,
+        "role": invite_obj.role
+    }
+
+@api_router.get("/invites")
+async def get_invite_links(user: User = Depends(require_auth)):
+    """Get all invite links created by the current admin"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can view invite links")
+    
+    invites = await db.invite_tokens.find(
+        {"created_by": user.id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(100)
+    
+    return {"invites": invites}
+
 # ==================== PAYMENT ENDPOINTS ====================
 
 PRICING = {
