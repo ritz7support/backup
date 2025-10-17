@@ -33,16 +33,16 @@ export default function Sidebar({ spaceGroups, spaces }) {
             <div key={group.id} className="space-y-1" data-testid={`sidebar-group-${group.id}`}>
               <button
                 onClick={() => toggleGroup(group.id)}
-                className="flex items-center justify-between w-full text-left px-2 py-1.5 hover:bg-gray-50 rounded-lg group"
+                className="flex items-center justify-between w-full text-left px-2 py-1.5 hover:bg-gray-800 rounded-lg group"
                 data-testid={`toggle-group-${group.id}`}
               >
                 <div className="flex items-center gap-2">
                   {expandedGroups[group.id] ? (
-                    <ChevronDown className="h-4 w-4 text-gray-500" />
+                    <ChevronDown className="h-4 w-4 text-gray-400" />
                   ) : (
-                    <ChevronRight className="h-4 w-4 text-gray-500" />
+                    <ChevronRight className="h-4 w-4 text-gray-400" />
                   )}
-                  <span className="text-sm font-semibold text-gray-700">{group.name}</span>
+                  <span className="text-sm font-semibold text-gray-300">{group.name}</span>
                 </div>
               </button>
 
@@ -58,15 +58,15 @@ export default function Sidebar({ spaceGroups, spaces }) {
                         to={isLocked ? '/pricing' : `/space/${space.id}`}
                         className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors ${
                           isActive
-                            ? 'bg-purple-50 text-purple-700 font-medium'
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'bg-purple-600 text-white font-medium'
+                            : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                         }`}
                         data-testid={`sidebar-space-${space.id}`}
                       >
                         <span className="text-lg">{space.icon || '📁'}</span>
                         <span className="flex-1">{space.name}</span>
                         {isLocked && (
-                          <Crown className="h-3.5 w-3.5 text-purple-600" data-testid={`locked-icon-${space.id}`} />
+                          <Crown className="h-3.5 w-3.5 text-purple-400" data-testid={`locked-icon-${space.id}`} />
                         )}
                       </Link>
                     );
