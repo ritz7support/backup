@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { spacesAPI } from '../lib/api';
+import { postsAPI } from '../lib/api';
 import { Button } from '../components/ui/button';
 import { ArrowLeft, Heart, MessageCircle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -11,28 +11,27 @@ export default function PostDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [post, setPost] = useState(null);
-  const [space, setSpace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
 
   useEffect(() => {
-    fetchPostAndSpace();
+    fetchPost();
   }, [postId, spaceId]);
 
-  const fetchPostAndSpace = async () => {
+  const fetchPost = async () => {
     try {
       setLoading(true);
       // Fetch posts from the space
-      const postsData = await spacesAPI.getPosts(spaceId);
+      const response = await postsAPI.getSpacePosts(spaceId);
+      const postsData = response.data;
       
       // Find the specific post
       const foundPost = postsData.find(p => p.id === postId);
       setPost(foundPost);
       
-      // If post has space info, use it; otherwise fetch separately
-      if (foundPost) {
-        setSpace({ name: 'Space', id: spaceId });
+      if (!foundPost) {
+        toast.error('Post not found');
       }
     } catch (error) {
       console.error('Error fetching post:', error);
