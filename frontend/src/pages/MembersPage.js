@@ -173,23 +173,78 @@ export default function MembersPage() {
               </h1>
               <p style={{ color: '#3B3B3B' }}>Connect with community members</p>
             </div>
-            <div className="flex gap-2">
-              <Button
-                variant={viewMode === 'grid' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                style={viewMode === 'grid' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' } : {}}
-              >
-                <Grid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                style={viewMode === 'list' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' } : {}}
-              >
-                <List className="h-4 w-4" />
-              </Button>
+            <div className="flex gap-3">
+              {user?.role === 'admin' && (
+                <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }} data-testid="invite-member-btn">
+                      <UserPlus className="h-5 w-5 mr-2" />
+                      Invite Member
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Invite New Member</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleInviteMember} className="space-y-4">
+                      <div>
+                        <Label htmlFor="name">Full Name</Label>
+                        <Input
+                          id="name"
+                          value={inviteFormData.name}
+                          onChange={(e) => setInviteFormData({ ...inviteFormData, name: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="email">Email</Label>
+                        <Input
+                          id="email"
+                          type="email"
+                          value={inviteFormData.email}
+                          onChange={(e) => setInviteFormData({ ...inviteFormData, email: e.target.value })}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="role">Access Level</Label>
+                        <Select value={inviteFormData.role} onValueChange={(value) => setInviteFormData({ ...inviteFormData, role: value })}>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="admin">Admin</SelectItem>
+                            <SelectItem value="mentor">Team Member</SelectItem>
+                            <SelectItem value="business_owner">Community Manager</SelectItem>
+                            <SelectItem value="learner">Member</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button type="submit" className="w-full" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}>
+                        Send Invitation
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              )}
+              <div className="flex gap-2">
+                <Button
+                  variant={viewMode === 'grid' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  style={viewMode === 'grid' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' } : {}}
+                >
+                  <Grid className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  style={viewMode === 'list' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' } : {}}
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
 
