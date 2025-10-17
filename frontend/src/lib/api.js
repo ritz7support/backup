@@ -23,12 +23,11 @@ export const authAPI = {
 // Spaces API
 export const spacesAPI = {
   getSpaceGroups: () => api.get('/space-groups'),
-  getSpaces: (groupId) => api.get('/spaces', { params: { space_group_id: groupId } }),
-  getSpacePosts: (spaceId, skip = 0, limit = 20) => api.get(`/spaces/${spaceId}/posts`, { params: { skip, limit } }),
-  createPost: (data) => api.post('/posts', data),
-  reactToPost: (postId, emoji) => api.post(`/posts/${postId}/react`, { emoji }),
-  getComments: (postId) => api.get(`/posts/${postId}/comments`),
-  addComment: (postId, content) => api.post(`/posts/${postId}/comments`, { content }),
+  getSpaces: (spaceGroupId) => api.get('/spaces', { params: { space_group_id: spaceGroupId } }),
+  joinSpace: (spaceId) => api.post(`/spaces/${spaceId}/join`),
+  leaveSpace: (spaceId) => api.post(`/spaces/${spaceId}/leave`),
+  getSpaceMembers: (spaceId) => api.get(`/spaces/${spaceId}/members`),
+  configureSpace: (spaceId, data) => api.put(`/admin/spaces/${spaceId}/configure`, data),
 };
 
 // Events API
