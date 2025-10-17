@@ -21,7 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { Bell, MessageCircle, Settings, LogOut, Crown } from 'lucide-react';
+import { Bell, MessageCircle, Settings, LogOut, Crown, Home } from 'lucide-react';
 
 export default function EventsPage() {
   const { user, logout } = useAuth();
