@@ -209,10 +209,10 @@ export default function MembersPage() {
                       <div>
                         <Label htmlFor="role">Access Level</Label>
                         <Select value={inviteFormData.role} onValueChange={(value) => setInviteFormData({ ...inviteFormData, role: value })}>
-                          <SelectTrigger>
-                            <SelectValue />
+                          <SelectTrigger id="role">
+                            <SelectValue placeholder="Select access level" />
                           </SelectTrigger>
-                          <SelectContent position="popper" sideOffset={5}>
+                          <SelectContent position="popper" sideOffset={5} className="z-[100]">
                             <SelectItem value="admin">Admin</SelectItem>
                             <SelectItem value="mentor">Team Member</SelectItem>
                             <SelectItem value="business_owner">Community Manager</SelectItem>
