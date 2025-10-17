@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { postsAPI } from '../lib/api';
+import { postsAPI, spacesAPI } from '../lib/api';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { Heart, MessageCircle, Send, Loader2, Sparkles, Crown } from 'lucide-react';
+import RichTextEditor from '../components/RichTextEditor';
+import { Heart, MessageCircle, Send, Loader2, Sparkles, Crown, Users, Lock, UserPlus, UserMinus } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 
@@ -19,10 +20,29 @@ export default function IntroductionFeed() {
   const [commentContent, setCommentContent] = useState('');
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
+  const [spaceInfo, setSpaceInfo] = useState(null);
+  const [memberCount, setMemberCount] = useState(0);
+  const [isMember, setIsMember] = useState(false);
+  const [joiningSpace, setJoiningSpace] = useState(false);
 
   useEffect(() => {
+    loadSpaceInfo();
     loadPosts();
   }, []);
+
+  const loadSpaceInfo = async () => {
+    try {
+      const { data: spaces } = await spacesAPI.getSpaces();
+      const introSpace = spaces.find(s => s.id === 'introductions');
+      if (introSpace) {
+        setSpaceInfo(introSpace);
+        setMemberCount(introSpace.member_count || 0);
+        setIsMember(introSpace.is_member);
+      }
+    } catch (error) {
+      console.error('Failed to load space info');
+    }
+  };
 
   const loadPosts = async () => {
     try {
@@ -32,6 +52,34 @@ export default function IntroductionFeed() {
       toast.error('Failed to load posts');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleJoinSpace = async () => {
+    setJoiningSpace(true);
+    try {
+      const { data } = await spacesAPI.joinSpace('introductions');
+      toast.success(data.message);
+      loadSpaceInfo();
+      setIsMember(true);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to join space');
+    } finally {
+      setJoiningSpace(false);
+    }
+  };
+
+  const handleLeaveSpace = async () => {
+    setJoiningSpace(true);
+    try {
+      const { data } = await spacesAPI.leaveSpace('introductions');
+      toast.success(data.message);
+      loadSpaceInfo();
+      setIsMember(false);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to leave space');
+    } finally {
+      setJoiningSpace(false);
     }
   };
 
