@@ -76,11 +76,12 @@ export default function MembersPage() {
               <Home className="h-5 w-5" />
               Home
             </Link>
-            <Link to="/events" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors" data-testid="nav-events">
-              <Calendar className="h-5 w-5" />
-              Events
-            </Link>
-            <Link to="/members" className="text-white font-medium flex items-center gap-2" data-testid="nav-members">
+            <Link 
+              to="/members" 
+              className="font-medium flex items-center gap-2 px-4 py-2 rounded-lg transition-colors" 
+              style={{ backgroundColor: '#0462CB', color: 'white' }}
+              data-testid="nav-members"
+            >
               <Users className="h-5 w-5" />
               Members
             </Link>
