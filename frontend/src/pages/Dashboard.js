@@ -127,6 +127,12 @@ export default function Dashboard() {
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </DropdownMenuItem>
+                {user?.role === 'admin' && (
+                  <DropdownMenuItem onClick={() => navigate('/admin/spaces')} data-testid="menu-admin-spaces">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Spaces
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout} data-testid="menu-logout">
                   <LogOut className="h-4 w-4 mr-2" />
