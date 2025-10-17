@@ -116,17 +116,9 @@ export default function SpaceFeed({ spaceId }) {
     }
   };
 
-  const openComments = async (post) => {
-    setSelectedPost(post);
-    setLoadingComments(true);
-    try {
-      const { data } = await postsAPI.getComments(post.id);
-      setComments(data);
-    } catch (error) {
-      toast.error('Failed to load comments');
-    } finally {
-      setLoadingComments(false);
-    }
+  const openComments = (post) => {
+    // Navigate to post detail page
+    navigate(`/space/${spaceId}/post/${post.id}`);
   };
 
   const handleAddComment = async (e) => {
