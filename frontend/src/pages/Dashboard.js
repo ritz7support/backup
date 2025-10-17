@@ -60,24 +60,28 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50 flex flex-col" data-testid="dashboard">
       {/* Top Navigation */}
       <header className="bg-white border-b sticky top-0 z-50">
-        <div className="px-6 py-4 flex justify-between items-center">
+        <div className="px-6 py-3 flex justify-between items-center">
           <div className="flex items-center gap-8">
             <Link to="/dashboard" className="flex items-center gap-2">
-              <Sparkles className="h-8 w-8 text-purple-600" />
+              <img 
+                src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/2ftx37lf_white-blackbackground.png" 
+                alt="ABCD Logo" 
+                className="h-10 w-10"
+              />
               <span className="text-2xl font-bold gradient-text">ABCD</span>
             </Link>
 
             <nav className="hidden md:flex gap-6">
-              <Link to="/events" className="text-gray-700 hover:text-purple-600 font-medium" data-testid="nav-events">
-                <Calendar className="h-5 w-5 inline mr-1" />
+              <Link to="/events" className="text-gray-700 hover:text-purple-600 font-medium flex items-center gap-2" data-testid="nav-events">
+                <Calendar className="h-5 w-5" />
                 Events
               </Link>
-              <Link to="/members" className="text-gray-700 hover:text-purple-600 font-medium" data-testid="nav-members">
-                <Users className="h-5 w-5 inline mr-1" />
+              <Link to="/members" className="text-gray-700 hover:text-purple-600 font-medium flex items-center gap-2" data-testid="nav-members">
+                <Users className="h-5 w-5" />
                 Members
               </Link>
-              <Link to="/dms" className="text-gray-700 hover:text-purple-600 font-medium" data-testid="nav-dms">
-                <MessageCircle className="h-5 w-5 inline mr-1" />
+              <Link to="/dms" className="text-gray-700 hover:text-purple-600 font-medium flex items-center gap-2" data-testid="nav-dms">
+                <MessageCircle className="h-5 w-5" />
                 Messages
               </Link>
             </nav>
