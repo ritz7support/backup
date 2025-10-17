@@ -44,6 +44,7 @@ const SPACE_CONFIG = {
 
 export default function SpaceFeed({ spaceId }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [postContent, setPostContent] = useState('');
