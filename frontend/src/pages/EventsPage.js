@@ -417,8 +417,14 @@ export default function EventsPage() {
                                 {dayEvents.slice(0, 2).map((event, idx) => (
                                   <div
                                     key={idx}
-                                    className="text-xs truncate rounded px-1 py-0.5 mt-0.5"
+                                    className="text-xs truncate rounded px-1 py-0.5 mt-0.5 cursor-pointer hover:opacity-80"
                                     style={{ backgroundColor: '#FFB91A', color: '#011328' }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      if (user?.role === 'admin') {
+                                        handleEditEvent(event);
+                                      }
+                                    }}
                                   >
                                     {event.title}
                                   </div>
@@ -437,7 +443,19 @@ export default function EventsPage() {
 
                 {/* Upcoming Events List */}
                 <div className="space-y-4">
-                  <h2 className="text-xl font-bold" style={{ color: '#011328' }}>Upcoming Events</h2>
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-bold" style={{ color: '#011328' }}>
+                      {showMyEvents ? 'My Registered Events' : 'Upcoming Events'}
+                    </h2>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowMyEvents(!showMyEvents)}
+                      style={showMyEvents ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white', border: 'none' } : {}}
+                    >
+                      {showMyEvents ? 'Show All' : 'My Events'}
+                    </Button>
+                  </div>
                   {upcomingEvents.map(event => {
                     const isRSVPd = event.rsvp_list?.includes(user?.id);
                     const isLocked = event.requires_membership && user?.membership_tier === 'free';
