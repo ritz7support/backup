@@ -46,6 +46,7 @@ function App() {
             
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/space/:spaceId" element={<PrivateRoute><SpaceView /></PrivateRoute>} />
+            <Route path="/space/:spaceId/post/:postId" element={<PrivateRoute><PostDetailPage /></PrivateRoute>} />
             <Route path="/events" element={<PrivateRoute><EventsPage /></PrivateRoute>} />
             <Route path="/members" element={<PrivateRoute><MembersPage /></PrivateRoute>} />
             <Route path="/profile/:userId" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
