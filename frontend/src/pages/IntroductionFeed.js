@@ -24,6 +24,7 @@ export default function IntroductionFeed() {
   const [memberCount, setMemberCount] = useState(0);
   const [isMember, setIsMember] = useState(false);
   const [joiningSpace, setJoiningSpace] = useState(false);
+  const [editorExpanded, setEditorExpanded] = useState(false);
 
   useEffect(() => {
     loadSpaceInfo();
