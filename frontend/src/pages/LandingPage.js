@@ -154,19 +154,19 @@ export default function LandingPage() {
 
       {/* CTA Section */}
       <section className="max-w-5xl mx-auto px-6 py-20">
-        <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-12 text-center text-white">
+        <div className="rounded-3xl p-12 text-center text-white" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
           <h2 className="text-4xl font-bold mb-4">Ready to Start Building?</h2>
-          <p className="text-xl text-purple-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl mb-8 max-w-2xl mx-auto" style={{ color: '#E6EFFA' }}>
             Join hundreds of builders who are turning their ideas into reality with no-code.
           </p>
           <div className="flex gap-4 justify-center">
             <Link to="/register">
-              <Button size="lg" variant="secondary" className="text-lg px-8" data-testid="cta-join-btn">
+              <Button size="lg" className="text-lg px-8 bg-white hover:bg-gray-100" style={{ color: '#0462CB' }} data-testid="cta-join-btn">
                 Join the Community
               </Button>
             </Link>
             <Link to="/pricing">
-              <Button size="lg" variant="outline" className="text-lg px-8 border-white text-white hover:bg-white hover:text-purple-600" data-testid="cta-pricing-btn">
+              <Button size="lg" variant="outline" className="text-lg px-8 border-white text-white hover:bg-white" style={{ borderColor: 'white' }} data-testid="cta-pricing-btn">
                 See Pricing
               </Button>
             </Link>
@@ -175,9 +175,9 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-white">
+      <footer className="border-t" style={{ backgroundColor: '#011328', borderColor: '#022955' }}>
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-white">
             <div className="flex items-center gap-2">
               <img 
                 src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/2ftx37lf_white-blackbackground.png" 
