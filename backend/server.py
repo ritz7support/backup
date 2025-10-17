@@ -491,6 +491,44 @@ async def generate_invite_link(role: str, user: User = Depends(require_auth)):
         "expires_at": invite.expires_at.isoformat()
     }
 
+@api_router.post("/invites/create-user")
+async def admin_create_user(user_data: UserCreate, user: User = Depends(require_auth)):
+    """Admin directly creates a user without logging in as them"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can create users directly")
+    
+    # Check if user exists
+    existing_user = await db.users.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Check founding member status (first 100 users)
+    user_count = await db.users.count_documents({})
+    is_founding = user_count < 100
+    
+    # Generate random password
+    random_password = str(uuid.uuid4())[:12]
+    password_hash = bcrypt.hashpw(random_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    # Create user
+    new_user = User(
+        email=user_data.email,
+        name=user_data.name,
+        role=user_data.role,
+        password_hash=password_hash,
+        is_founding_member=is_founding,
+        badges=["🎉 Founding 100"] if is_founding else []
+    )
+    
+    user_dict = new_user.model_dump()
+    user_dict['created_at'] = user_dict['created_at'].isoformat()
+    await db.users.insert_one(user_dict)
+    
+    return {
+        "user": new_user,
+        "message": f"User {user_data.name} created successfully"
+    }
+
 @api_router.get("/invites/validate/{token}")
 async def validate_invite_token(token: str):
     """Validate an invite token"""
