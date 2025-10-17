@@ -804,11 +804,123 @@ async def get_space_groups():
     return groups
 
 @api_router.get("/spaces")
-async def get_spaces(space_group_id: Optional[str] = None):
-    """Get all spaces or by group"""
+async def get_spaces(space_group_id: Optional[str] = None, user: User = Depends(require_auth)):
+    """Get all spaces or by group - filtered by visibility and user membership"""
     query = {"space_group_id": space_group_id} if space_group_id else {}
     spaces = await db.spaces.find(query, {"_id": 0}).sort("order", 1).to_list(100)
-    return spaces
+    
+    # Filter based on visibility and enrich with membership info
+    visible_spaces = []
+    for space in spaces:
+        # Check if user is admin
+        is_admin = user.role == 'admin'
+        
+        # Get user membership
+        membership = await db.space_memberships.find_one({
+            "space_id": space['id'],
+            "user_id": user.id
+        }, {"_id": 0})
+        
+        # Determine visibility
+        if space.get('visibility') == 'secret':
+            # Secret spaces only visible if member or admin
+            if not (membership or is_admin):
+                continue
+        
+        space['is_member'] = bool(membership)
+        space['membership_status'] = membership.get('status') if membership else None
+        visible_spaces.append(space)
+    
+    return visible_spaces
+
+@api_router.post("/spaces/{space_id}/join")
+async def join_space(space_id: str, user: User = Depends(require_auth)):
+    """Join a space"""
+    space = await db.spaces.find_one({"id": space_id}, {"_id": 0})
+    if not space:
+        raise HTTPException(status_code=404, detail="Space not found")
+    
+    # Check if already a member
+    existing = await db.space_memberships.find_one({
+        "space_id": space_id,
+        "user_id": user.id
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="Already a member or pending")
+    
+    # Check payment requirement
+    if space.get('requires_payment') and user.membership_tier != 'paid':
+        raise HTTPException(status_code=403, detail="This space requires a paid membership")
+    
+    # Determine status based on visibility
+    status = "pending" if space.get('visibility') == 'private' else "member"
+    
+    # Create membership
+    membership = SpaceMembership(
+        space_id=space_id,
+        user_id=user.id,
+        status=status
+    )
+    
+    membership_dict = membership.model_dump()
+    membership_dict['joined_at'] = membership_dict['joined_at'].isoformat()
+    await db.space_memberships.insert_one(membership_dict)
+    
+    # Update member count if approved
+    if status == "member":
+        await db.spaces.update_one({"id": space_id}, {"$inc": {"member_count": 1}})
+    
+    return {"message": f"{'Join request sent' if status == 'pending' else 'Joined space successfully'}", "status": status}
+
+@api_router.post("/spaces/{space_id}/leave")
+async def leave_space(space_id: str, user: User = Depends(require_auth)):
+    """Leave a space"""
+    result = await db.space_memberships.delete_one({
+        "space_id": space_id,
+        "user_id": user.id,
+        "status": "member"
+    })
+    
+    if result.deleted_count > 0:
+        await db.spaces.update_one({"id": space_id}, {"$inc": {"member_count": -1}})
+        return {"message": "Left space successfully"}
+    
+    raise HTTPException(status_code=404, detail="Not a member of this space")
+
+@api_router.get("/spaces/{space_id}/members")
+async def get_space_members(space_id: str, user: User = Depends(require_auth)):
+    """Get members of a space"""
+    memberships = await db.space_memberships.find({
+        "space_id": space_id,
+        "status": "member"
+    }, {"_id": 0}).to_list(1000)
+    
+    return {"members": memberships, "count": len(memberships)}
+
+@api_router.put("/admin/spaces/{space_id}/configure")
+async def configure_space(space_id: str, request: Request, user: User = Depends(require_auth)):
+    """Configure space settings (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can configure spaces")
+    
+    data = await request.json()
+    
+    update_fields = {}
+    if 'visibility' in data:
+        if data['visibility'] not in ['public', 'private', 'secret']:
+            raise HTTPException(status_code=400, detail="Invalid visibility value")
+        update_fields['visibility'] = data['visibility']
+    
+    if 'requires_payment' in data:
+        update_fields['requires_payment'] = data['requires_payment']
+    
+    if 'description' in data:
+        update_fields['description'] = data['description']
+    
+    if update_fields:
+        await db.spaces.update_one({"id": space_id}, {"$set": update_fields})
+    
+    return {"message": "Space configured successfully"}
 
 @api_router.get("/spaces/{space_id}/posts")
 async def get_space_posts(space_id: str, skip: int = 0, limit: int = 20):
