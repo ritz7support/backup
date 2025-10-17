@@ -49,10 +49,6 @@ export default function SpaceFeed({ spaceId }) {
   const [loading, setLoading] = useState(true);
   const [postContent, setPostContent] = useState('');
   const [posting, setPosting] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
-  const [commentContent, setCommentContent] = useState('');
-  const [comments, setComments] = useState([]);
-  const [loadingComments, setLoadingComments] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
   const [editorExpanded, setEditorExpanded] = useState(false);
 
