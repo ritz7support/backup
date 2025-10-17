@@ -25,22 +25,7 @@ export default function Sidebar({ spaceGroups, spaces }) {
 
   return (
     <div className="w-64 flex flex-col" style={{ height: 'calc(100vh - 64px)', backgroundColor: '#011328' }} data-testid="sidebar">
-      {/* Logo Section */}
-      <div className="p-6 border-b" style={{ borderColor: '#022955' }}>
-        <div className="flex items-center justify-center">
-          <img 
-            src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/2ftx37lf_white-blackbackground.png" 
-            alt="ABCD" 
-            className="h-20 w-20"
-            onError={(e) => {
-              console.error('Logo failed to load');
-              e.target.style.display = 'none';
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 pt-6">
         {/* Welcome & Next Steps */}
         <Link
           to="/dashboard"
