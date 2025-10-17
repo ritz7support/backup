@@ -207,6 +207,18 @@ class FeatureRequest(BaseModel):
     vote_count: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+# Invite Models
+class InviteToken(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    token: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    role: str  # admin, mentor, business_owner, learner
+    created_by: str  # user_id of admin who created the invite
+    used: bool = False
+    used_by: Optional[str] = None  # user_id who used the invite
+    expires_at: datetime
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # ==================== AUTH HELPER ====================
 
 async def get_current_user(request: Request, authorization: Optional[str] = Header(None)) -> Optional[User]:
