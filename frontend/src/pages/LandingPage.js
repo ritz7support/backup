@@ -14,9 +14,9 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#F3F4F6' }}>
       {/* Header */}
-      <header className="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b sticky top-0 z-50" style={{ backgroundColor: '#011328', borderColor: '#022955' }}>
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <img 
@@ -24,14 +24,14 @@ export default function LandingPage() {
               alt="ABCD Logo" 
               className="h-10 w-10"
             />
-            <span className="text-2xl font-bold gradient-text">ABCD</span>
+            <span className="text-2xl font-bold text-white">ABCD</span>
           </div>
           <div className="flex gap-3">
             <Link to="/login">
-              <Button variant="ghost" data-testid="login-btn">Login</Button>
+              <Button variant="ghost" className="text-white hover:bg-white/10" data-testid="login-btn">Login</Button>
             </Link>
             <Link to="/register">
-              <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700" data-testid="register-btn">
+              <Button style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }} data-testid="register-btn">
                 Join Now
               </Button>
             </Link>
@@ -41,29 +41,29 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <section className="max-w-7xl mx-auto px-6 py-20 text-center">
-        <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium mb-6" style={{ backgroundColor: '#E6EFFA', color: '#0462CB' }}>
           <Rocket className="h-4 w-4" />
           First 100 Members Get Founding Member Badge
         </div>
         
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-6 leading-tight" style={{ color: '#011328' }}>
           Anybody Can
           <br />
-          <span className="gradient-text">Design, Develop & Deploy</span>
+          <span style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Design, Develop & Deploy</span>
         </h1>
         
-        <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+        <p className="text-xl max-w-2xl mx-auto mb-8" style={{ color: '#3B3B3B' }}>
           Join the ultimate no-code community. Learn, build, showcase your work, and connect with mentors and peers.
         </p>
         
         <div className="flex gap-4 justify-center">
           <Link to="/register">
-            <Button size="lg" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-lg px-8" data-testid="hero-cta-btn">
+            <Button size="lg" className="text-lg px-8" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }} data-testid="hero-cta-btn">
               Start Your Journey
             </Button>
           </Link>
           <Link to="/pricing">
-            <Button size="lg" variant="outline" className="text-lg px-8" data-testid="view-pricing-btn">
+            <Button size="lg" variant="outline" className="text-lg px-8" style={{ borderColor: '#0462CB', color: '#0462CB' }} data-testid="view-pricing-btn">
               View Pricing
             </Button>
           </Link>
@@ -72,12 +72,12 @@ export default function LandingPage() {
 
       {/* Features Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">
-        <h2 className="text-4xl font-bold text-center mb-12">Everything You Need to Succeed</h2>
+        <h2 className="text-4xl font-bold text-center mb-12" style={{ color: '#011328' }}>Everything You Need to Succeed</h2>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-8 rounded-2xl shadow-sm hover-lift">
-            <div className="h-12 w-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4">
-              <GraduationCap className="h-6 w-6 text-purple-600" />
+          <div className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+            <div className="h-12 w-12 rounded-xl flex items-center justify-center mb-4" style={{ backgroundColor: '#E6EFFA' }}>
+              <GraduationCap className="h-6 w-6" style={{ color: '#0462CB' }} />
             </div>
             <h3 className="text-xl font-semibold mb-2">Structured Learning</h3>
             <p className="text-gray-600">Master Bubble.io, automation tools, and advanced workflows through our cohort-based programs.</p>
