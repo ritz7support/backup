@@ -37,9 +37,9 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex" style={{ backgroundColor: '#F3F4F6' }}>
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 to-indigo-700 p-12 text-white flex-col justify-between">
+      <div className="hidden lg:flex lg:w-1/2 p-12 text-white flex-col justify-between" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
         <div className="flex items-center gap-3">
           <img 
             src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/white-blackbackground.png" 
