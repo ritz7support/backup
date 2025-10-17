@@ -1,11 +1,13 @@
 import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Sidebar from '../components/Sidebar';
 import ComingSoonPage from './ComingSoonPage';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
-import { Home, Users, MessageCircle, Bell, LogOut, Crown, Settings } from 'lucide-react';
+import { Home, Users, MessageCircle, Bell, LogOut, Crown, Settings, Loader2 } from 'lucide-react';
+import { spacesAPI } from '../lib/api';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +20,28 @@ export default function SpaceView() {
   const { spaceId } = useParams();
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [spaceGroups, setSpaceGroups] = useState([]);
+  const [spaces, setSpaces] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadSpaces();
+  }, []);
+
+  const loadSpaces = async () => {
+    try {
+      const [groupsRes, spacesRes] = await Promise.all([
+        spacesAPI.getSpaceGroups(),
+        spacesAPI.getSpaces(),
+      ]);
+      setSpaceGroups(groupsRes.data);
+      setSpaces(spacesRes.data);
+    } catch (error) {
+      console.error('Failed to load spaces');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -35,6 +59,14 @@ export default function SpaceView() {
     };
     return titles[spaceId] || 'Space';
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F4F6' }}>
+        <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#0462CB' }} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F3F4F6' }}>
@@ -113,7 +145,7 @@ export default function SpaceView() {
 
       {/* Main Layout */}
       <div className="flex flex-1 min-h-0">
-        <Sidebar />
+        <Sidebar spaceGroups={spaceGroups} spaces={spaces} />
         <main className="flex-1">
           <ComingSoonPage 
             title={getSpaceTitle()}
