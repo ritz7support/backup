@@ -339,17 +339,17 @@ async def google_auth(redirect_url: str):
     return {"auth_url": auth_url}
 
 @api_router.post("/auth/session")
-async def process_session(request: Request, x_session_id: str = Header(..., alias="X-Session-ID")):
+async def process_session(request: Request, response: Response, x_session_id: str = Header(..., alias="X-Session-ID")):
     """Process Google OAuth session and create user session"""
     # Call Emergent auth endpoint
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.get(
+            response_data = await client.get(
                 "https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data",
                 headers={"X-Session-ID": x_session_id}
             )
-            response.raise_for_status()
-            oauth_data = response.json()
+            response_data.raise_for_status()
+            oauth_data = response_data.json()
         except Exception as e:
             logger.error(f"OAuth error: {e}")
             raise HTTPException(status_code=400, detail="Invalid session ID")
@@ -389,6 +389,17 @@ async def process_session(request: Request, x_session_id: str = Header(..., alia
     session_dict['created_at'] = session_dict['created_at'].isoformat()
     session_dict['expires_at'] = session_dict['expires_at'].isoformat()
     await db.user_sessions.insert_one(session_dict)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7*24*60*60,
+        path="/"
+    )
     
     return {"session_token": session_token, "user_id": user_id}
 
