@@ -260,12 +260,30 @@ async def require_auth(request: Request, authorization: Optional[str] = Header(N
 # ==================== AUTH ENDPOINTS ====================
 
 @api_router.post("/auth/register")
-async def register(user_data: UserCreate, response: Response):
+async def register(user_data: UserCreate, response: Response, invite_token: Optional[str] = None):
     """Register new user with email/password"""
     # Check if user exists
     existing_user = await db.users.find_one({"email": user_data.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Handle invite token if provided
+    role = user_data.role
+    if invite_token:
+        invite = await db.invite_tokens.find_one({"token": invite_token}, {"_id": 0})
+        if not invite:
+            raise HTTPException(status_code=400, detail="Invalid invite link")
+        
+        invite_obj = InviteToken(**invite)
+        
+        if invite_obj.used:
+            raise HTTPException(status_code=400, detail="This invite link has already been used")
+        
+        if datetime.now(timezone.utc) > invite_obj.expires_at:
+            raise HTTPException(status_code=400, detail="This invite link has expired")
+        
+        # Use role from invite token
+        role = invite_obj.role
     
     # Check founding member status (first 100 users)
     user_count = await db.users.count_documents({})
@@ -278,7 +296,7 @@ async def register(user_data: UserCreate, response: Response):
     user = User(
         email=user_data.email,
         name=user_data.name,
-        role=user_data.role,
+        role=role,
         password_hash=password_hash,
         is_founding_member=is_founding,
         badges=["🎉 Founding 100"] if is_founding else []
@@ -287,6 +305,13 @@ async def register(user_data: UserCreate, response: Response):
     user_dict = user.model_dump()
     user_dict['created_at'] = user_dict['created_at'].isoformat()
     await db.users.insert_one(user_dict)
+    
+    # Mark invite token as used
+    if invite_token:
+        await db.invite_tokens.update_one(
+            {"token": invite_token},
+            {"$set": {"used": True, "used_by": user.id}}
+        )
     
     # Create session
     session_token = str(uuid.uuid4())
