@@ -746,6 +746,51 @@ async def create_event(request: Request, user: User = Depends(require_auth)):
     
     return event
 
+@api_router.put("/events/{event_id}")
+async def update_event(event_id: str, request: Request, user: User = Depends(require_auth)):
+    """Update event (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    event = await db.events.find_one({"id": event_id})
+    if not event:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    data = await request.json()
+    
+    update_fields = {}
+    if 'title' in data:
+        update_fields['title'] = data['title']
+    if 'description' in data:
+        update_fields['description'] = data['description']
+    if 'event_type' in data:
+        update_fields['event_type'] = data['event_type']
+    if 'start_time' in data:
+        update_fields['start_time'] = datetime.fromisoformat(data['start_time']).isoformat()
+    if 'end_time' in data:
+        update_fields['end_time'] = datetime.fromisoformat(data['end_time']).isoformat()
+    if 'requires_membership' in data:
+        update_fields['requires_membership'] = data['requires_membership']
+    if 'tags' in data:
+        update_fields['tags'] = data['tags']
+    
+    if update_fields:
+        await db.events.update_one({"id": event_id}, {"$set": update_fields})
+    
+    return {"message": "Event updated successfully"}
+
+@api_router.delete("/events/{event_id}")
+async def delete_event(event_id: str, user: User = Depends(require_auth)):
+    """Delete event (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.events.delete_one({"id": event_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Event not found")
+    
+    return {"message": "Event deleted successfully"}
+
 @api_router.post("/events/{event_id}/rsvp")
 async def rsvp_event(event_id: str, user: User = Depends(require_auth)):
     """RSVP to event"""
