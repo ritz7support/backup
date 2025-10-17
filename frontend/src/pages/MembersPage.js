@@ -74,6 +74,30 @@ export default function MembersPage() {
     }
   };
 
+  const handleGenerateInviteLink = async () => {
+    try {
+      const { data } = await invitesAPI.generateInvite(inviteFormData.role);
+      const inviteLink = `${window.location.origin}/register?invite=${data.token}`;
+      setGeneratedInviteLink(inviteLink);
+      toast.success('Invite link generated!');
+    } catch (error) {
+      toast.error('Failed to generate invite link');
+    }
+  };
+
+  const handleCopyInviteLink = () => {
+    navigator.clipboard.writeText(generatedInviteLink);
+    setLinkCopied(true);
+    toast.success('Link copied to clipboard!');
+    setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const handleInviteMethodChange = (method) => {
+    setInviteMethod(method);
+    setGeneratedInviteLink('');
+    setLinkCopied(false);
+  };
+
   const filteredMembers = members.filter(member =>
     member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
