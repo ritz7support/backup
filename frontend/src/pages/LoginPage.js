@@ -58,8 +58,12 @@ export default function LoginPage() {
       {/* Right Side - Login Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8">
         <div className="w-full max-w-md">
-          <div className="lg:hidden flex items-center gap-2 mb-8">
-            <Sparkles className="h-8 w-8 text-purple-600" />
+          <div className="lg:hidden flex items-center gap-3 mb-8">
+            <img 
+              src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/2ftx37lf_white-blackbackground.png" 
+              alt="ABCD Logo" 
+              className="h-10 w-10"
+            />
             <span className="text-2xl font-bold gradient-text">ABCD</span>
           </div>
 
