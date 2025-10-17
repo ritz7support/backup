@@ -70,6 +70,11 @@ class UserCreate(BaseModel):
     name: str
     role: str = "learner"
 
+class AdminUserCreate(BaseModel):
+    email: EmailStr
+    name: str
+    role: str = "learner"
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
