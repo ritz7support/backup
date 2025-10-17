@@ -193,7 +193,7 @@ export default function IntroductionFeed() {
         </p>
       </div>
 
-          {/* Create Post with Rich Editor */}
+          {/* Create Post with Collapsible Rich Editor */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6" style={{ borderColor: '#D1D5DB' }}>
             <div className="flex gap-3">
               <Avatar className="h-10 w-10 flex-shrink-0">
@@ -202,26 +202,49 @@ export default function IntroductionFeed() {
                   {user?.name?.[0]}
                 </AvatarFallback>
               </Avatar>
-              <form onSubmit={handleCreatePost} className="flex-1">
-                <RichTextEditor
-                  content={postContent}
-                  onChange={setPostContent}
-                  placeholder="Introduce yourself to the community... 👋"
-                />
-                <div className="flex justify-end mt-3">
-                  <Button
-                    type="submit"
-                    disabled={posting || !postContent.trim() || postContent === '<p></p>'}
-                    style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
-                  >
-                    {posting ? (
-                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Posting...</>
-                    ) : (
-                      <><Send className="h-4 w-4 mr-2" /> Post Introduction</>
-                    )}
-                  </Button>
-                </div>
-              </form>
+              <div className="flex-1">
+                {!editorExpanded ? (
+                  <input
+                    type="text"
+                    placeholder="Introduce yourself to the community... 👋"
+                    onClick={() => setEditorExpanded(true)}
+                    readOnly
+                    className="w-full px-4 py-3 rounded-lg border cursor-text hover:border-blue-400 transition-colors"
+                    style={{ borderColor: '#D1D5DB', color: '#3B3B3B' }}
+                  />
+                ) : (
+                  <form onSubmit={handleCreatePost}>
+                    <RichTextEditor
+                      content={postContent}
+                      onChange={setPostContent}
+                      placeholder="Introduce yourself to the community... 👋"
+                    />
+                    <div className="flex justify-end gap-2 mt-3">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => {
+                          setEditorExpanded(false);
+                          setPostContent('');
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        disabled={posting || !postContent.trim() || postContent === '<p></p>'}
+                        style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
+                      >
+                        {posting ? (
+                          <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Posting...</>
+                        ) : (
+                          <><Send className="h-4 w-4 mr-2" /> Post Introduction</>
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                )}
+              </div>
             </div>
           </div>
 
