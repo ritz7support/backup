@@ -517,7 +517,7 @@ async def generate_invite_link(role: str, user: User = Depends(require_auth)):
     }
 
 @api_router.post("/invites/create-user")
-async def admin_create_user(user_data: UserCreate, user: User = Depends(require_auth)):
+async def admin_create_user(user_data: AdminUserCreate, user: User = Depends(require_auth)):
     """Admin directly creates a user without logging in as them"""
     if user.role != 'admin':
         raise HTTPException(status_code=403, detail="Only admins can create users directly")
