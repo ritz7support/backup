@@ -116,105 +116,130 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
   }
 
   return (
-    <div className="border rounded-lg" style={{ borderColor: '#D1D5DB' }}>
-      {/* Editor */}
-      <EditorContent editor={editor} />
-      
-      {/* Toolbar at Bottom */}
-      <div className="border-t p-2 flex flex-wrap items-center gap-1" style={{ borderColor: '#E5E7EB', backgroundColor: '#F9FAFB' }}>
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={handleBold}
-          className={editor.isActive('bold') ? 'bg-gray-200' : ''}
-        >
-          <Bold className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={handleItalic}
-          className={editor.isActive('italic') ? 'bg-gray-200' : ''}
-        >
-          <Italic className="h-4 w-4" />
-        </Button>
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={handleBulletList}
-          className={editor.isActive('bulletList') ? 'bg-gray-200' : ''}
-        >
-          <List className="h-4 w-4" />
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={handleOrderedList}
-          className={editor.isActive('orderedList') ? 'bg-gray-200' : ''}
-        >
-          <ListOrdered className="h-4 w-4" />
-        </Button>
-        <div className="w-px h-6 bg-gray-300 mx-1" />
-        <div className="relative">
-          <Button
-            type="button"
-            size="sm"
-            variant="ghost"
-            onClick={() => setShowLinkInput(!showLinkInput)}
-          >
-            <LinkIcon className="h-4 w-4" />
-          </Button>
-          {showLinkInput && (
-            <div className="absolute bottom-full left-0 mb-1 p-2 bg-white border rounded-lg shadow-lg z-10 flex gap-2" style={{ minWidth: '250px' }}>
-              <input
-                type="url"
-                placeholder="Enter URL..."
-                value={linkUrl}
-                onChange={(e) => setLinkUrl(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleAddLink()}
-                className="flex-1 px-2 py-1 border rounded text-sm"
-                style={{ borderColor: '#D1D5DB' }}
+    <div className="space-y-3">
+      {/* Image Previews */}
+      {uploadedImages.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {uploadedImages.map((img) => (
+            <div key={img.id} className="relative group">
+              <img 
+                src={img.src} 
+                alt={img.name}
+                className="w-24 h-24 object-cover rounded-lg border border-gray-200"
               />
-              <Button type="button" size="sm" onClick={handleAddLink}>
-                Add
-              </Button>
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(img.id)}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="h-3 w-3" />
+              </button>
+              <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 rounded-lg transition-all" />
             </div>
-          )}
+          ))}
         </div>
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <ImageIcon className="h-4 w-4" />
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          className="hidden"
-        />
-        <div className="relative">
+      )}
+      
+      <div className="border rounded-lg" style={{ borderColor: '#D1D5DB' }}>
+        {/* Editor */}
+        <EditorContent editor={editor} />
+        
+        {/* Toolbar at Bottom */}
+        <div className="border-t p-2 flex flex-wrap items-center gap-1" style={{ borderColor: '#E5E7EB', backgroundColor: '#F9FAFB' }}>
           <Button
             type="button"
             size="sm"
             variant="ghost"
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            onClick={handleBold}
+            className={editor.isActive('bold') ? 'bg-gray-200' : ''}
           >
-            <Smile className="h-4 w-4" />
+            <Bold className="h-4 w-4" />
           </Button>
-          {showEmojiPicker && (
-            <div className="absolute bottom-full left-0 mb-1 z-10">
-              <EmojiPicker onEmojiClick={handleEmojiSelect} width={300} height={400} />
-            </div>
-          )}
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={handleItalic}
+            className={editor.isActive('italic') ? 'bg-gray-200' : ''}
+          >
+            <Italic className="h-4 w-4" />
+          </Button>
+          <div className="w-px h-6 bg-gray-300 mx-1" />
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={handleBulletList}
+            className={editor.isActive('bulletList') ? 'bg-gray-200' : ''}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={handleOrderedList}
+            className={editor.isActive('orderedList') ? 'bg-gray-200' : ''}
+          >
+            <ListOrdered className="h-4 w-4" />
+          </Button>
+          <div className="w-px h-6 bg-gray-300 mx-1" />
+          <div className="relative">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowLinkInput(!showLinkInput)}
+            >
+              <LinkIcon className="h-4 w-4" />
+            </Button>
+            {showLinkInput && (
+              <div className="absolute bottom-full left-0 mb-1 p-2 bg-white border rounded-lg shadow-lg z-10 flex gap-2" style={{ minWidth: '250px' }}>
+                <input
+                  type="url"
+                  placeholder="Enter URL..."
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddLink()}
+                  className="flex-1 px-2 py-1 border rounded text-sm"
+                  style={{ borderColor: '#D1D5DB' }}
+                />
+                <Button type="button" size="sm" onClick={handleAddLink}>
+                  Add
+                </Button>
+              </div>
+            )}
+          </div>
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <ImageIcon className="h-4 w-4" />
+          </Button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          <div className="relative">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            >
+              <Smile className="h-4 w-4" />
+            </Button>
+            {showEmojiPicker && (
+              <div className="absolute bottom-full left-0 mb-1 z-10">
+                <EmojiPicker onEmojiClick={handleEmojiSelect} width={300} height={400} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
