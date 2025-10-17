@@ -67,13 +67,29 @@ export default function EventsPage() {
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
+    
+    // Validate end time is after start time
+    if (new Date(formData.end_time) <= new Date(formData.start_time)) {
+      toast.error('End time must be after start time');
+      return;
+    }
+    
     try {
-      await eventsAPI.createEvent({
-        ...formData,
-        tags: [formData.event_type]
-      });
-      toast.success('Event created successfully!');
+      if (editingEvent) {
+        await eventsAPI.updateEvent(editingEvent.id, {
+          ...formData,
+          tags: [formData.event_type]
+        });
+        toast.success('Event updated successfully!');
+      } else {
+        await eventsAPI.createEvent({
+          ...formData,
+          tags: [formData.event_type]
+        });
+        toast.success('Event created successfully!');
+      }
       setCreateDialogOpen(false);
+      setEditingEvent(null);
       setFormData({
         title: '',
         description: '',
@@ -84,7 +100,32 @@ export default function EventsPage() {
       });
       loadData();
     } catch (error) {
-      toast.error('Failed to create event');
+      toast.error(editingEvent ? 'Failed to update event' : 'Failed to create event');
+    }
+  };
+
+  const handleEditEvent = (event) => {
+    setEditingEvent(event);
+    setFormData({
+      title: event.title,
+      description: event.description || '',
+      event_type: event.event_type,
+      start_time: event.start_time.slice(0, 16), // Format for datetime-local
+      end_time: event.end_time.slice(0, 16),
+      requires_membership: event.requires_membership
+    });
+    setCreateDialogOpen(true);
+  };
+
+  const handleDeleteEvent = async (eventId) => {
+    if (window.confirm('Are you sure you want to delete this event?')) {
+      try {
+        await eventsAPI.deleteEvent(eventId);
+        toast.success('Event deleted successfully!');
+        loadData();
+      } catch (error) {
+        toast.error('Failed to delete event');
+      }
     }
   };
 
