@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Crown, BookOpen, Video, Users, MessageCircle, Lightbulb, HelpCircle, UserPlus } from 'lucide-react';
+import { ChevronDown, ChevronRight, Crown, BookOpen, Video, Users, MessageCircle, Lightbulb, HelpCircle, UserPlus, Heart, Trophy } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Sidebar({ spaceGroups, spaces }) {
@@ -56,7 +56,7 @@ export default function Sidebar({ spaceGroups, spaces }) {
           <span>Introduction</span>
         </Link>
 
-        {/* Resources & Recordings */}
+        {/* Resources */}
         <div className="space-y-1">
           <button
             onClick={() => toggleSection('resources')}
@@ -66,7 +66,7 @@ export default function Sidebar({ spaceGroups, spaces }) {
           >
             <div className="flex items-center gap-3">
               <BookOpen className="h-5 w-5" style={{ color: '#8CB7E7' }} />
-              <span className="text-sm font-medium">Resources & Recordings</span>
+              <span className="text-sm font-medium">Resources</span>
             </div>
             {expandedSections.resources ? (
               <ChevronDown className="h-4 w-4" style={{ color: '#8CB7E7' }} />
@@ -133,6 +133,36 @@ export default function Sidebar({ spaceGroups, spaces }) {
         >
           <HelpCircle className="h-5 w-5" />
           <span>Ask-Doubts</span>
+        </Link>
+
+        {/* Gratitude */}
+        <Link
+          to="/space/gratitude"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+            location.pathname === '/space/gratitude'
+              ? 'text-white font-medium'
+              : 'text-gray-300 hover:text-white'
+          }`}
+          style={location.pathname === '/space/gratitude' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
+          data-testid="sidebar-gratitude"
+        >
+          <Heart className="h-5 w-5" />
+          <span>Gratitude</span>
+        </Link>
+
+        {/* Showcase */}
+        <Link
+          to="/space/showcase"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+            location.pathname === '/space/showcase'
+              ? 'text-white font-medium'
+              : 'text-gray-300 hover:text-white'
+          }`}
+          style={location.pathname === '/space/showcase' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
+          data-testid="sidebar-showcase"
+        >
+          <Trophy className="h-5 w-5" />
+          <span>Showcase</span>
         </Link>
 
         {/* Community */}
