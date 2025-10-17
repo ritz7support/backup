@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
 import { Button } from './ui/button';
 import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Smile, X } from 'lucide-react';
@@ -21,6 +22,14 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
         openOnClick: false,
         HTMLAttributes: {
           class: 'text-blue-600 underline',
+        },
+      }),
+      Image.configure({
+        inline: true,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: 'rounded-lg my-2',
+          style: 'max-width: 100%; height: auto;',
         },
       }),
       Placeholder.configure({
