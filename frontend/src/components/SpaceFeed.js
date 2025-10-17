@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { postsAPI, spacesAPI } from '../lib/api';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import RichTextEditor from '../components/RichTextEditor';
 import { Heart, MessageCircle, Send, Loader2, Sparkles, Crown, Users } from 'lucide-react';
 import { toast } from 'sonner';
