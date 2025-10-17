@@ -464,9 +464,20 @@ export default function EventsPage() {
                       <div key={event.id} className="bg-white rounded-xl p-4 shadow-sm border" style={{ borderColor: '#D1D5DB' }}>
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="font-semibold" style={{ color: '#011328' }}>{event.title}</h3>
-                          {isLocked && (
-                            <Crown className="h-4 w-4" style={{ color: '#FFB91A' }} />
-                          )}
+                          <div className="flex items-center gap-2">
+                            {isLocked && (
+                              <Crown className="h-4 w-4" style={{ color: '#FFB91A' }} />
+                            )}
+                            {user?.role === 'admin' && (
+                              <button
+                                onClick={() => handleEditEvent(event)}
+                                className="text-xs px-2 py-1 rounded hover:bg-gray-100"
+                                style={{ color: '#0462CB' }}
+                              >
+                                Edit
+                              </button>
+                            )}
+                          </div>
                         </div>
                         <p className="text-sm mb-3" style={{ color: '#3B3B3B' }}>{event.description}</p>
                         <div className="flex items-center gap-4 text-sm mb-3" style={{ color: '#8E8E8E' }}>
@@ -508,6 +519,13 @@ export default function EventsPage() {
                       </div>
                     );
                   })}
+                  {upcomingEvents.length === 0 && (
+                    <div className="text-center py-10">
+                      <p style={{ color: '#8E8E8E' }}>
+                        {showMyEvents ? 'No registered events yet' : 'No upcoming events'}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
