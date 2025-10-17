@@ -40,8 +40,12 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-purple-600 to-indigo-700 p-12 text-white flex-col justify-between">
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-8 w-8" />
+        <div className="flex items-center gap-3">
+          <img 
+            src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/white-blackbackground.png" 
+            alt="ABCD Logo" 
+            className="h-12 w-12 bg-white rounded-lg p-1"
+          />
           <span className="text-2xl font-bold">ABCD</span>
         </div>
         <div>
