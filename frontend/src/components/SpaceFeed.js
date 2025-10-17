@@ -281,10 +281,20 @@ export default function SpaceFeed({ spaceId }) {
 
               {/* Post Content */}
               <div 
-                className="mb-4 prose max-w-none" 
+                className="mb-4 prose max-w-none post-content" 
                 style={{ color: '#3B3B3B' }}
                 dangerouslySetInnerHTML={{ __html: post.content }}
               />
+
+              <style jsx>{`
+                .post-content img {
+                  max-width: 100%;
+                  height: auto;
+                  border-radius: 8px;
+                  margin: 8px 0;
+                  display: block;
+                }
+              `}</style>
 
               {/* Post Actions */}
               <div className="flex items-center gap-4 pt-3 border-t" style={{ borderColor: '#E5E7EB' }}>
