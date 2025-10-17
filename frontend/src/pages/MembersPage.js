@@ -209,48 +209,136 @@ export default function MembersPage() {
                       Invite Member
                     </Button>
                   </DialogTrigger>
-                  <DialogContent>
+                  <DialogContent className="max-w-md">
                     <DialogHeader>
                       <DialogTitle>Invite New Member</DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleInviteMember} className="space-y-4">
-                      <div>
-                        <Label htmlFor="name">Full Name</Label>
-                        <Input
-                          id="name"
-                          value={inviteFormData.name}
-                          onChange={(e) => setInviteFormData({ ...inviteFormData, name: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="email">Email</Label>
-                        <Input
-                          id="email"
-                          type="email"
-                          value={inviteFormData.email}
-                          onChange={(e) => setInviteFormData({ ...inviteFormData, email: e.target.value })}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="role">Access Level</Label>
-                        <Select value={inviteFormData.role} onValueChange={(value) => setInviteFormData({ ...inviteFormData, role: value })}>
-                          <SelectTrigger id="role">
-                            <SelectValue placeholder="Select access level" />
-                          </SelectTrigger>
-                          <SelectContent position="popper" sideOffset={5} className="z-[100]">
-                            <SelectItem value="admin">Admin</SelectItem>
-                            <SelectItem value="mentor">Team Member</SelectItem>
-                            <SelectItem value="business_owner">Community Manager</SelectItem>
-                            <SelectItem value="learner">Member</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Button type="submit" className="w-full" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}>
-                        Send Invitation
+                    
+                    {/* Invite Method Selector */}
+                    <div className="flex gap-2 mb-4">
+                      <Button
+                        type="button"
+                        variant={inviteMethod === 'email' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleInviteMethodChange('email')}
+                        className="flex-1"
+                        style={inviteMethod === 'email' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' } : {}}
+                      >
+                        <UserPlus className="h-4 w-4 mr-2" />
+                        Direct Invite
                       </Button>
-                    </form>
+                      <Button
+                        type="button"
+                        variant={inviteMethod === 'link' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => handleInviteMethodChange('link')}
+                        className="flex-1"
+                        style={inviteMethod === 'link' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' } : {}}
+                      >
+                        <Link2 className="h-4 w-4 mr-2" />
+                        Invite Link
+                      </Button>
+                    </div>
+
+                    {inviteMethod === 'email' ? (
+                      <form onSubmit={handleInviteMember} className="space-y-4">
+                        <div>
+                          <Label htmlFor="name">Full Name</Label>
+                          <Input
+                            id="name"
+                            value={inviteFormData.name}
+                            onChange={(e) => setInviteFormData({ ...inviteFormData, name: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="email">Email</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            value={inviteFormData.email}
+                            onChange={(e) => setInviteFormData({ ...inviteFormData, email: e.target.value })}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="role">Access Level</Label>
+                          <Select value={inviteFormData.role} onValueChange={(value) => setInviteFormData({ ...inviteFormData, role: value })}>
+                            <SelectTrigger id="role">
+                              <SelectValue placeholder="Select access level" />
+                            </SelectTrigger>
+                            <SelectContent position="popper" sideOffset={5} className="z-[100]">
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="mentor">Team Member</SelectItem>
+                              <SelectItem value="business_owner">Community Manager</SelectItem>
+                              <SelectItem value="learner">Member</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <Button type="submit" className="w-full" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}>
+                          Send Invitation
+                        </Button>
+                      </form>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor="link-role">Access Level</Label>
+                          <Select value={inviteFormData.role} onValueChange={(value) => setInviteFormData({ ...inviteFormData, role: value })}>
+                            <SelectTrigger id="link-role">
+                              <SelectValue placeholder="Select access level" />
+                            </SelectTrigger>
+                            <SelectContent position="popper" sideOffset={5} className="z-[100]">
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="mentor">Team Member</SelectItem>
+                              <SelectItem value="business_owner">Community Manager</SelectItem>
+                              <SelectItem value="learner">Member</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        {!generatedInviteLink ? (
+                          <Button 
+                            type="button" 
+                            onClick={handleGenerateInviteLink} 
+                            className="w-full"
+                            style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
+                          >
+                            <Link2 className="h-4 w-4 mr-2" />
+                            Generate Invite Link
+                          </Button>
+                        ) : (
+                          <div className="space-y-3">
+                            <div className="p-3 rounded-lg" style={{ backgroundColor: '#E6EFFA' }}>
+                              <Label className="text-xs mb-1" style={{ color: '#011328' }}>Invite Link (expires in 7 days)</Label>
+                              <div className="flex items-center gap-2 mt-2">
+                                <Input
+                                  value={generatedInviteLink}
+                                  readOnly
+                                  className="text-sm"
+                                  style={{ backgroundColor: 'white' }}
+                                />
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  onClick={handleCopyInviteLink}
+                                  style={{ background: linkCopied ? '#10B981' : 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
+                                >
+                                  {linkCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                </Button>
+                              </div>
+                            </div>
+                            <Button 
+                              type="button" 
+                              onClick={handleGenerateInviteLink} 
+                              variant="outline"
+                              className="w-full"
+                            >
+                              Generate New Link
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </DialogContent>
                 </Dialog>
               )}
