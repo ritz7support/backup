@@ -180,37 +180,16 @@ export default function IntroductionFeed() {
         </div>
       </div>
 
-      {!isMember ? (
-        <div className="bg-white rounded-2xl p-8 shadow-sm border text-center" style={{ borderColor: '#D1D5DB' }}>
-          <Lock className="h-12 w-12 mx-auto mb-4" style={{ color: '#8E8E8E' }} />
-          <h3 className="text-xl font-bold mb-2" style={{ color: '#011328' }}>Join to Participate</h3>
-          <p className="mb-6" style={{ color: '#3B3B3B' }}>
-            Join this space to share your introduction and connect with other members.
-          </p>
-          <Button
-            onClick={handleJoinSpace}
-            disabled={joiningSpace}
-            style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
-          >
-            {joiningSpace ? (
-              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Joining...</>
-            ) : (
-              <><UserPlus className="h-4 w-4 mr-2" /> Join Space</>
-            )}
-          </Button>
+      {/* Welcome Banner */}
+      <div className="mb-6 p-6 rounded-2xl text-white" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
+        <div className="flex items-center gap-3 mb-3">
+          <Sparkles className="h-6 w-6" style={{ color: '#FFB91A' }} />
+          <h2 className="text-2xl font-bold">Welcome to Introductions!</h2>
         </div>
-      ) : (
-        <>
-          {/* Welcome Banner */}
-          <div className="mb-6 p-6 rounded-2xl text-white" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
-            <div className="flex items-center gap-3 mb-3">
-              <Sparkles className="h-6 w-6" style={{ color: '#FFB91A' }} />
-              <h2 className="text-2xl font-bold">Welcome to Introductions!</h2>
-            </div>
-            <p style={{ color: '#E6EFFA' }}>
-              Share your story, connect with fellow builders, and let the community know who you are!
-            </p>
-          </div>
+        <p style={{ color: '#E6EFFA' }}>
+          Share your story, connect with fellow builders, and let the community know who you are!
+        </p>
+      </div>
 
           {/* Create Post with Rich Editor */}
           <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6" style={{ borderColor: '#D1D5DB' }}>
