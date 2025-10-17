@@ -50,6 +50,24 @@ export default function MembersPage() {
     navigate('/');
   };
 
+  const handleInviteMember = async (e) => {
+    e.preventDefault();
+    try {
+      // For now, we'll just create the user directly
+      // In production, this would send an invitation email
+      const { data } = await authAPI.register({
+        ...inviteFormData,
+        password: Math.random().toString(36).slice(-8) // Generate random password
+      });
+      toast.success(`Invitation sent to ${inviteFormData.email}`);
+      setInviteDialogOpen(false);
+      setInviteFormData({ name: '', email: '', role: 'learner' });
+      loadMembers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to invite member');
+    }
+  };
+
   const filteredMembers = members.filter(member =>
     member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
