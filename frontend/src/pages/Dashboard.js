@@ -138,12 +138,10 @@ export default function Dashboard() {
       </header>
 
       {/* Main Layout with Sidebar */}
-      <div className="flex flex-1 overflow-hidden h-[calc(100vh-64px)]">
+      <div className="flex flex-1 min-h-0">
         {/* Left Sidebar */}
         {!loading && (
-          <div className="h-full">
-            <Sidebar spaceGroups={spaceGroups} spaces={spaces} />
-          </div>
+          <Sidebar spaceGroups={spaceGroups} spaces={spaces} />
         )}
 
         {/* Main Content */}
