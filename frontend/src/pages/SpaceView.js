@@ -147,6 +147,12 @@ export default function SpaceView() {
                   <Settings className="h-4 w-4 mr-2" />
                   Settings
                 </DropdownMenuItem>
+                {user?.role === 'admin' && (
+                  <DropdownMenuItem onClick={() => navigate('/admin/spaces')}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Manage Spaces
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="h-4 w-4 mr-2" />
