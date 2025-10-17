@@ -77,6 +77,9 @@ export const adminAPI = {
   createSpaceGroup: (data) => api.post('/admin/space-groups', data),
   createSpace: (data) => api.post('/admin/spaces', data),
   getAnalytics: () => api.get('/admin/analytics'),
+  archiveMember: (userId) => api.put(`/admin/members/${userId}/archive`),
+  unarchiveMember: (userId) => api.put(`/admin/members/${userId}/unarchive`),
+  deleteMember: (userId) => api.delete(`/admin/members/${userId}`),
 };
 
 // Invites API
@@ -84,4 +87,5 @@ export const invitesAPI = {
   generateInvite: (role) => api.post('/invites/generate', null, { params: { role } }),
   validateInvite: (token) => api.get(`/invites/validate/${token}`),
   getInvites: () => api.get('/invites'),
+  createUserDirectly: (data) => api.post('/invites/create-user', data),
 };
