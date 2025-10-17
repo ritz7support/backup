@@ -212,7 +212,7 @@ export default function MembersPage() {
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent position="popper" sideOffset={5}>
                             <SelectItem value="admin">Admin</SelectItem>
                             <SelectItem value="mentor">Team Member</SelectItem>
                             <SelectItem value="business_owner">Community Manager</SelectItem>
