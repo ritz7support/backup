@@ -23,8 +23,8 @@ export default function Sidebar({ spaceGroups, spaces }) {
   };
 
   return (
-    <div className="w-64 bg-gray-900 text-gray-100 h-full overflow-y-auto" data-testid="sidebar">
-      <div className="p-4 space-y-6">
+    <div className="w-64 bg-gray-900 text-gray-100 h-full flex flex-col overflow-hidden" data-testid="sidebar">
+      <div className="flex-1 overflow-y-auto p-4 space-y-6">
         {spaceGroups.map((group) => {
           const groupSpaces = getSpacesByGroup(group.id);
           if (groupSpaces.length === 0) return null;
