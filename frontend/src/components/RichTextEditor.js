@@ -91,8 +91,11 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
 
   return (
     <div className="border rounded-lg" style={{ borderColor: '#D1D5DB' }}>
-      {/* Toolbar */}
-      <div className="border-b p-2 flex flex-wrap items-center gap-1" style={{ borderColor: '#E5E7EB', backgroundColor: '#F9FAFB' }}>
+      {/* Editor */}
+      <EditorContent editor={editor} />
+      
+      {/* Toolbar at Bottom */}
+      <div className="border-t p-2 flex flex-wrap items-center gap-1" style={{ borderColor: '#E5E7EB', backgroundColor: '#F9FAFB' }}>
         <Button
           type="button"
           size="sm"
@@ -141,7 +144,7 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
             <LinkIcon className="h-4 w-4" />
           </Button>
           {showLinkInput && (
-            <div className="absolute top-full left-0 mt-1 p-2 bg-white border rounded-lg shadow-lg z-10 flex gap-2" style={{ minWidth: '250px' }}>
+            <div className="absolute bottom-full left-0 mb-1 p-2 bg-white border rounded-lg shadow-lg z-10 flex gap-2" style={{ minWidth: '250px' }}>
               <input
                 type="url"
                 placeholder="Enter URL..."
@@ -182,15 +185,12 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
             <Smile className="h-4 w-4" />
           </Button>
           {showEmojiPicker && (
-            <div className="absolute top-full left-0 mt-1 z-10">
+            <div className="absolute bottom-full left-0 mb-1 z-10">
               <EmojiPicker onEmojiClick={handleEmojiSelect} width={300} height={400} />
             </div>
           )}
         </div>
       </div>
-
-      {/* Editor */}
-      <EditorContent editor={editor} />
     </div>
   );
 }
