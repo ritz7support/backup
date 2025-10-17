@@ -105,7 +105,7 @@ export default function Sidebar({ spaceGroups, spaces }) {
           )}
         </div>
 
-        {/* Live Sessions */}
+        {/* Events */}
         <Link
           to="/events"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
@@ -117,7 +117,7 @@ export default function Sidebar({ spaceGroups, spaces }) {
           data-testid="sidebar-events"
         >
           <Video className="h-5 w-5" />
-          <span>Live Sessions</span>
+          <span>Events</span>
         </Link>
 
         {/* Ask-Doubts */}
