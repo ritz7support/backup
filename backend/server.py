@@ -275,12 +275,22 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
         if not invite:
             raise HTTPException(status_code=400, detail="Invalid invite link")
         
+        # Convert expires_at from ISO string to datetime if needed
+        if isinstance(invite.get('expires_at'), str):
+            invite['expires_at'] = datetime.fromisoformat(invite['expires_at'].replace('Z', '+00:00'))
+        
         invite_obj = InviteToken(**invite)
         
         if invite_obj.used:
             raise HTTPException(status_code=400, detail="This invite link has already been used")
         
-        if datetime.now(timezone.utc) > invite_obj.expires_at:
+        # Ensure both datetimes are timezone-aware for comparison
+        now = datetime.now(timezone.utc)
+        expires_at = invite_obj.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=timezone.utc)
+        
+        if now > expires_at:
             raise HTTPException(status_code=400, detail="This invite link has expired")
         
         # Use role from invite token
