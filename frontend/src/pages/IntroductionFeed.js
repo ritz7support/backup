@@ -369,9 +369,11 @@ export default function IntroductionFeed() {
                     </p>
                   </div>
                 </div>
-                <p className="whitespace-pre-wrap" style={{ color: '#3B3B3B' }}>
-                  {selectedPost.content}
-                </p>
+                <div 
+                  className="prose max-w-none" 
+                  style={{ color: '#3B3B3B' }}
+                  dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                />
               </div>
 
               {/* Comments List */}
