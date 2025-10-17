@@ -155,7 +155,9 @@ export default function EventsPage() {
     });
   };
 
-  const upcomingEvents = events.slice(0, 10);
+  const upcomingEvents = showMyEvents 
+    ? events.filter(event => event.rsvp_list?.includes(user?.id)).slice(0, 10)
+    : events.slice(0, 10);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F3F4F6' }} data-testid="events-page">
