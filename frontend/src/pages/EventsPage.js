@@ -233,10 +233,10 @@ export default function EventsPage() {
                       <div>
                         <Label htmlFor="event_type">Event Type</Label>
                         <Select value={formData.event_type} onValueChange={(value) => setFormData({ ...formData, event_type: value })}>
-                          <SelectTrigger>
-                            <SelectValue />
+                          <SelectTrigger id="event_type">
+                            <SelectValue placeholder="Select event type" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent position="popper" sideOffset={5}>
                             <SelectItem value="live_session">Live Session</SelectItem>
                             <SelectItem value="workshop">Workshop</SelectItem>
                             <SelectItem value="q_and_a">Q&A</SelectItem>
