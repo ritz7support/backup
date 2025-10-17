@@ -824,6 +824,9 @@ async def get_spaces(space_group_id: Optional[str] = None, user: User = Depends(
     query = {"space_group_id": space_group_id} if space_group_id else {}
     spaces = await db.spaces.find(query, {"_id": 0}).sort("order", 1).to_list(100)
     
+    # Get total community member count for auto-join spaces
+    total_members = await db.users.count_documents({"archived": {"$ne": True}})
+    
     # Filter based on visibility and enrich with membership info
     visible_spaces = []
     for space in spaces:
@@ -844,6 +847,11 @@ async def get_spaces(space_group_id: Optional[str] = None, user: User = Depends(
         
         space['is_member'] = bool(membership)
         space['membership_status'] = membership.get('status') if membership else None
+        
+        # For auto-join spaces, show total community member count
+        if space.get('auto_join'):
+            space['member_count'] = total_members
+        
         visible_spaces.append(space)
     
     return visible_spaces
