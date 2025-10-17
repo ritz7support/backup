@@ -59,13 +59,9 @@ export default function MembersPage() {
   const handleInviteMember = async (e) => {
     e.preventDefault();
     try {
-      // For now, we'll just create the user directly
-      // In production, this would send an invitation email
-      const { data } = await authAPI.register({
-        ...inviteFormData,
-        password: Math.random().toString(36).slice(-8) // Generate random password
-      });
-      toast.success(`Invitation sent to ${inviteFormData.email}`);
+      // Use admin endpoint to create user without logging in as them
+      const { data } = await invitesAPI.createUserDirectly(inviteFormData);
+      toast.success(`${inviteFormData.name} has been invited successfully!`);
       setInviteDialogOpen(false);
       setInviteFormData({ name: '', email: '', role: 'learner' });
       loadMembers();
