@@ -24,7 +24,7 @@ export default function Sidebar({ spaceGroups, spaces }) {
   );
 
   return (
-    <div className="w-64 flex flex-col" style={{ height: 'calc(100vh - 64px)', backgroundColor: '#011328' }} data-testid="sidebar">
+    <div className="w-64 flex flex-col sticky top-[64px] self-start" style={{ height: 'calc(100vh - 64px)', backgroundColor: '#011328' }} data-testid="sidebar">
       <div className="flex-1 overflow-y-auto p-4 space-y-2 pt-6">
         {/* Welcome & Next Steps */}
         <Link
