@@ -175,24 +175,26 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="role">I am a...</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                <SelectTrigger data-testid="role-select">
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="learner">Learner</SelectItem>
-                  <SelectItem value="mentor">Mentor</SelectItem>
-                  <SelectItem value="business_owner">Business Owner</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {!inviteToken && (
+              <div>
+                <Label htmlFor="role">I am a...</Label>
+                <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+                  <SelectTrigger data-testid="role-select">
+                    <SelectValue placeholder="Select your role" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" sideOffset={5}>
+                    <SelectItem value="learner">Learner</SelectItem>
+                    <SelectItem value="mentor">Mentor</SelectItem>
+                    <SelectItem value="business_owner">Business Owner</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <Button
               type="submit"
               className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-              disabled={loading}
+              disabled={loading || (inviteToken && !inviteValid)}
               data-testid="submit-btn"
             >
               {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...</> : 'Create Account'}
