@@ -165,49 +165,110 @@ export default function IntroductionFeed() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      {/* Welcome Banner */}
-      <div className="mb-6 p-6 rounded-2xl text-white" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
-        <div className="flex items-center gap-3 mb-3">
-          <Sparkles className="h-6 w-6" style={{ color: '#FFB91A' }} />
-          <h2 className="text-2xl font-bold">Welcome to Introductions!</h2>
+      {/* Space Header with Member Count */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: '#011328' }}>Introduction</h1>
+          <p className="text-sm" style={{ color: '#8E8E8E' }}>Share your story with the community</p>
         </div>
-        <p style={{ color: '#E6EFFA' }}>
-          Share your story, connect with fellow builders, and let the community know who you are!
-        </p>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#E6EFFA' }}>
+            <Users className="h-5 w-5" style={{ color: '#0462CB' }} />
+            <span className="font-semibold" style={{ color: '#011328' }}>{memberCount}</span>
+            <span className="text-sm" style={{ color: '#3B3B3B' }}>members</span>
+          </div>
+          {!isMember ? (
+            <Button
+              onClick={handleJoinSpace}
+              disabled={joiningSpace}
+              style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
+            >
+              {joiningSpace ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Joining...</>
+              ) : (
+                <><UserPlus className="h-4 w-4 mr-2" /> Join Space</>
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={handleLeaveSpace}
+              disabled={joiningSpace}
+              variant="outline"
+              style={{ borderColor: '#DC2626', color: '#DC2626' }}
+            >
+              {joiningSpace ? (
+                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Leaving...</>
+              ) : (
+                <><UserMinus className="h-4 w-4 mr-2" /> Leave Space</>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Create Post */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6" style={{ borderColor: '#D1D5DB' }}>
-        <div className="flex gap-3">
-          <Avatar className="h-10 w-10">
-            <AvatarImage src={user?.picture} />
-            <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>
-              {user?.name?.[0]}
-            </AvatarFallback>
-          </Avatar>
-          <form onSubmit={handleCreatePost} className="flex-1">
-            <Textarea
-              placeholder="Introduce yourself to the community... 👋"
-              value={postContent}
-              onChange={(e) => setPostContent(e.target.value)}
-              className="min-h-[100px] mb-3 resize-none border-gray-200 focus:border-blue-500"
-            />
-            <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={posting || !postContent.trim()}
-                style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
-              >
-                {posting ? (
-                  <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Posting...</>
-                ) : (
-                  <><Send className="h-4 w-4 mr-2" /> Post Introduction</>
-                )}
-              </Button>
-            </div>
-          </form>
+      {!isMember ? (
+        <div className="bg-white rounded-2xl p-8 shadow-sm border text-center" style={{ borderColor: '#D1D5DB' }}>
+          <Lock className="h-12 w-12 mx-auto mb-4" style={{ color: '#8E8E8E' }} />
+          <h3 className="text-xl font-bold mb-2" style={{ color: '#011328' }}>Join to Participate</h3>
+          <p className="mb-6" style={{ color: '#3B3B3B' }}>
+            Join this space to share your introduction and connect with other members.
+          </p>
+          <Button
+            onClick={handleJoinSpace}
+            disabled={joiningSpace}
+            style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
+          >
+            {joiningSpace ? (
+              <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Joining...</>
+            ) : (
+              <><UserPlus className="h-4 w-4 mr-2" /> Join Space</>
+            )}
+          </Button>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* Welcome Banner */}
+          <div className="mb-6 p-6 rounded-2xl text-white" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
+            <div className="flex items-center gap-3 mb-3">
+              <Sparkles className="h-6 w-6" style={{ color: '#FFB91A' }} />
+              <h2 className="text-2xl font-bold">Welcome to Introductions!</h2>
+            </div>
+            <p style={{ color: '#E6EFFA' }}>
+              Share your story, connect with fellow builders, and let the community know who you are!
+            </p>
+          </div>
+
+          {/* Create Post with Rich Editor */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6" style={{ borderColor: '#D1D5DB' }}>
+            <div className="flex gap-3">
+              <Avatar className="h-10 w-10 flex-shrink-0">
+                <AvatarImage src={user?.picture} />
+                <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>
+                  {user?.name?.[0]}
+                </AvatarFallback>
+              </Avatar>
+              <form onSubmit={handleCreatePost} className="flex-1">
+                <RichTextEditor
+                  content={postContent}
+                  onChange={setPostContent}
+                  placeholder="Introduce yourself to the community... 👋"
+                />
+                <div className="flex justify-end mt-3">
+                  <Button
+                    type="submit"
+                    disabled={posting || !postContent.trim() || postContent === '<p></p>'}
+                    style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
+                  >
+                    {posting ? (
+                      <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Posting...</>
+                    ) : (
+                      <><Send className="h-4 w-4 mr-2" /> Post Introduction</>
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
 
       {/* Posts Feed */}
       <div className="space-y-4">
