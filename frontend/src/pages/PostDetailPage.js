@@ -44,15 +44,11 @@ export default function PostDetailPage() {
   const handleReaction = async () => {
     if (!post) return;
     
-    const hasReacted = post.reactions?.some(r => r.user_id === user.id);
+    const hasReacted = hasUserReacted(post.reactions);
     
     try {
-      if (hasReacted) {
-        await spacesAPI.removeReaction(spaceId, postId);
-      } else {
-        await spacesAPI.addReaction(spaceId, postId, '❤️');
-      }
-      await fetchPostAndSpace();
+      await postsAPI.reactToPost(postId, '❤️');
+      await fetchPost();
     } catch (error) {
       console.error('Error handling reaction:', error);
       toast.error('Failed to update reaction');
@@ -65,9 +61,9 @@ export default function PostDetailPage() {
 
     setSubmittingComment(true);
     try {
-      await spacesAPI.addComment(spaceId, postId, comment);
+      await postsAPI.addComment(postId, comment);
       setComment('');
-      await fetchPostAndSpace();
+      await fetchPost();
       toast.success('Comment added!');
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -78,8 +74,25 @@ export default function PostDetailPage() {
   };
 
   const getReactionCount = (reactions) => {
-    if (!reactions || reactions.length === 0) return 0;
-    return reactions.length;
+    if (!reactions || typeof reactions !== 'object') return 0;
+    return Object.values(reactions).flat().length;
+  };
+
+  const hasUserReacted = (reactions) => {
+    if (!reactions || typeof reactions !== 'object') return false;
+    return Object.values(reactions).flat().includes(user?.id);
+  };
+
+  const getSpaceName = () => {
+    const spaceNames = {
+      'introductions': 'Introduction',
+      'ask-doubts': 'Ask-Doubts',
+      'gratitude': 'Gratitude',
+      'resources': 'Resources',
+      'showcase': 'Showcase',
+      'discussions': 'Discussions'
+    };
+    return spaceNames[spaceId] || 'Space';
   };
 
   if (loading) {
