@@ -59,17 +59,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col" data-testid="dashboard">
       {/* Top Navigation */}
-      <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-50">
+      <header className="border-b sticky top-0 z-50" style={{ backgroundColor: '#011328', borderColor: '#022955' }}>
         <div className="px-6 py-3 flex justify-between items-center">
-          <div className="flex items-center">
-            <Link to="/dashboard" className="flex items-center">
-              <img 
-                src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/white-blackbackground.png" 
-                alt="ABCD Logo" 
-                className="h-10 w-10 bg-white rounded-lg p-1"
-              />
-            </Link>
-          </div>
+          <div className="w-10"></div>
 
           <nav className="flex gap-8">
             <Link to="/events" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors" data-testid="nav-events">
@@ -87,16 +79,16 @@ export default function Dashboard() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white hover:bg-gray-800" data-testid="notifications-btn">
+            <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white" style={{ backgroundColor: 'transparent' }} data-testid="notifications-btn">
               <Bell className="h-5 w-5" />
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-gray-800" data-testid="user-menu-trigger">
+                <Button variant="ghost" className="flex items-center gap-2 text-gray-300 hover:text-white" style={{ backgroundColor: 'transparent' }} data-testid="user-menu-trigger">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.picture} />
-                    <AvatarFallback>{user?.name?.[0]}</AvatarFallback>
+                    <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>{user?.name?.[0]}</AvatarFallback>
                   </Avatar>
                   <span className="hidden md:inline">{user?.name}</span>
                 </Button>
