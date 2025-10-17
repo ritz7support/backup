@@ -54,6 +54,7 @@ class User(BaseModel):
     is_founding_member: bool = False
     badges: List[str] = []
     membership_tier: str = "free"  # free, paid
+    archived: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
