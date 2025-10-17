@@ -86,7 +86,7 @@ export default function IntroductionFeed() {
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
-    if (!postContent.trim()) return;
+    if (!postContent.trim() || postContent === '<p></p>') return;
 
     setPosting(true);
     try {
@@ -95,6 +95,7 @@ export default function IntroductionFeed() {
         content: postContent
       });
       setPostContent('');
+      setEditorExpanded(false);
       toast.success('Introduction posted! 🎉');
       loadPosts();
     } catch (error) {
