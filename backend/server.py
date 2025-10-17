@@ -248,7 +248,7 @@ async def require_auth(request: Request, authorization: Optional[str] = Header(N
 # ==================== AUTH ENDPOINTS ====================
 
 @api_router.post("/auth/register")
-async def register(user_data: UserCreate):
+async def register(user_data: UserCreate, response: Response):
     """Register new user with email/password"""
     # Check if user exists
     existing_user = await db.users.find_one({"email": user_data.email})
@@ -288,6 +288,17 @@ async def register(user_data: UserCreate):
     session_dict['created_at'] = session_dict['created_at'].isoformat()
     session_dict['expires_at'] = session_dict['expires_at'].isoformat()
     await db.user_sessions.insert_one(session_dict)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        secure=True,
+        samesite="none",
+        max_age=7*24*60*60,
+        path="/"
+    )
     
     return {"user": user, "session_token": session_token}
 
