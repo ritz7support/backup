@@ -137,61 +137,61 @@ export default function Dashboard() {
         )}
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto bg-gray-50">
+        <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#F3F4F6' }}>
           <div className="max-w-4xl mx-auto px-8 py-8">
             {/* Welcome Banner */}
-            <div className="bg-white rounded-2xl p-8 mb-6 shadow-sm border" data-testid="welcome-banner">
-              <h1 className="text-3xl font-bold mb-2 text-gray-900">
+            <div className="bg-white rounded-2xl p-8 mb-6 shadow-sm border" style={{ borderColor: '#D1D5DB' }} data-testid="welcome-banner">
+              <h1 className="text-3xl font-bold mb-2" style={{ color: '#011328' }}>
                 Welcome back, {user?.name?.split(' ')[0]}! 👋
               </h1>
-              <p className="text-gray-600 text-lg">
+              <p className="text-lg" style={{ color: '#3B3B3B' }}>
                 Continue your no-code journey with the ABCD community
               </p>
             </div>
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+                <Loader2 className="h-8 w-8 animate-spin" style={{ color: '#0462CB' }} />
               </div>
             ) : (
               <div className="space-y-6">
                 {/* Quick Start Section */}
-                <div className="bg-white rounded-2xl p-8 shadow-sm border">
-                  <h2 className="text-2xl font-bold mb-4 text-gray-900">Quick Start</h2>
-                  <p className="text-gray-600 mb-6">
+                <div className="bg-white rounded-2xl p-8 shadow-sm border" style={{ borderColor: '#D1D5DB' }}>
+                  <h2 className="text-2xl font-bold mb-4" style={{ color: '#011328' }}>Quick Start</h2>
+                  <p className="mb-6" style={{ color: '#3B3B3B' }}>
                     Choose a learning path from the sidebar to get started, or explore community discussions.
                   </p>
                   <div className="grid md:grid-cols-3 gap-4">
-                    <div className="p-6 bg-gray-50 rounded-xl hover:bg-purple-50 transition-colors cursor-pointer border">
+                    <div className="p-6 rounded-xl transition-all cursor-pointer border" style={{ backgroundColor: '#E6EFFA', borderColor: '#5796DC' }}>
                       <div className="text-3xl mb-3">🚀</div>
-                      <h3 className="font-semibold mb-2 text-gray-900">Start Learning</h3>
-                      <p className="text-sm text-gray-600">Begin with Bubble.io basics</p>
+                      <h3 className="font-semibold mb-2" style={{ color: '#011328' }}>Start Learning</h3>
+                      <p className="text-sm" style={{ color: '#3B3B3B' }}>Begin with Bubble.io basics</p>
                     </div>
-                    <div className="p-6 bg-gray-50 rounded-xl hover:bg-purple-50 transition-colors cursor-pointer border">
+                    <div className="p-6 rounded-xl transition-all cursor-pointer border" style={{ backgroundColor: '#E6EFFA', borderColor: '#5796DC' }}>
                       <div className="text-3xl mb-3">💬</div>
-                      <h3 className="font-semibold mb-2 text-gray-900">Join Discussions</h3>
-                      <p className="text-sm text-gray-600">Connect with the community</p>
+                      <h3 className="font-semibold mb-2" style={{ color: '#011328' }}>Join Discussions</h3>
+                      <p className="text-sm" style={{ color: '#3B3B3B' }}>Connect with the community</p>
                     </div>
-                    <div className="p-6 bg-gray-50 rounded-xl hover:bg-purple-50 transition-colors cursor-pointer border">
+                    <div className="p-6 rounded-xl transition-all cursor-pointer border" style={{ backgroundColor: '#E6EFFA', borderColor: '#5796DC' }}>
                       <div className="text-3xl mb-3">📅</div>
-                      <h3 className="font-semibold mb-2 text-gray-900">Attend Events</h3>
-                      <p className="text-sm text-gray-600">Join live sessions & Q&As</p>
+                      <h3 className="font-semibold mb-2" style={{ color: '#011328' }}>Attend Events</h3>
+                      <p className="text-sm" style={{ color: '#3B3B3B' }}>Join live sessions & Q&As</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Upgrade Banner for Free Users */}
                 {user?.membership_tier === 'free' && (
-                  <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl p-8 text-white shadow-lg" data-testid="upgrade-banner">
+                  <div className="rounded-2xl p-8 text-white shadow-lg" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }} data-testid="upgrade-banner">
                     <div className="flex items-center justify-between flex-wrap gap-4">
                       <div>
                         <h3 className="text-2xl font-bold mb-2">Unlock Premium Features</h3>
-                        <p className="text-purple-100">
+                        <p style={{ color: '#E6EFFA' }}>
                           Get access to all learning spaces, live sessions, and exclusive community perks.
                         </p>
                       </div>
                       <Link to="/pricing">
-                        <Button className="bg-white text-purple-600 hover:bg-gray-100" data-testid="upgrade-btn">
+                        <Button className="font-medium" style={{ backgroundColor: '#FFB91A', color: '#011328' }} data-testid="upgrade-btn">
                           Upgrade Now
                         </Button>
                       </Link>
