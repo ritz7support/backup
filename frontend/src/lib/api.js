@@ -78,3 +78,10 @@ export const adminAPI = {
   createSpace: (data) => api.post('/admin/spaces', data),
   getAnalytics: () => api.get('/admin/analytics'),
 };
+
+// Invites API
+export const invitesAPI = {
+  generateInvite: (role) => api.post('/invites/generate', null, { params: { role } }),
+  validateInvite: (token) => api.get(`/invites/validate/${token}`),
+  getInvites: () => api.get('/invites'),
+};
