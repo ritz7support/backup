@@ -177,32 +177,6 @@ export default function IntroductionFeed() {
             <span className="font-semibold" style={{ color: '#011328' }}>{memberCount}</span>
             <span className="text-sm" style={{ color: '#3B3B3B' }}>members</span>
           </div>
-          {!isMember ? (
-            <Button
-              onClick={handleJoinSpace}
-              disabled={joiningSpace}
-              style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
-            >
-              {joiningSpace ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Joining...</>
-              ) : (
-                <><UserPlus className="h-4 w-4 mr-2" /> Join Space</>
-              )}
-            </Button>
-          ) : (
-            <Button
-              onClick={handleLeaveSpace}
-              disabled={joiningSpace}
-              variant="outline"
-              style={{ borderColor: '#DC2626', color: '#DC2626' }}
-            >
-              {joiningSpace ? (
-                <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Leaving...</>
-              ) : (
-                <><UserMinus className="h-4 w-4 mr-2" /> Leave Space</>
-              )}
-            </Button>
-          )}
         </div>
       </div>
 
