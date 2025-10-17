@@ -81,9 +81,34 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
     const reader = new FileReader();
     reader.onload = (e) => {
       const base64 = e.target.result;
-      editor.chain().focus().insertContent(`<img src="${base64}" alt="uploaded image" style="max-width: 100%; height: auto;" />`).run();
+      
+      // Add to uploaded images array for preview
+      const imageId = Date.now().toString();
+      setUploadedImages(prev => [...prev, { id: imageId, src: base64, name: file.name }]);
+      
+      // Insert image into editor with a unique id
+      editor.chain().focus().insertContent(
+        `<img src="${base64}" alt="${file.name}" data-image-id="${imageId}" style="max-width: 100%; height: auto; border-radius: 8px; margin: 8px 0;" />`
+      ).run();
     };
     reader.readAsDataURL(file);
+    
+    // Reset file input
+    e.target.value = '';
+  };
+
+  const handleRemoveImage = (imageId) => {
+    // Remove from uploaded images
+    setUploadedImages(prev => prev.filter(img => img.id !== imageId));
+    
+    // Remove from editor content
+    const currentContent = editor.getHTML();
+    const updatedContent = currentContent.replace(
+      new RegExp(`<img[^>]*data-image-id="${imageId}"[^>]*>`, 'g'),
+      ''
+    );
+    editor.commands.setContent(updatedContent);
+    onChange(updatedContent);
   };
 
   if (!editor) {
