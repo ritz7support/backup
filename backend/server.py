@@ -982,6 +982,66 @@ async def update_profile(request: Request, user: User = Depends(require_auth)):
     
     return {"message": "Profile updated"}
 
+@api_router.put("/admin/members/{user_id}/archive")
+async def archive_member(user_id: str, user: User = Depends(require_auth)):
+    """Archive a member (soft delete - admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can archive members")
+    
+    if user_id == user.id:
+        raise HTTPException(status_code=400, detail="Cannot archive yourself")
+    
+    member = await db.users.find_one({"id": user_id})
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    # Set archived flag and prevent login
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"archived": True, "archived_at": datetime.now(timezone.utc).isoformat()}}
+    )
+    
+    # Delete all active sessions
+    await db.user_sessions.delete_many({"user_id": user_id})
+    
+    return {"message": f"Member {member.get('name')} archived successfully"}
+
+@api_router.put("/admin/members/{user_id}/unarchive")
+async def unarchive_member(user_id: str, user: User = Depends(require_auth)):
+    """Unarchive a member (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can unarchive members")
+    
+    member = await db.users.find_one({"id": user_id})
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"archived": False}, "$unset": {"archived_at": ""}}
+    )
+    
+    return {"message": f"Member {member.get('name')} restored successfully"}
+
+@api_router.delete("/admin/members/{user_id}")
+async def delete_member(user_id: str, user: User = Depends(require_auth)):
+    """Permanently delete a member (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can delete members")
+    
+    if user_id == user.id:
+        raise HTTPException(status_code=400, detail="Cannot delete yourself")
+    
+    member = await db.users.find_one({"id": user_id})
+    if not member:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    # Delete user and all related data
+    await db.users.delete_one({"id": user_id})
+    await db.user_sessions.delete_many({"user_id": user_id})
+    
+    return {"message": f"Member {member.get('name')} permanently deleted"}
+
 # ==================== DM ENDPOINTS ====================
 
 @api_router.get("/dms")
