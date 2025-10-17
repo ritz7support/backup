@@ -23,6 +23,12 @@ export default function MembersPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('grid');
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [inviteFormData, setInviteFormData] = useState({
+    name: '',
+    email: '',
+    role: 'learner'
+  });
 
   useEffect(() => {
     loadMembers();
