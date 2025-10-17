@@ -32,6 +32,9 @@ export default function MembersPage() {
     email: '',
     role: 'learner'
   });
+  const [inviteMethod, setInviteMethod] = useState('email'); // 'email' or 'link'
+  const [generatedInviteLink, setGeneratedInviteLink] = useState('');
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     loadMembers();
