@@ -22,6 +22,7 @@ import {
   Bell,
   Crown,
   Loader2,
+  Home,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
