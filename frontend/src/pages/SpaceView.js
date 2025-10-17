@@ -105,7 +105,7 @@ export default function SpaceView() {
                   <LogOut className="h-4 w-4 mr-2" />
                   Logout
                 </DropdownMenuItem>
-              </DropdownMenuItem>
+              </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </div>
