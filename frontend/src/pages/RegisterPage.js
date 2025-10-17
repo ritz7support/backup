@@ -84,7 +84,7 @@ export default function RegisterPage() {
         </div>
         <div>
           <h1 className="text-5xl font-bold mb-4">Start Your Journey</h1>
-          <p className="text-xl text-purple-100">Join the fastest growing no-code community and turn your ideas into reality.</p>
+          <p className="text-xl" style={{ color: '#E6EFFA' }}>Join the fastest growing no-code community and turn your ideas into reality.</p>
         </div>
         <div className="text-sm text-purple-200">© 2025 ABCD Community</div>
       </div>
