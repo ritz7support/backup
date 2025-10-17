@@ -1,14 +1,18 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { useAuth } from '../hooks/useAuth';
+import { invitesAPI } from '../lib/api';
 import { toast } from 'sonner';
-import { Sparkles, User, Mail, Lock, Loader2 } from 'lucide-react';
+import { Sparkles, User, Mail, Lock, Loader2, Link2 } from 'lucide-react';
 
 export default function RegisterPage() {
+  const [searchParams] = useSearchParams();
+  const inviteToken = searchParams.get('invite');
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -16,14 +20,39 @@ export default function RegisterPage() {
     role: 'learner'
   });
   const [loading, setLoading] = useState(false);
+  const [inviteValid, setInviteValid] = useState(false);
+  const [inviteRole, setInviteRole] = useState('');
+  const [validatingInvite, setValidatingInvite] = useState(false);
   const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (inviteToken) {
+      validateInvite();
+    }
+  }, [inviteToken]);
+
+  const validateInvite = async () => {
+    setValidatingInvite(true);
+    try {
+      const { data } = await invitesAPI.validateInvite(inviteToken);
+      setInviteValid(true);
+      setInviteRole(data.role);
+      setFormData(prev => ({ ...prev, role: data.role }));
+      toast.success(`You've been invited as ${data.role.replace('_', ' ')}!`);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Invalid or expired invite link');
+      setInviteValid(false);
+    } finally {
+      setValidatingInvite(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await register(formData);
+      await register({ ...formData, invite_token: inviteToken });
       toast.success('Welcome to ABCD! 🎉');
       navigate('/dashboard');
     } catch (error) {
