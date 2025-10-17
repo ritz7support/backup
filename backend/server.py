@@ -333,6 +333,20 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
     user_dict['created_at'] = user_dict['created_at'].isoformat()
     await db.users.insert_one(user_dict)
     
+    # Auto-join user to auto-join spaces
+    auto_join_spaces = await db.spaces.find({"auto_join": True}, {"_id": 0, "id": 1}).to_list(100)
+    for space in auto_join_spaces:
+        membership = SpaceMembership(
+            space_id=space['id'],
+            user_id=user.id,
+            status="member"
+        )
+        membership_dict = membership.model_dump()
+        membership_dict['joined_at'] = membership_dict['joined_at'].isoformat()
+        await db.space_memberships.insert_one(membership_dict)
+        # Update member count
+        await db.spaces.update_one({"id": space['id']}, {"$inc": {"member_count": 1}})
+    
     # Mark invite token as used
     if invite_token:
         await db.invite_tokens.update_one(
