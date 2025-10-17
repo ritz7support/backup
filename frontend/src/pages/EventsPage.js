@@ -41,6 +41,8 @@ export default function EventsPage() {
     end_time: '',
     requires_membership: false
   });
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [showMyEvents, setShowMyEvents] = useState(false);
 
   useEffect(() => {
     loadData();
