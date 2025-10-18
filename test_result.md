@@ -110,201 +110,79 @@ user_problem_statement: |
   4. Space Managers Role - Can moderate content, approve join requests, manage members (but cannot create spaces or edit settings)
 
 backend:
-  - task: "Comment API - Add Comment"
+  - task: "SpaceMembership Model - Add role and blocked fields"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
     needs_retesting: true
     status_history:
-      - working: true
+      - working: "NA"
         agent: "main"
-        comment: "Comment creation API already exists. Need to verify it supports image content in HTML format."
+        comment: "Updated SpaceMembership model to include role (member/manager) and blocked status fields"
 
-  - task: "Create Event API"
+  - task: "Space Manager Helper Functions"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
+      - working: "NA"
         agent: "main"
-        comment: "Event creation endpoint exists at POST /api/events. Need to verify with testing."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: POST /api/events working correctly. Creates events with proper data validation. Admin authentication required. Event created successfully with ID and all fields match input. Minor: Date validation (end_time > start_time) not implemented but core functionality works."
+        comment: "Added is_space_manager_or_admin() and is_space_member() helper functions"
 
-  - task: "Update Event API"
+  - task: "Get Spaces - Include join request status"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
+      - working: "NA"
         agent: "main"
-        comment: "Event update endpoint exists at PUT /api/events/{event_id}. Need to verify with testing."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: PUT /api/events/{event_id} working correctly. Admin-only access properly enforced (403 for non-admin users). Event updates are saved and verified in database. All update fields working properly."
+        comment: "Updated /api/spaces endpoint to include has_pending_request and pending_request_id fields"
 
-  - task: "Delete Event API"
+  - task: "Member Management Endpoints"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
+      - working: "NA"
         agent: "main"
-        comment: "Event deletion endpoint exists at DELETE /api/events/{event_id}. Need to verify with testing."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: DELETE /api/events/{event_id} working correctly. Admin-only access properly enforced (403 for non-admin users). Event deletion verified - events are completely removed from database."
+        comment: "Added endpoints: GET /spaces/{space_id}/members-detailed, DELETE /spaces/{space_id}/members/{user_id}, PUT /spaces/{space_id}/members/{user_id}/block, PUT /spaces/{space_id}/members/{user_id}/unblock, PUT /spaces/{space_id}/members/{user_id}/promote, PUT /spaces/{space_id}/members/{user_id}/demote"
 
-  - task: "RSVP Event API"
+  - task: "Join Request Approval - Support Managers"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
+      - working: "NA"
         agent: "main"
-        comment: "RSVP endpoint exists at POST /api/events/{event_id}/rsvp. Need to verify with testing."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: POST /api/events/{event_id}/rsvp working correctly. RSVP toggle behavior working (RSVP again removes user from list). Returns proper rsvp_list with attendee count. Authentication required."
+        comment: "Updated approve/reject join request endpoints to allow both admins and managers"
 
-  - task: "Get Events API"
+  - task: "Post/Comment/React - Check for blocked users and membership"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
-      - working: true
+      - working: "NA"
         agent: "main"
-        comment: "Get events endpoint exists at GET /api/events. Need to verify with testing."
-      - working: true
-        agent: "testing"
-        comment: "✅ TESTED: GET /api/events working correctly. Returns list of events with proper structure including all required fields: id, title, description, event_type, start_time, end_time, requires_membership, rsvp_list. No authentication required for reading events."
+        comment: "Updated create_post, add_comment, and react_to_post endpoints to check if user is blocked and if they are members for non-public spaces"
 
 frontend:
-  - task: "CommentEditor Component"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/components/CommentEditor.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Created new CommentEditor component with text + image support, 3000 char limit, character counter. No rich text formatting."
-
-  - task: "Dynamic Back Button"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/PostDetailPage.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Implemented dynamic back button that shows correct space name (e.g., 'Back to Introduction', 'Back to Resources'). Space name passed via route state or fetched from API."
-
-  - task: "Comment Submission - No Page Refresh"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/pages/PostDetailPage.js, /app/frontend/src/components/SpaceFeed.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Fixed comment submission to update state directly instead of full page reload. Comments are added optimistically, comment_count updated locally. Works in both PostDetailPage and quick comment popup."
-
-  - task: "All Spaces Generic Functionality"
-    implemented: true
-    working: "NA"
-    file: "/app/frontend/src/components/SpaceFeed.js, /app/frontend/src/pages/SpaceView.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: true
-    status_history:
-      - working: "NA"
-        agent: "main"
-        comment: "Added SPACE_CONFIG for all 6 spaces (resources, showcase, discussions added). Updated feedSpaces array to include all spaces. All spaces now have consistent functionality."
-
-  - task: "Date Picker UX - Click to Open"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/EventsPage.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Date picker now opens when clicking input field using onClick with showPicker(). Verified via screenshot."
-
-  - task: "Date/Time Validation"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/EventsPage.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "End time field has min={formData.start_time} attribute and form validation checks end > start. Verified via screenshot."
-
-  - task: "Click Events to Edit (Admin)"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/EventsPage.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Calendar events are clickable and call handleEditEvent when user is admin. Verified via screenshot showing 'Edit' buttons."
-
-  - task: "My Events View"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/EventsPage.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "My Events toggle button implemented with filter logic. Shows registered events when active. Verified via screenshot."
-
-  - task: "Empty State Message"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/EventsPage.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: true
-        agent: "main"
-        comment: "Empty state shows 'No registered events yet' when My Events is active and user has no RSVPs. Verified via screenshot."
 
 metadata:
   created_by: "main_agent"
