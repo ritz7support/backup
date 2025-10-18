@@ -756,8 +756,28 @@ class Phase2EnhancedUserManagementTester:
             return False
         
         try:
+            # Create a fresh non-admin user for this test
+            fresh_session = requests.Session()
+            fresh_user_data = {
+                "email": "fresh_learner2@test.com",
+                "password": "fresh123",
+                "name": "Fresh Learner User 2",
+                "role": "learner"
+            }
+            
+            register_response = fresh_session.post(f"{BACKEND_URL}/auth/register", json=fresh_user_data)
+            if register_response.status_code == 400:
+                # User exists, just login
+                login_response = fresh_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": fresh_user_data["email"],
+                    "password": fresh_user_data["password"]
+                })
+                if login_response.status_code != 200:
+                    self.log("❌ Failed to login fresh user", "ERROR")
+                    return False
+            
             grant_data = {"is_team_member": True}
-            response = self.learner_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/set-team-member", json=grant_data)
+            response = fresh_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/set-team-member", json=grant_data)
             
             if response.status_code == 403:
                 self.log("✅ Non-admin team member badge management correctly rejected (403 Forbidden)")
