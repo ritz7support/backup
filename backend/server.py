@@ -1627,12 +1627,14 @@ async def get_my_join_requests(user: User = Depends(require_auth)):
 @api_router.put("/join-requests/{request_id}/approve")
 async def approve_join_request(request_id: str, user: User = Depends(require_auth)):
     """Approve a join request (admin/manager only)"""
-    if user.role != 'admin':
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
     join_request = await db.join_requests.find_one({"id": request_id}, {"_id": 0})
     if not join_request:
         raise HTTPException(status_code=404, detail="Request not found")
+    
+    # Check if user is admin or manager for this space
+    is_authorized = await is_space_manager_or_admin(user, join_request['space_id'])
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
     
     if join_request['status'] != 'pending':
         raise HTTPException(status_code=400, detail="Request already processed")
@@ -1668,12 +1670,14 @@ async def approve_join_request(request_id: str, user: User = Depends(require_aut
 @api_router.put("/join-requests/{request_id}/reject")
 async def reject_join_request(request_id: str, user: User = Depends(require_auth)):
     """Reject a join request (admin/manager only)"""
-    if user.role != 'admin':
-        raise HTTPException(status_code=403, detail="Admin access required")
-    
     join_request = await db.join_requests.find_one({"id": request_id}, {"_id": 0})
     if not join_request:
         raise HTTPException(status_code=404, detail="Request not found")
+    
+    # Check if user is admin or manager for this space
+    is_authorized = await is_space_manager_or_admin(user, join_request['space_id'])
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
     
     if join_request['status'] != 'pending':
         raise HTTPException(status_code=400, detail="Request already processed")
