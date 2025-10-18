@@ -1681,17 +1681,27 @@ export default function AdminPanel() {
                     {/* Action Buttons */}
                     <div className="grid grid-cols-3 gap-2">
                       {membership.status === 'blocked' ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            handleUnblockMember(membersDialog.spaceId, membership.user_id, membership.user?.name);
-                            setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
-                          }}
-                          className="col-span-3"
-                        >
-                          Unblock Member
-                        </Button>
+                        <div className="col-span-3 space-y-2">
+                          {membership.block_type && (
+                            <p className="text-xs text-gray-600">
+                              Block Type: <strong>{membership.block_type === 'soft' ? '🔒 Soft (Can read)' : '🚫 Hard (Cannot read)'}</strong>
+                              {membership.block_expires_at && (
+                                <span> • Expires: {new Date(membership.block_expires_at).toLocaleString()}</span>
+                              )}
+                            </p>
+                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              handleUnblockMember(membersDialog.spaceId, membership.user_id, membership.user?.name);
+                              setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
+                            }}
+                            className="w-full"
+                          >
+                            Unblock Member
+                          </Button>
+                        </div>
                       ) : (
                         <>
                           {/* Admin Management */}
