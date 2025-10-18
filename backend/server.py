@@ -143,6 +143,8 @@ class Space(BaseModel):
     requires_payment: bool = False
     subscription_tier_id: Optional[str] = None  # Link to subscription tier if requires_payment=True
     auto_join: bool = False  # Auto-join users when they register
+    space_type: str = "post"  # post, qa, announcement, resource, event
+    allow_member_posts: bool = True  # If False, only admins/managers can create posts
     member_count: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
