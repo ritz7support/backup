@@ -2071,7 +2071,7 @@ async def promote_user_to_admin(user_id: str, user: User = Depends(require_auth)
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
     
-    return {"message": f"User promoted to admin successfully"}
+    return {"message": "User promoted to admin successfully"}
 
 @api_router.put("/users/{user_id}/demote-from-admin")
 async def demote_user_from_admin(user_id: str, user: User = Depends(require_auth)):
