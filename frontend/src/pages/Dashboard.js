@@ -89,6 +89,19 @@ export default function Dashboard() {
           </nav>
 
           <div className="flex items-center gap-4">
+            {/* Leaderboard Icon - Always Visible */}
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-yellow-400 hover:text-yellow-300 transition-colors relative" 
+              style={{ backgroundColor: 'transparent' }} 
+              onClick={() => navigate('/leaderboard')}
+              title="Leaderboard"
+              data-testid="leaderboard-btn"
+            >
+              <Trophy className="h-5 w-5" />
+            </Button>
+
             <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white" style={{ backgroundColor: 'transparent' }} data-testid="notifications-btn">
               <Bell className="h-5 w-5" />
             </Button>
