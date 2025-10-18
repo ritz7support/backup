@@ -16,7 +16,7 @@ BACKEND_URL = "https://community-space-8.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@test.com"
 ADMIN_PASSWORD = "admin123"
 LEARNER_EMAIL = "learner@test.com"
-LEARNER_PASSWORD = "password123"
+LEARNER_PASSWORD = "learner123"
 
 class Phase2EnhancedUserManagementTester:
     def __init__(self):
