@@ -124,12 +124,13 @@ class Space(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str
     description: Optional[str] = None
-    space_group_id: str
+    space_group_id: Optional[str] = None  # Optional - can be standalone
     icon: Optional[str] = None
     order: int = 0
     is_pinned: bool = False
     visibility: str = "public"  # public, private, secret
     requires_payment: bool = False
+    subscription_tier_id: Optional[str] = None  # Link to subscription tier if requires_payment=True
     auto_join: bool = False  # Auto-join users when they register
     member_count: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
