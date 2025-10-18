@@ -118,7 +118,9 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
           allow_member_posts: space.allow_member_posts !== false,
           space_type: space.space_type || 'post',
           name: space.name,
-          description: space.description
+          description: space.description,
+          welcome_title: space.welcome_title,
+          welcome_message: space.welcome_message
         });
       }
     } catch (error) {
