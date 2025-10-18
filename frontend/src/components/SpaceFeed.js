@@ -116,8 +116,16 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
   const loadSpaceInfo = async () => {
     try {
       const { data: spaces } = await spacesAPI.getSpaces();
+      console.log('All spaces:', spaces);
+      console.log('Looking for spaceId:', spaceId);
       const space = spaces.find(s => s.id === spaceId);
+      console.log('Found space:', space);
+      
       if (space) {
+        console.log('Space is_member:', space.is_member);
+        console.log('Space visibility:', space.visibility);
+        console.log('Space has_pending_request:', space.has_pending_request);
+        
         setMemberCount(space.member_count || 0);
         setIsMember(space.is_member || false);
         setSpaceVisibility(space.visibility || 'public');
@@ -132,9 +140,17 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
           welcome_message: space.welcome_message,
           visibility: space.visibility
         });
+      } else {
+        console.error('Space not found for ID:', spaceId);
+        // Default to non-member state if space not found
+        setIsMember(false);
+        setSpaceVisibility('public');
       }
     } catch (error) {
-      console.error('Failed to load space info');
+      console.error('Failed to load space info:', error);
+      // Default to non-member state on error
+      setIsMember(false);
+      setSpaceVisibility('public');
     }
   };
 
