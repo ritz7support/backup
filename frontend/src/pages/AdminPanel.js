@@ -218,18 +218,26 @@ export default function AdminPanel() {
   };
 
   const handlePromoteToManager = async (spaceId, userId, userName) => {
-    if (!window.confirm(`Promote ${userName} to manager? They can moderate content and manage members.`)) return;
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/promote`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to promote member');
-      toast.success('Member promoted to manager');
-      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
-    } catch (error) {
-      toast.error(error.message);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Promote to Space Manager',
+      message: `Promote ${userName} to manager? They can moderate content and manage members.`,
+      variant: 'success',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/promote`, {
+            method: 'PUT',
+            credentials: 'include'
+          });
+          if (!response.ok) throw new Error('Failed to promote member');
+          toast.success(`${userName} promoted to manager`);
+          handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+        } catch (error) {
+          toast.error(error.message);
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
   const handleDemoteFromManager = async (spaceId, userId, userName) => {
