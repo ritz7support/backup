@@ -95,6 +95,10 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
   const [spaceVisibility, setSpaceVisibility] = useState('public');
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const [pendingRequestId, setPendingRequestId] = useState(null);
+  const [joinRequests, setJoinRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [showRequestsPanel, setShowRequestsPanel] = useState(false);
+  const [isAdminOrManager, setIsAdminOrManager] = useState(false);
 
   const config = SPACE_CONFIG[spaceId] || {
     title: spaceSettings.name || 'Space',
