@@ -1443,37 +1443,14 @@ export default function AdminPanel() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            const newName = prompt('Enter level name:', level.level_name);
-                            const newPoints = prompt('Enter points required:', level.points_required);
-                            if (newName !== null || newPoints !== null) {
-                              leaderboardAPI.updateLevel(level.id, {
-                                level_name: newName || level.level_name,
-                                points_required: newPoints ? parseInt(newPoints) : level.points_required
-                              }).then(() => {
-                                toast.success('Level updated!');
-                                loadLevels();
-                              }).catch(err => {
-                                toast.error(err.response?.data?.detail || 'Failed to update level');
-                              });
-                            }
-                          }}
+                          onClick={() => handleEditLevel(level.id)}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            if (window.confirm(`Delete ${level.level_name}?`)) {
-                              leaderboardAPI.deleteLevel(level.id).then(() => {
-                                toast.success('Level deleted');
-                                loadLevels();
-                              }).catch(err => {
-                                toast.error('Failed to delete level');
-                              });
-                            }
-                          }}
+                          onClick={() => handleDeleteLevel(level.id)}
                           className="text-red-600 border-red-300"
                         >
                           <Trash2 className="h-4 w-4" />
