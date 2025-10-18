@@ -1449,9 +1449,9 @@ export default function AdminPanel() {
         </DialogContent>
       </Dialog>
 
-      {/* Members Dialog */}
+      {/* Members Dialog - Enhanced with Role Management */}
       <Dialog open={membersDialog.open} onOpenChange={(open) => setMembersDialog({ ...membersDialog, open })}>
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Members of {membersDialog.spaceName}</DialogTitle>
           </DialogHeader>
@@ -1461,84 +1461,25 @@ export default function AdminPanel() {
             ) : (
               <div className="space-y-3">
                 {membersDialog.members.map((membership) => (
-                  <div key={membership.id} className="flex items-center justify-between p-3 border rounded-lg" style={{ borderColor: '#E5E7EB' }}>
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
-                        {membership.user?.name?.charAt(0) || '?'}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium" style={{ color: '#011328' }}>{membership.user?.name || 'Unknown'}</span>
-                          {membership.role === 'manager' && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              Manager
-                            </span>
-                          )}
-                          {membership.status === 'blocked' && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              Blocked
-                            </span>
-                          )}
-                          {membership.user?.role === 'admin' && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Admin
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-sm" style={{ color: '#8E8E8E' }}>{membership.user?.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      {membership.status === 'blocked' ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleUnblockMember(membersDialog.spaceId, membership.user_id, membership.user?.name)}
-                        >
-                          Unblock
-                        </Button>
-                      ) : (
-                        <>
-                          {membership.role === 'manager' ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDemoteFromManager(membersDialog.spaceId, membership.user_id, membership.user?.name)}
-                            >
-                              Demote
-                            </Button>
-                          ) : membership.user?.role !== 'admin' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handlePromoteToManager(membersDialog.spaceId, membership.user_id, membership.user?.name)}
-                            >
-                              Promote
-                            </Button>
-                          )}
-                          {membership.user?.role !== 'admin' && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleBlockMember(membersDialog.spaceId, membership.user_id, membership.user?.name)}
-                              >
-                                Block
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleRemoveMember(membersDialog.spaceId, membership.user_id, membership.user?.name)}
-                                style={{ color: '#EF4444' }}
-                              >
-                                Remove
-                              </Button>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
+                  <MemberCard 
+                    key={membership.id}
+                    membership={membership}
+                    spaceId={membersDialog.spaceId}
+                    spaceName={membersDialog.spaceName}
+                    onReload={() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName)}
+                    handlers={{
+                      handlePromoteToAdmin,
+                      handleDemoteFromAdmin,
+                      handlePromoteToManager,
+                      handleDemoteFromManager,
+                      handleBlockMember,
+                      handleUnblockMember,
+                      handleRemoveMember,
+                      openSpaceSelector: (userId, userName) => {
+                        setSpaceSelectDialog({ open: true, userId, userName, selectedSpaces: [] });
+                      }
+                    }}
+                  />
                 ))}
               </div>
             )}
