@@ -2138,6 +2138,57 @@ async def get_user_managed_spaces(user_id: str, user: User = Depends(require_aut
         if space:
             managed_spaces.append(space)
     
+
+
+# ==================== BLOCK EXPIRY MANAGEMENT ====================
+
+@api_router.post("/admin/process-expired-blocks")
+async def process_expired_blocks(user: User = Depends(require_auth)):
+    """Process all expired blocks and auto-unblock them (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Find all blocked memberships with expiry dates
+    blocked_memberships = await db.space_memberships.find({
+        "status": "blocked",
+        "block_expires_at": {"$ne": None}
+    }, {"_id": 0}).to_list(1000)
+    
+    unblocked_count = 0
+    now = datetime.now(timezone.utc)
+    
+    for membership in blocked_memberships:
+        block_expires_at = membership.get('block_expires_at')
+        if block_expires_at:
+            try:
+                expiry_datetime = datetime.fromisoformat(block_expires_at.replace('Z', '+00:00'))
+                
+                # If block has expired, auto-unblock
+                if now >= expiry_datetime:
+                    await db.space_memberships.update_one(
+                        {
+                            "user_id": membership['user_id'],
+                            "space_id": membership['space_id']
+                        },
+                        {
+                            "$set": {
+                                "status": "member",
+                                "blocked_at": None,
+                                "blocked_by": None,
+                                "block_type": "hard",
+                                "block_expires_at": None
+                            }
+                        }
+                    )
+                    unblocked_count += 1
+            except Exception as e:
+                logger.error(f"Error processing expired block: {e}")
+    
+    return {
+        "message": f"Processed {len(blocked_memberships)} blocked memberships",
+        "unblocked_count": unblocked_count
+    }
+
     return managed_spaces
 
 
