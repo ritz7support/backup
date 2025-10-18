@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Events Page functionality
-Tests all event-related endpoints with proper authentication
+Backend API Testing for User Role Management System
+Tests user role management endpoints with proper authentication and validation
 """
 
 import requests
@@ -14,6 +14,8 @@ import os
 BACKEND_URL = "https://community-gates.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@test.com"
 ADMIN_PASSWORD = "admin123"
+LEARNER_EMAIL = "learner@test.com"
+LEARNER_PASSWORD = "learner123"
 
 class EventAPITester:
     def __init__(self):
