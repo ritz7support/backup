@@ -279,15 +279,16 @@ export default function SpaceFeed({ spaceId }) {
       </div>
 
       {/* Create Post with Collapsible Rich Editor */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6" style={{ borderColor: '#D1D5DB' }}>
-        <div className="flex gap-3">
-          <Avatar className="h-10 w-10 flex-shrink-0">
-            <AvatarImage src={user?.picture} />
-            <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>
-              {user?.name?.[0]}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
+      {canCreatePost ? (
+        <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6" style={{ borderColor: '#D1D5DB' }}>
+          <div className="flex gap-3">
+            <Avatar className="h-10 w-10 flex-shrink-0">
+              <AvatarImage src={user?.picture} />
+              <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>
+                {user?.name?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
             {!editorExpanded ? (
               <input
                 type="text"
