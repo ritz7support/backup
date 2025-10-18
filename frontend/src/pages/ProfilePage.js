@@ -109,6 +109,7 @@ export default function ProfilePage() {
         try {
           await authAPI.updateProfilePicture(reader.result);
           toast.success('Profile picture updated successfully!');
+          await checkAuth(); // Update user in context
           loadMember(); // Reload member data to show new picture
         } catch (error) {
           toast.error(error.response?.data?.detail || 'Failed to update profile picture');
@@ -124,6 +125,7 @@ export default function ProfilePage() {
     try {
       await authAPI.removeProfilePicture();
       toast.success('Profile picture removed');
+      await checkAuth(); // Update user in context
       loadMember(); // Reload member data
     } catch (error) {
       toast.error('Failed to remove profile picture');
