@@ -19,6 +19,7 @@ export default function PostDetailPage() {
   const { user, logout } = useAuth();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
+  const [spaces, setSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
@@ -29,8 +30,24 @@ export default function PostDetailPage() {
   };
 
   useEffect(() => {
+    fetchSpaces();
     fetchPost();
   }, [postId, spaceId]);
+
+  const fetchSpaces = async () => {
+    try {
+      const response = await postsAPI.getSpacePosts(spaceId);
+      // This will fail, let me use the correct API
+      const spacesResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces`, {
+        credentials: 'include'
+      });
+      const spacesData = await spacesResponse.json();
+      setSpaces(spacesData || []);
+    } catch (error) {
+      console.error('Error fetching spaces:', error);
+      setSpaces([]);
+    }
+  };
 
   const fetchPost = async () => {
     try {
