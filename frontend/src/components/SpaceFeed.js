@@ -90,6 +90,8 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
   const [commentContent, setCommentContent] = useState('');
   const [commentImage, setCommentImage] = useState(null);
   const [commentInputRef, setCommentInputRef] = useState(null);
+  const [isMember, setIsMember] = useState(false);
+  const [joiningSpace, setJoiningSpace] = useState(false);
 
   const config = SPACE_CONFIG[spaceId] || {
     title: spaceSettings.name || 'Space',
