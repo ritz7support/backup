@@ -485,9 +485,7 @@ export default function SpaceFeed({ spaceId }) {
                             <h5 className="font-semibold text-sm mb-1" style={{ color: '#011328' }}>
                               {comment.author_name}
                             </h5>
-                            <p className="text-sm" style={{ color: '#3B3B3B' }}>
-                              {comment.content}
-                            </p>
+                            <p className="text-sm" style={{ color: '#3B3B3B' }} dangerouslySetInnerHTML={{ __html: comment.content }} />
                           </div>
                           <p className="text-xs mt-1 ml-3" style={{ color: '#8E8E8E' }}>
                             {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
