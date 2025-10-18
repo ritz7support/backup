@@ -148,6 +148,12 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
   };
 
   const loadPosts = async () => {
+    // For private/secret spaces, only load posts if user is a member or admin
+    if ((spaceVisibility === 'private' || spaceVisibility === 'secret') && !isMember && user?.role !== 'admin') {
+      setLoading(false);
+      return;
+    }
+    
     try {
       const { data } = await postsAPI.getSpacePosts(spaceId);
       setPosts(data);
