@@ -1110,13 +1110,13 @@ async def create_post(request: Request, user: User = Depends(require_auth)):
     if not space:
         raise HTTPException(status_code=404, detail="Space not found")
     
-    # Check if user is blocked from this space
-    membership = await db.space_memberships.find_one({
-        "user_id": user.id,
-        "space_id": data['space_id']
-    })
-    if membership and membership.get('status') == 'blocked':
-        raise HTTPException(status_code=403, detail="You are blocked from posting in this space")
+    # Check if user is blocked from this space (handles both hard and soft blocks)
+    block_status = await get_effective_block_status(user.id, data['space_id'])
+    if block_status['is_blocked']:
+        if block_status['block_type'] == 'soft':
+            raise HTTPException(status_code=403, detail="You are temporarily blocked from posting in this space")
+        else:
+            raise HTTPException(status_code=403, detail="You are blocked from posting in this space")
     
     # Check if user is a member - required for ALL spaces (public, private, secret)
     # Public spaces allow viewing without membership, but posting requires membership
