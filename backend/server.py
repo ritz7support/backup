@@ -2189,8 +2189,6 @@ async def process_expired_blocks(user: User = Depends(require_auth)):
         "unblocked_count": unblocked_count
     }
 
-    return managed_spaces
-
 
 # ==================== TEAM MEMBER BADGE MANAGEMENT (ADMIN ONLY) ====================
 
