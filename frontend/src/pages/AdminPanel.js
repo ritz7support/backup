@@ -33,6 +33,7 @@ export default function AdminPanel() {
   const [deleteDialog, setDeleteDialog] = useState({ open: false, type: null, id: null, name: '' });
   const [membersDialog, setMembersDialog] = useState({ open: false, spaceId: null, spaceName: '', members: [] });
   const [joinRequestsDialog, setJoinRequestsDialog] = useState({ open: false, spaceId: null, spaceName: '', requests: [] });
+  const [managersDialog, setManagersDialog] = useState({ open: false, spaceId: null, spaceName: '', managers: [], allMembers: [] });
   
   // Form states
   const [groupForm, setGroupForm] = useState({ name: '', description: '', icon: '', order: 0 });
