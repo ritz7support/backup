@@ -18,12 +18,14 @@ ADMIN_PASSWORD = "admin123"
 LEARNER_EMAIL = "learner@test.com"
 LEARNER_PASSWORD = "password123"
 
-class UserRoleManagementTester:
+class Phase2EnhancedUserManagementTester:
     def __init__(self):
         self.admin_session = requests.Session()
         self.learner_session = requests.Session()
         self.test_learner_id = None
         self.test_admin_id = None
+        self.test_space_id = None
+        self.test_user_for_blocking_id = None
         
     def log(self, message, level="INFO"):
         """Log test messages"""
