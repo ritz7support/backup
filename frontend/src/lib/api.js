@@ -89,6 +89,7 @@ export const featureRequestsAPI = {
 export const paymentsAPI = {
   createOrder: (plan, originUrl) => api.post('/payments/create-order', { origin_url: originUrl }, { params: { plan } }),
   checkStatus: (sessionId) => api.get(`/payments/status/${sessionId}`),
+  verifyRazorpayPayment: (data) => api.post('/payments/razorpay/verify', data),
 };
 
 
