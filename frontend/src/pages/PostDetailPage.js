@@ -204,7 +204,7 @@ export default function PostDetailPage() {
         {/* Comments Section */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold mb-4" style={{ color: '#1F2937' }}>
-            Comments ({post.comments?.length || 0})
+            Comments ({comments.length})
           </h3>
 
           {/* Add Comment Form */}
@@ -244,8 +244,8 @@ export default function PostDetailPage() {
 
           {/* Comments List */}
           <div className="space-y-4">
-            {post.comments && post.comments.length > 0 ? (
-              post.comments.map((comment) => (
+            {comments && comments.length > 0 ? (
+              comments.map((comment) => (
                 <div key={comment.id} className="flex items-start gap-3 pb-4 border-b last:border-b-0" style={{ borderColor: '#E5E7EB' }}>
                   <div
                     className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
@@ -272,6 +272,7 @@ export default function PostDetailPage() {
               </p>
             )}
           </div>
+        </div>
         </div>
       </div>
 
