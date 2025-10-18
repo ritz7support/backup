@@ -1077,6 +1077,15 @@ export default function AdminPanel() {
                                       >
                                         <UsersIcon className="h-3 w-3" />
                                       </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleViewManagers(space.id, space.name)}
+                                        title="Manage Space Managers"
+                                        style={{ color: '#7C3AED' }}
+                                      >
+                                        <Shield className="h-3 w-3" />
+                                      </Button>
                                       {(space.visibility === 'private' || space.visibility === 'secret') && (
                                         <Button
                                           variant="ghost"
