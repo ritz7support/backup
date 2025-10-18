@@ -1315,6 +1315,16 @@ async def create_post(request: Request, user: User = Depends(require_auth)):
     post_dict['updated_at'] = post_dict['updated_at'].isoformat()
     await db.posts.insert_one(post_dict)
     
+    # Award points for creating a post (3 points)
+    await award_points(
+        user_id=user.id,
+        points=3,
+        action_type="post",
+        related_entity_type="post",
+        related_entity_id=post.id,
+        description=f"Created a post in {space.get('name', 'space')}"
+    )
+    
     return post
 
 @api_router.post("/posts/{post_id}/react")
