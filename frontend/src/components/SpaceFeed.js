@@ -692,7 +692,8 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
             </div>
           ))
         )}
-      </div>
+        </div>
+      )}
 
       {/* Comments Dialog - Quick Comment Popup */}
       <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
