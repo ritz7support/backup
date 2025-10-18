@@ -1600,14 +1600,16 @@ async def create_join_request(space_id: str, request: Request, user: User = Depe
 @api_router.get("/spaces/{space_id}/join-requests")
 async def get_join_requests(space_id: str, user: User = Depends(require_auth)):
     """Get all join requests for a space (admin/manager only)"""
-    if user.role != 'admin':
-        raise HTTPException(status_code=403, detail="Admin access required")
+    # Check if user is admin or manager
+    is_authorized = await is_space_manager_or_admin(user, space_id)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
     
     requests = await db.join_requests.find({"space_id": space_id}, {"_id": 0}).to_list(100)
     
     # Enrich with user data
     for req in requests:
-        user_data = await db.users.find_one({"id": req['user_id']}, {"_id": 0, "password": 0})
+        user_data = await db.users.find_one({"id": req['user_id']}, {"_id": 0, "password_hash": 0})
         req['user'] = user_data
     
     return requests
