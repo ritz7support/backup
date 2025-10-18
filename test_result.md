@@ -424,15 +424,18 @@ frontend:
 
   - task: "Team Member Badge - User Model Update"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added is_team_member field to User model. Added PUT /api/users/{user_id}/set-team-member endpoint for admins to grant/remove team member badge."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Team member badge management working correctly. PUT /api/users/{user_id}/set-team-member endpoint successfully grants and removes team member badges. Admin-only access properly enforced (403 for non-admins). Badge changes are immediately persisted in database and verified through GET /api/users/all endpoint."
 
   - task: "Soft Block with Expiry - SpaceMembership Model Update"
     implemented: true
