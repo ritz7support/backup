@@ -41,6 +41,11 @@ export const spacesAPI = {
   approveJoinRequest: (requestId) => api.put(`/join-requests/${requestId}/approve`),
   rejectJoinRequest: (requestId) => api.put(`/join-requests/${requestId}/reject`),
   cancelJoinRequest: (requestId) => api.delete(`/join-requests/${requestId}`),
+  // Space Invites (for Secret spaces)
+  createSpaceInvite: (spaceId, maxUses, expiresAt) => api.post(`/spaces/${spaceId}/invites`, { max_uses: maxUses, expires_at: expiresAt }),
+  getSpaceInvites: (spaceId) => api.get(`/spaces/${spaceId}/invites`),
+  deactivateInvite: (inviteCode) => api.delete(`/invites/${inviteCode}`),
+  joinViaInvite: (inviteCode) => api.post(`/join/${inviteCode}`),
 };
 
 // Events API
