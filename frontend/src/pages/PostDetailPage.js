@@ -295,12 +295,12 @@ export default function PostDetailPage() {
 
         {/* Post Content Area */}
         <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#F3F4F6' }}>
-          {/* Back Button - Sticky at top left of content area */}
-          <div className="sticky top-0 z-10 bg-transparent pt-4 pl-6">
+          {/* Back Button - Non-sticky, in document flow */}
+          <div className="pt-6 pl-6 pb-4">
             <Button
               variant="ghost"
               onClick={() => navigate(`/space/${spaceId}`)}
-              className="flex items-center gap-2 hover:bg-white hover:shadow-sm bg-white shadow-sm"
+              className="flex items-center gap-2 hover:bg-white hover:shadow-md bg-white shadow-sm transition-all"
               style={{ borderRadius: '8px' }}
             >
               <svg
