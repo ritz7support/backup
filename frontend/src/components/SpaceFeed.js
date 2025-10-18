@@ -82,6 +82,7 @@ export default function SpaceFeed({ spaceId }) {
   const [postContent, setPostContent] = useState('');
   const [posting, setPosting] = useState(false);
   const [memberCount, setMemberCount] = useState(0);
+  const [spaceSettings, setSpaceSettings] = useState({ allow_member_posts: true });
   const [editorExpanded, setEditorExpanded] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const [comments, setComments] = useState([]);
@@ -91,6 +92,7 @@ export default function SpaceFeed({ spaceId }) {
   const [commentInputRef, setCommentInputRef] = useState(null);
 
   const config = SPACE_CONFIG[spaceId] || SPACE_CONFIG['introductions'];
+  const canCreatePost = user?.role === 'admin' || spaceSettings.allow_member_posts;
 
   useEffect(() => {
     loadSpaceInfo();
