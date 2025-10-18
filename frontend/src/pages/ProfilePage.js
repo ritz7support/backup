@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { membersAPI, adminAPI } from '../lib/api';
+import { membersAPI, adminAPI, authAPI } from '../lib/api';
 import { Button } from '../components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { ArrowLeft, Mail, MapPin, Linkedin, Crown, Archive, Trash2, ArchiveRestore, Loader2 } from 'lucide-react';
