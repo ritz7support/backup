@@ -776,6 +776,89 @@ export default function AdminPanel() {
     );
   }
 
+  // Level Management handlers
+  const handleCreateLevel = () => {
+    setLevelForm({ level_number: '', level_name: '', points_required: '' });
+    setLevelDialog({ open: true, mode: 'create', data: null });
+  };
+
+  const handleSubmitLevel = async () => {
+    try {
+      const levelData = {
+        level_number: parseInt(levelForm.level_number),
+        level_name: levelForm.level_name,
+        points_required: parseInt(levelForm.points_required)
+      };
+
+      if (!levelData.level_number || !levelData.points_required) {
+        toast.error('Level number and points are required');
+        return;
+      }
+
+      await leaderboardAPI.createLevel(levelData);
+      toast.success('Level created successfully!');
+      setLevelDialog({ open: false, mode: 'create', data: null });
+      loadLevels();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to create level');
+    }
+  };
+
+  const handleEditLevel = async (levelId) => {
+    const level = levels.find(l => l.id === levelId);
+    if (!level) return;
+
+    setLevelForm({
+      level_number: level.level_number.toString(),
+      level_name: level.level_name,
+      points_required: level.points_required.toString()
+    });
+    setLevelDialog({ open: true, mode: 'edit', data: level });
+  };
+
+  const handleUpdateLevel = async () => {
+    try {
+      const levelData = {
+        level_name: levelForm.level_name,
+        points_required: parseInt(levelForm.points_required)
+      };
+
+      if (!levelData.points_required) {
+        toast.error('Points required is mandatory');
+        return;
+      }
+
+      await leaderboardAPI.updateLevel(levelDialog.data.id, levelData);
+      toast.success('Level updated successfully!');
+      setLevelDialog({ open: false, mode: 'edit', data: null });
+      loadLevels();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update level');
+    }
+  };
+
+  const handleDeleteLevel = async (levelId) => {
+    const level = levels.find(l => l.id === levelId);
+    if (!level) return;
+
+    setConfirmDialog({
+      open: true,
+      title: 'Delete Level',
+      message: `Are you sure you want to delete ${level.level_name || `Level ${level.level_number}`}? This will recalculate all user levels.`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await leaderboardAPI.deleteLevel(levelId);
+          toast.success('Level deleted successfully');
+          loadLevels();
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Failed to delete level');
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F3F4F6' }}>
       {/* Header */}
