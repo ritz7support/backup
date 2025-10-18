@@ -1637,7 +1637,7 @@ class Phase2EnhancedUserManagementTester:
         self.log(f"\nOverall: {passed}/{total} tests passed")
         
         if passed == total:
-            self.log("🎉 All Phase 2 enhanced user management tests passed!")
+            self.log("🎉 All Phase 2 & 3 enhanced user management and payment gateway tests passed!")
             return True
         else:
             self.log(f"⚠️ {total - passed} tests failed")
