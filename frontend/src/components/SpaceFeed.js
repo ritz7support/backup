@@ -118,9 +118,52 @@ export default function SpaceFeed({ spaceId }) {
     }
   };
 
-  const openComments = (post) => {
-    // Navigate to post detail page
-    navigate(`/space/${spaceId}/post/${post.id}`);
+  const openComments = async (post) => {
+    setSelectedPost(post);
+    setLoadingComments(true);
+    try {
+      const response = await postsAPI.getComments(post.id);
+      setComments(response.data || []);
+      setCommentContent('');
+      // Focus will be handled by Dialog after it opens
+      setTimeout(() => {
+        if (commentInputRef) {
+          commentInputRef.focus();
+        }
+      }, 100);
+    } catch (error) {
+      toast.error('Failed to load comments');
+      setComments([]);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!commentContent.trim() || !selectedPost) return;
+
+    try {
+      await postsAPI.addComment(selectedPost.id, commentContent);
+      setCommentContent('');
+      
+      // Reload comments
+      const response = await postsAPI.getComments(selectedPost.id);
+      setComments(response.data || []);
+      
+      // Reload posts to update count
+      loadPosts();
+      toast.success('Comment added!');
+    } catch (error) {
+      toast.error('Failed to add comment');
+    }
+  };
+
+  const handleExpandToFullPage = () => {
+    if (selectedPost) {
+      navigate(`/space/${spaceId}/post/${selectedPost.id}`);
+      setSelectedPost(null);
+    }
   };
 
   const getReactionCount = (reactions) => {
