@@ -257,50 +257,52 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "2.0"
+  test_sequence: 2
   run_ui: false
 
 test_plan:
   current_focus:
-    - "CommentEditor Component"
-    - "Dynamic Back Button"
-    - "Comment Submission - No Page Refresh"
-    - "All Spaces Generic Functionality"
+    - "SpaceMembership Model - Add role and blocked fields"
+    - "Member Management Endpoints"
+    - "Join Request Approval - Support Managers"
+    - "Post/Comment/React - Check for blocked users and membership"
+    - "SpaceFeed - Public Space Join Button"
+    - "SpaceFeed - Private Space Request Button"
+    - "AdminPanel - Members Dialog"
+    - "AdminPanel - Join Requests Dialog"
   stuck_tasks: []
-  test_all: false
+  test_all: true
   test_priority: "high_first"
 
 agent_communication:
   - agent: "main"
     message: |
-      Implemented comment functionality and space improvements as requested:
+      Implemented comprehensive space access control and member management system:
       
-      ✅ CommentEditor Component:
-      - Created /app/frontend/src/components/CommentEditor.js
-      - Supports text + image upload (no rich text)
-      - 3000 character limit with counter (LinkedIn-style)
-      - Max image size 5MB, image preview functionality
+      **Backend Changes:**
+      ✅ Updated SpaceMembership model with role (member/manager) and blocked status
+      ✅ Added helper functions: is_space_manager_or_admin(), is_space_member()
+      ✅ Updated /api/spaces to include join request status (has_pending_request, pending_request_id)
+      ✅ Added member management endpoints:
+        - GET /api/spaces/{space_id}/members-detailed
+        - DELETE /api/spaces/{space_id}/members/{user_id}
+        - PUT /api/spaces/{space_id}/members/{user_id}/block
+        - PUT /api/spaces/{space_id}/members/{user_id}/unblock
+        - PUT /api/spaces/{space_id}/members/{user_id}/promote
+        - PUT /api/spaces/{space_id}/members/{user_id}/demote
+      ✅ Updated join request approval to support managers (not just admins)
+      ✅ Added membership and blocked checks to create_post, add_comment, react_to_post
       
-      ✅ Dynamic Back Button:
-      - PostDetailPage now receives space name via route state
-      - Falls back to API fetch if space name not available
-      - Back button shows "Back to [Space Name]" dynamically
-      - Works for all spaces generically
+      **Frontend Changes:**
+      ✅ SpaceFeed now shows Join/Request buttons based on space visibility
+      ✅ Public spaces: Direct join button
+      ✅ Private/Secret spaces: Request to Join with pending status display
+      ✅ Added cancel request functionality
+      ✅ Membership checks before allowing reactions, comments, and posts
+      ✅ AdminPanel: Added Members button to each space row
+      ✅ AdminPanel: Members dialog with remove, block/unblock, promote/demote options
+      ✅ AdminPanel: Join Requests button for private/secret spaces
+      ✅ AdminPanel: Join Requests dialog with approve/reject options
       
-      ✅ Comment Submission - No Page Refresh:
-      - Fixed both PostDetailPage and SpaceFeed quick popup
-      - Comments added to state directly (optimistic UI)
-      - Post comment_count updated locally
-      - No more full page reload after commenting
-      
-      ✅ All Spaces Generic:
-      - Added SPACE_CONFIG for resources, showcase, discussions
-      - Updated feedSpaces array to include all 6 spaces
-      - All spaces now work consistently
-      
-      Frontend restarted. Ready for testing to verify:
-      1. Comment submission works smoothly without refresh
-      2. Images in comments render properly
-      3. Back button shows correct space name
-      4. All 6 spaces (Introduction, Ask-Doubts, Gratitude, Resources, Showcase, Discussions) work the same way
+      Ready for comprehensive backend and frontend testing.
