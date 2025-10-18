@@ -183,6 +183,77 @@ backend:
         comment: "Updated create_post, add_comment, and react_to_post endpoints to check if user is blocked and if they are members for non-public spaces"
 
 frontend:
+  - task: "SpaceFeed - Public Space Join Button"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/SpaceFeed.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Join Space button for public spaces in the welcome banner. Non-members can view posts but must join to engage."
+
+  - task: "SpaceFeed - Private Space Request Button"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/SpaceFeed.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Request to Join button for private/secret spaces. Shows 'Request Pending' status with cancel option."
+
+  - task: "SpaceFeed - Membership Checks for Engagement"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/SpaceFeed.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added membership checks to handleReact, openComments, handleAddComment. Shows toast messages for non-members."
+
+  - task: "API Client - Member Management Methods"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/lib/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added API methods: getSpaceMembersDetailed, removeMember, blockMember, unblockMember, promoteToManager, demoteFromManager"
+
+  - task: "AdminPanel - Members Dialog"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Members management dialog with options to view, remove, block/unblock, promote/demote members. Added Members button to each space row."
+
+  - task: "AdminPanel - Join Requests Dialog"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Join Requests management dialog with approve/reject options. Added Join Requests button to private/secret space rows."
 
 metadata:
   created_by: "main_agent"
