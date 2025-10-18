@@ -411,7 +411,8 @@ class SpaceManagementTester:
                 # Verify member was blocked
                 verify_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
                 if verify_response.status_code == 200:
-                    members = verify_response.json()
+                    response_data = verify_response.json()
+                    members = response_data.get('members', [])
                     blocked_member = None
                     for m in members:
                         if isinstance(m, dict) and m.get('user_id') == self.blocked_user_id:
