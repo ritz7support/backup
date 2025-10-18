@@ -353,13 +353,61 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
       )}
 
       {/* Posts Feed */}
-      <div className="space-y-4">
+      <div className={isQAMode ? "space-y-2" : "space-y-4"}>
         {posts.length === 0 ? (
           <div className="text-center py-12 bg-white rounded-2xl border" style={{ borderColor: '#D1D5DB' }}>
             <p className="text-lg mb-2" style={{ color: '#8E8E8E' }}>{config.emptyState}</p>
             <p className="text-sm" style={{ color: '#8E8E8E' }}>{config.emptyMessage}</p>
           </div>
+        ) : isQAMode ? (
+          // Q&A Mode - List View
+          posts.map((post) => (
+            <div 
+              key={post.id} 
+              className="bg-white rounded-lg p-4 border hover:bg-gray-50 transition-colors cursor-pointer"
+              style={{ borderColor: '#E5E7EB' }}
+              onClick={() => handlePostClick(post)}
+            >
+              <div className="flex gap-4">
+                {/* Vote/Stats Column */}
+                <div className="flex flex-col items-center gap-1 min-w-[60px]">
+                  <div className="text-sm font-semibold" style={{ color: '#6B7280' }}>
+                    {getReactionCount(post.reactions)} {getReactionCount(post.reactions) === 1 ? 'vote' : 'votes'}
+                  </div>
+                  <div className="text-xs" style={{ color: '#9CA3AF' }}>
+                    {post.comment_count || 0} {post.comment_count === 1 ? 'answer' : 'answers'}
+                  </div>
+                </div>
+
+                {/* Question Content */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold mb-2 hover:text-blue-600 transition-colors" style={{ color: '#011328' }}>
+                    {post.title || 'Question'}
+                  </h3>
+                  <div 
+                    className="text-sm mb-2 line-clamp-2" 
+                    style={{ color: '#6B7280' }}
+                    dangerouslySetInnerHTML={{ __html: post.content }}
+                  />
+                  <div className="flex items-center gap-3 text-xs" style={{ color: '#9CA3AF' }}>
+                    <div className="flex items-center gap-1">
+                      <Avatar className="h-5 w-5">
+                        <AvatarImage src={post.author?.picture} />
+                        <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white', fontSize: '10px' }}>
+                          {post.author?.name?.[0]}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>{post.author?.name}</span>
+                    </div>
+                    <span>•</span>
+                    <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))
         ) : (
+          // Standard Post Mode - Card View
           posts.map((post) => (
             <div key={post.id} className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow" style={{ borderColor: '#D1D5DB' }}>
               {/* Post Header */}
