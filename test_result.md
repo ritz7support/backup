@@ -1005,10 +1005,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Razorpay Payment Order Creation"
-    - "Razorpay Payment Verification"
-    - "Stripe Payment Checkout Session Creation"
-    - "Stripe Payment Status Polling"
     - "Razorpay SDK Loading"
     - "PricingPage - Payment Flow Handler"
     - "PaymentSuccess - Status Polling"
