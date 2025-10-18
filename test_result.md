@@ -509,14 +509,24 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "2.2"
-  test_sequence: 4
+  version: "2.3"
+  test_sequence: 5
   run_ui: false
 
 test_plan:
   current_focus:
-    - "Enhanced Member and Space Manager Management System"
-    - "GET /api/users/{user_id}/managed-spaces endpoint"
+    - "Team Member Badge - User Model Update"
+    - "Soft Block with Expiry - SpaceMembership Model Update"
+    - "Soft Block - Enhanced Block/Unblock Endpoints"
+    - "Soft Block - Auto-Expiry Helper Functions"
+    - "Soft Block - Engagement Endpoint Updates"
+    - "Centralized User Management - Enhanced API Endpoint"
+    - "Process Expired Blocks - Admin Endpoint"
+    - "API Client - Team Member and Soft Block Methods"
+    - "AdminPanel - Centralized User Management Tab"
+    - "AdminPanel - Team Member Badge Management"
+    - "AdminPanel - Soft Block Dialog"
+    - "AdminPanel - Enhanced Members Dialog with Soft Block"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
