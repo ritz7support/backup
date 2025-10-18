@@ -1461,7 +1461,7 @@ async def update_space(space_id: str, request: Request, user: User = Depends(req
     
     allowed_fields = ['name', 'description', 'space_group_id', 'icon', 'order', 'is_pinned', 
                       'visibility', 'requires_payment', 'subscription_tier_id', 'auto_join',
-                      'space_type', 'allow_member_posts']
+                      'space_type', 'allow_member_posts', 'welcome_title', 'welcome_message']
     
     for field in allowed_fields:
         if field in data:
