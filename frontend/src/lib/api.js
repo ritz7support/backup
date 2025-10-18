@@ -92,6 +92,7 @@ export const adminAPI = {
   archiveMember: (userId) => api.put(`/admin/members/${userId}/archive`),
   unarchiveMember: (userId) => api.put(`/admin/members/${userId}/unarchive`),
   deleteMember: (userId) => api.delete(`/admin/members/${userId}`),
+  processExpiredBlocks: () => api.post('/admin/process-expired-blocks'),
 };
 
 
