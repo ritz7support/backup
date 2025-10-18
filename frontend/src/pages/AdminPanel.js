@@ -241,18 +241,26 @@ export default function AdminPanel() {
   };
 
   const handleDemoteFromManager = async (spaceId, userId, userName) => {
-    if (!window.confirm(`Demote ${userName} from manager to regular member?`)) return;
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/demote`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to demote manager');
-      toast.success('Manager demoted to member');
-      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
-    } catch (error) {
-      toast.error(error.message);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Remove Manager Role',
+      message: `Demote ${userName} from manager to regular member?`,
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/demote`, {
+            method: 'PUT',
+            credentials: 'include'
+          });
+          if (!response.ok) throw new Error('Failed to demote manager');
+          toast.success('Manager demoted to member');
+          handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+        } catch (error) {
+          toast.error(error.message);
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
   // Join requests management
