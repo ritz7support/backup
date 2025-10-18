@@ -240,12 +240,31 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
 
   // Load join requests for admin/manager
   const loadJoinRequests = async () => {
-    if (!user || user.role !== 'admin') {
+    if (!user) {
       setIsAdminOrManager(false);
       return;
     }
     
-    setIsAdminOrManager(true);
+    // Check if user is admin or manager of this space
+    const isAdmin = user.role === 'admin';
+    let isManager = false;
+    
+    if (!isAdmin) {
+      try {
+        const { data } = await spacesAPI.getSpaceMembersDetailed(spaceId);
+        const myMembership = data.members?.find(m => m.user_id === user.id);
+        isManager = myMembership?.role === 'manager';
+      } catch (error) {
+        console.error('Failed to check manager status:', error);
+      }
+    }
+    
+    const hasPermission = isAdmin || isManager;
+    setIsAdminOrManager(hasPermission);
+    
+    if (!hasPermission) {
+      return;
+    }
     
     try {
       setLoadingRequests(true);
