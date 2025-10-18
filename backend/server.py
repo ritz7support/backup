@@ -2019,6 +2019,7 @@ async def get_all_users(user: User = Depends(require_auth)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     users = await db.users.find({}, {"_id": 0, "password_hash": 0}).to_list(1000)
+    return users
 
 
 @api_router.get("/users/{user_id}/managed-spaces")
@@ -2043,8 +2044,6 @@ async def get_user_managed_spaces(user_id: str, user: User = Depends(require_aut
             managed_spaces.append(space)
     
     return managed_spaces
-
-    return users
 
 # Subscription Tiers Management
 @api_router.get("/subscription-tiers")
