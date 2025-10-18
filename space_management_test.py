@@ -175,9 +175,13 @@ class SpaceManagementTester:
                     # Find the regular user's membership
                     regular_membership = None
                     for member in members:
-                        if member.get('user_id') == self.regular_user_id:
-                            regular_membership = member
-                            break
+                        # Handle both dict and string responses
+                        if isinstance(member, dict):
+                            if member.get('user_id') == self.regular_user_id:
+                                regular_membership = member
+                                break
+                        else:
+                            self.log(f"⚠️ Unexpected member format: {type(member)} - {member}", "WARNING")
                     
                     if regular_membership:
                         # Check if role field exists and has correct default value
