@@ -345,7 +345,8 @@ class MemberManagerTester:
                 # Verify demotion by checking membership
                 members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
                 if members_response.status_code == 200:
-                    members = members_response.json()
+                    members_data = members_response.json()
+                    members = members_data.get('members', [])
                     demoted_member = next((m for m in members if m.get('user', {}).get('id') == self.test_manager_id), None)
                     
                     if demoted_member and demoted_member.get('role') == 'member':
