@@ -2105,6 +2105,17 @@ async def approve_join_request(request_id: str, user: User = Depends(require_aut
         {"$inc": {"member_count": 1}}
     )
     
+    # Award 1 point for joining a space (after approval)
+    space = await db.spaces.find_one({"id": join_request['space_id']}, {"_id": 0})
+    await award_points(
+        user_id=join_request['user_id'],
+        points=1,
+        action_type="join_space",
+        related_entity_type="space",
+        related_entity_id=join_request['space_id'],
+        description=f"Joined space: {space.get('name', 'Unknown') if space else 'Unknown'}"
+    )
+    
     return {"message": "Request approved"}
 
 @api_router.put("/join-requests/{request_id}/reject")
