@@ -1828,8 +1828,8 @@ async def remove_space_member(space_id: str, user_id: str, user: User = Depends(
     raise HTTPException(status_code=404, detail="Member not found")
 
 @api_router.put("/spaces/{space_id}/members/{user_id}/block")
-async def block_space_member(space_id: str, user_id: str, user: User = Depends(require_auth)):
-    """Block a member from a space (admin/manager only)"""
+async def block_space_member(space_id: str, user_id: str, request: Request, user: User = Depends(require_auth)):
+    """Block a member from a space (admin/manager only) - supports both hard and soft blocks"""
     # Check if user is admin or manager
     is_authorized = await is_space_manager_or_admin(user, space_id)
     if not is_authorized:
@@ -1838,6 +1838,23 @@ async def block_space_member(space_id: str, user_id: str, user: User = Depends(r
     # Can't block yourself
     if user_id == user.id:
         raise HTTPException(status_code=400, detail="Cannot block yourself")
+    
+    # Get block parameters from request body
+    data = await request.json()
+    block_type = data.get('block_type', 'hard')  # 'hard' or 'soft'
+    expires_at = data.get('expires_at')  # ISO datetime string for expiry (optional)
+    
+    # Validate block_type
+    if block_type not in ['hard', 'soft']:
+        raise HTTPException(status_code=400, detail="Invalid block_type. Must be 'hard' or 'soft'")
+    
+    # Parse expiry date if provided
+    block_expires_at = None
+    if expires_at:
+        try:
+            block_expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid expires_at format: {str(e)}")
     
     result = await db.space_memberships.update_one(
         {
@@ -1848,7 +1865,9 @@ async def block_space_member(space_id: str, user_id: str, user: User = Depends(r
             "$set": {
                 "status": "blocked",
                 "blocked_at": datetime.now(timezone.utc).isoformat(),
-                "blocked_by": user.id
+                "blocked_by": user.id,
+                "block_type": block_type,
+                "block_expires_at": block_expires_at.isoformat() if block_expires_at else None
             }
         }
     )
@@ -1856,7 +1875,10 @@ async def block_space_member(space_id: str, user_id: str, user: User = Depends(r
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Member not found")
     
-    return {"message": "Member blocked successfully"}
+    block_msg = f"Member {block_type}-blocked successfully"
+    if block_expires_at:
+        block_msg += f" until {block_expires_at.strftime('%Y-%m-%d %H:%M:%S %Z')}"
+    return {"message": block_msg}
 
 @api_router.put("/spaces/{space_id}/members/{user_id}/unblock")
 async def unblock_space_member(space_id: str, user_id: str, user: User = Depends(require_auth)):
