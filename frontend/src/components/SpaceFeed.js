@@ -138,6 +138,11 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
           welcome_message: space.welcome_message,
           visibility: space.visibility
         });
+        
+        // Load join requests if admin and space is private/secret
+        if (user?.role === 'admin' && (space.visibility === 'private' || space.visibility === 'secret')) {
+          loadJoinRequests();
+        }
       } else {
         // Default to non-member state if space not found
         setIsMember(false);
