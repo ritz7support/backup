@@ -344,6 +344,147 @@ export default function SpaceFeed({ spaceId }) {
           ))
         )}
       </div>
+
+      {/* Comments Dialog - Quick Comment Popup */}
+      <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto p-0">
+          {/* Custom Header with Close and Expand buttons */}
+          <div className="sticky top-0 bg-white border-b z-10 flex items-center justify-between p-4" style={{ borderColor: '#E5E7EB' }}>
+            <h2 className="text-lg font-semibold" style={{ color: '#1F2937' }}>Post & Comments</h2>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleExpandToFullPage}
+                className="hover:bg-gray-100"
+                title="Open in full page"
+              >
+                <Maximize2 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSelectedPost(null)}
+                className="hover:bg-gray-100"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {selectedPost && (
+            <div className="p-6">
+              {/* Post Content */}
+              <div className="mb-6 pb-6 border-b" style={{ borderColor: '#E5E7EB' }}>
+                <div className="flex items-start gap-3 mb-3">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={selectedPost.author?.picture} />
+                    <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>
+                      {selectedPost.author?.name?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-semibold" style={{ color: '#011328' }}>
+                      {selectedPost.author?.name}
+                    </h4>
+                    <p className="text-sm" style={{ color: '#8E8E8E' }}>
+                      {formatDistanceToNow(new Date(selectedPost.created_at), { addSuffix: true })}
+                    </p>
+                  </div>
+                </div>
+                <div 
+                  className="prose max-w-none post-content" 
+                  style={{ color: '#3B3B3B' }}
+                  dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                />
+              </div>
+
+              {/* Add Comment Form - Highlighted */}
+              <form onSubmit={handleAddComment} className="mb-6">
+                <div className="flex gap-3">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user?.picture} />
+                    <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>
+                      {user?.name?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 flex gap-2">
+                    <input
+                      ref={setCommentInputRef}
+                      type="text"
+                      placeholder="Write a comment..."
+                      value={commentContent}
+                      onChange={(e) => setCommentContent(e.target.value)}
+                      autoFocus
+                      className="flex-1 px-3 py-2 border-2 rounded-lg focus:outline-none focus:border-blue-500"
+                      style={{ borderColor: '#3B82F6' }}
+                    />
+                    <Button
+                      type="submit"
+                      disabled={!commentContent.trim()}
+                      style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </form>
+
+              {/* Comments List */}
+              <div>
+                <h3 className="text-sm font-semibold mb-4" style={{ color: '#6B7280' }}>
+                  Comments ({comments.length})
+                </h3>
+                <div className="space-y-4">
+                  {loadingComments ? (
+                    <div className="flex justify-center py-4">
+                      <Loader2 className="h-6 w-6 animate-spin" style={{ color: '#0462CB' }} />
+                    </div>
+                  ) : comments.length === 0 ? (
+                    <p className="text-center py-4" style={{ color: '#8E8E8E' }}>
+                      No comments yet. Be the first to comment!
+                    </p>
+                  ) : (
+                    comments.map((comment) => (
+                      <div key={comment.id} className="flex gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={comment.author?.picture} />
+                          <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>
+                            {comment.author_name?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="bg-gray-50 rounded-lg p-3">
+                            <h5 className="font-semibold text-sm mb-1" style={{ color: '#011328' }}>
+                              {comment.author_name}
+                            </h5>
+                            <p className="text-sm" style={{ color: '#3B3B3B' }}>
+                              {comment.content}
+                            </p>
+                          </div>
+                          <p className="text-xs mt-1 ml-3" style={{ color: '#8E8E8E' }}>
+                            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <style jsx>{`
+            .post-content img {
+              max-width: 100%;
+              height: auto;
+              border-radius: 8px;
+              margin: 8px 0;
+              display: block;
+            }
+          `}</style>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
