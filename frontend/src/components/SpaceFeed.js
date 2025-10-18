@@ -57,6 +57,7 @@ export default function SpaceFeed({ spaceId }) {
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [commentContent, setCommentContent] = useState('');
+  const [commentImage, setCommentImage] = useState(null);
   const [commentInputRef, setCommentInputRef] = useState(null);
 
   const config = SPACE_CONFIG[spaceId] || SPACE_CONFIG['introductions'];
