@@ -117,7 +117,7 @@ export default function PostDetailPage() {
     );
   }
 
-  const hasReacted = post.reactions?.some(r => r.user_id === user.id);
+  const hasReacted = hasUserReacted(post.reactions);
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#F3F4F6' }}>
