@@ -315,7 +315,8 @@ export default function PostDetailPage() {
             )}
           </div>
         </div>
-        </div>
+          </div>
+        </main>
       </div>
 
       <style jsx>{`
