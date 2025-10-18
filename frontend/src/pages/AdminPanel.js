@@ -29,6 +29,8 @@ export default function AdminPanel() {
   const [spaceDialog, setSpaceDialog] = useState({ open: false, mode: 'create', data: null });
   const [tierDialog, setTierDialog] = useState({ open: false, mode: 'create', data: null });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, type: null, id: null, name: '' });
+  const [membersDialog, setMembersDialog] = useState({ open: false, spaceId: null, spaceName: '', members: [] });
+  const [joinRequestsDialog, setJoinRequestsDialog] = useState({ open: false, spaceId: null, spaceName: '', requests: [] });
   
   // Form states
   const [groupForm, setGroupForm] = useState({ name: '', description: '', icon: '', order: 0 });
