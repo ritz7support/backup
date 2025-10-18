@@ -1211,9 +1211,9 @@ class Phase2EnhancedUserManagementTester:
                 results[test_name] = False
         
         # Summary
-        self.log("\n" + "="*70)
-        self.log("📊 USER ROLE MANAGEMENT TEST RESULTS SUMMARY")
-        self.log("="*70)
+        self.log("\n" + "="*80)
+        self.log("📊 PHASE 2 ENHANCED USER MANAGEMENT TEST RESULTS SUMMARY")
+        self.log("="*80)
         
         passed = 0
         total = len(results)
