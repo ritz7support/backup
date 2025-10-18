@@ -382,6 +382,50 @@ export default function AdminPanel() {
   };
 
 
+  // Space invites management (for secret spaces)
+  const handleViewInvites = async (spaceId, spaceName) => {
+    try {
+      const { data } = await spacesAPI.getSpaceInvites(spaceId);
+      setInvitesDialog({ open: true, spaceId, spaceName, invites: data || [] });
+    } catch (error) {
+      toast.error('Failed to load invites');
+    }
+  };
+
+  const handleCreateInvite = async (spaceId, maxUses, expiresAt) => {
+    try {
+      const { data } = await spacesAPI.createSpaceInvite(spaceId, maxUses, expiresAt);
+      toast.success('Invite created!');
+      const inviteLink = `${window.location.origin}/join/${data.invite_code}`;
+      navigator.clipboard.writeText(inviteLink);
+      toast.success('Invite link copied to clipboard!');
+      handleViewInvites(spaceId, invitesDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to create invite');
+    }
+  };
+
+  const handleDeactivateInvite = async (inviteCode) => {
+    setConfirmDialog({
+      open: true,
+      title: 'Deactivate Invite',
+      message: 'Are you sure you want to deactivate this invite? It will no longer work.',
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          await spacesAPI.deactivateInvite(inviteCode);
+          toast.success('Invite deactivated');
+          handleViewInvites(invitesDialog.spaceId, invitesDialog.spaceName); // Reload
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Failed to deactivate invite');
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
+  };
+
+
+
   // Space managers management
   const handleViewManagers = async (spaceId, spaceName) => {
     try {
