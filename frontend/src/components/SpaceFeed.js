@@ -368,8 +368,8 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
         </div>
         <p style={{ color: '#E6EFFA' }}>{config.welcomeMessage}</p>
         
-        {/* Join/Request Button for Non-Members */}
-        {!isMember && (
+        {/* Join/Request Button for Non-Members (excluding admins) */}
+        {!isMember && user?.role !== 'admin' && (
           <div className="mt-4">
             {hasPendingRequest ? (
               <div className="flex items-center gap-3">
