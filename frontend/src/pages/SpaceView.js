@@ -69,9 +69,9 @@ export default function SpaceView() {
     );
   }
 
-  // Render SpaceFeed for posting spaces (introductions, ask-doubts, gratitude)
+  // Render SpaceFeed for posting spaces (introductions, ask-doubts, gratitude, resources, showcase, discussions)
   const renderSpaceContent = () => {
-    const feedSpaces = ['introductions', 'ask-doubts', 'gratitude'];
+    const feedSpaces = ['introductions', 'ask-doubts', 'gratitude', 'resources', 'showcase', 'discussions'];
     
     if (feedSpaces.includes(spaceId)) {
       return <SpaceFeed spaceId={spaceId} />;
