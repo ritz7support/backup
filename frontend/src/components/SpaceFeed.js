@@ -127,14 +127,6 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
       const space = spaces.find(s => s.id === spaceId);
       
       if (space) {
-        console.log('=== SPACE INFO DEBUG ===');
-        console.log('Space name:', space.name);
-        console.log('Space visibility:', space.visibility);
-        console.log('Space is_member:', space.is_member);
-        console.log('Space auto_join:', space.auto_join);
-        console.log('User role:', user?.role);
-        console.log('======================');
-        
         setMemberCount(space.member_count || 0);
         setIsMember(space.is_member || false);
         setSpaceVisibility(space.visibility || 'public');
@@ -150,7 +142,6 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
           visibility: space.visibility
         });
       } else {
-        console.error('Space not found for ID:', spaceId);
         // Default to non-member state if space not found
         setIsMember(false);
         setSpaceVisibility('public');
