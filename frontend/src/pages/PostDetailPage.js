@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { postsAPI } from '../lib/api';
 import { Button } from '../components/ui/button';
 import Sidebar from '../components/Sidebar';
+import CommentEditor from '../components/CommentEditor';
 import { Heart, MessageCircle, User, ChevronDown, LogOut, Settings } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -16,12 +17,15 @@ import {
 export default function PostDetailPage() {
   const { spaceId, postId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, logout } = useAuth();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [spaces, setSpaces] = useState([]);
+  const [spaceName, setSpaceName] = useState('');
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
+  const [commentImage, setCommentImage] = useState(null);
   const [submittingComment, setSubmittingComment] = useState(false);
 
   const handleLogout = async () => {
