@@ -333,6 +333,13 @@ export default function SpaceFeed({ spaceId }) {
           </div>
         </div>
       </div>
+      ) : (
+        <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6 text-center" style={{ borderColor: '#D1D5DB' }}>
+          <p style={{ color: '#8E8E8E' }}>
+            Only admins can create posts in this space. You can still comment and react to posts!
+          </p>
+        </div>
+      )}
 
       {/* Posts Feed */}
       <div className="space-y-4">
