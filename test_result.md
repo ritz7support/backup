@@ -484,15 +484,18 @@ frontend:
 
   - task: "Soft Block - Engagement Endpoint Updates"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Updated create_post, react_to_post, and add_comment endpoints to use get_effective_block_status(). Soft blocks now allow reading but prevent engagement with appropriate error messages."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Engagement endpoint updates working correctly. create_post, react_to_post, and add_comment endpoints properly use get_effective_block_status(). Soft blocked users receive 403 Forbidden with 'temporarily blocked' message when attempting engagement. Hard blocked users receive 403 Forbidden with 'blocked' message. Auto-expiry is checked before each engagement attempt. Soft blocks allow reading but prevent posting/commenting/reacting as expected."
 
   - task: "Centralized User Management - Enhanced API Endpoint"
     implemented: true
