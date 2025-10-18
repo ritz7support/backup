@@ -142,15 +142,18 @@ backend:
 
   - task: "Get Spaces - Include join request status"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Updated /api/spaces endpoint to include has_pending_request and pending_request_id fields"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - GET /api/spaces correctly includes join request status. has_pending_request and pending_request_id fields are properly populated when users have pending join requests for private/secret spaces."
 
   - task: "Member Management Endpoints"
     implemented: true
