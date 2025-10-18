@@ -149,6 +149,72 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
       setIsMember(false);
       setSpaceVisibility('public');
     }
+    }
+    
+    // Check if user is admin or manager of this space
+    checkAdminOrManager();
+  };
+
+  const checkAdminOrManager = async () => {
+    if (user?.role === 'admin') {
+      setIsAdminOrManager(true);
+      loadJoinRequests();
+    } else {
+      // Check if user is a manager - would need an API endpoint for this
+      // For now, only admins can see join requests
+      setIsAdminOrManager(false);
+    }
+  };
+
+  const loadJoinRequests = async () => {
+    if (!user || user.role !== 'admin') return;
+    
+    try {
+      setLoadingRequests(true);
+      const { data } = await spacesAPI.getJoinRequests(spaceId);
+      const pending = data.filter(r => r.status === 'pending');
+      setJoinRequests(pending);
+    } catch (error) {
+      console.error('Failed to load join requests:', error);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleApproveRequest = async (requestId, userName) => {
+    try {
+      await spacesAPI.approveJoinRequest(requestId);
+      toast.success(`${userName} approved! 🎉`);
+      loadJoinRequests(); // Reload the list
+      loadSpaceInfo(); // Update member count
+    } catch (error) {
+      toast.error('Failed to approve request');
+    }
+  };
+
+  const handleRejectRequest = async (requestId, userName) => {
+    try {
+      await spacesAPI.rejectJoinRequest(requestId);
+      toast.success(`Request from ${userName} rejected`);
+      loadJoinRequests(); // Reload the list
+    } catch (error) {
+      toast.error('Failed to reject request');
+    }
+  };
+
+  const handleApproveAll = async () => {
+    if (!window.confirm(`Approve all ${joinRequests.length} pending requests?`)) return;
+    
+    try {
+      for (const request of joinRequests) {
+        await spacesAPI.approveJoinRequest(request.id);
+      }
+      toast.success(`All requests approved! 🎉`);
+      loadJoinRequests();
+      loadSpaceInfo();
+    } catch (error) {
+      toast.error('Failed to approve all requests');
+
   };
 
   const loadPosts = async () => {
