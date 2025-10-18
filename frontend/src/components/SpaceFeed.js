@@ -192,7 +192,10 @@ export default function SpaceFeed({ spaceId }) {
 
   const handleExpandToFullPage = () => {
     if (selectedPost) {
-      navigate(`/space/${spaceId}/post/${selectedPost.id}`);
+      // Pass space name to PostDetailPage via route state
+      navigate(`/space/${spaceId}/post/${selectedPost.id}`, {
+        state: { spaceName: config.title }
+      });
       setSelectedPost(null);
     }
   };
