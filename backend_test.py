@@ -1153,8 +1153,8 @@ class Phase2EnhancedUserManagementTester:
             return False
     
     def run_all_tests(self):
-        """Run all user role management tests"""
-        self.log("🚀 Starting User Role Management API Tests")
+        """Run all Phase 2 enhanced user management tests"""
+        self.log("🚀 Starting Phase 2 Enhanced User Management API Tests")
         self.log(f"Backend URL: {BACKEND_URL}")
         
         results = {}
@@ -1164,8 +1164,18 @@ class Phase2EnhancedUserManagementTester:
             self.log("❌ Failed to setup test users - aborting tests", "ERROR")
             return False
         
+        # Setup test space and user for blocking tests
+        if not self.setup_test_space():
+            self.log("❌ Failed to setup test space - aborting tests", "ERROR")
+            return False
+        
+        if not self.setup_test_user_for_blocking():
+            self.log("❌ Failed to setup test user for blocking - aborting tests", "ERROR")
+            return False
+        
         # Run tests in order
         test_methods = [
+            # Phase 1 Tests (existing)
             ('GET All Users (Admin)', self.test_get_all_users_admin),
             ('GET All Users (Non-Admin)', self.test_get_all_users_non_admin),
             ('Promote User to Admin', self.test_promote_user_to_admin),
@@ -1177,6 +1187,20 @@ class Phase2EnhancedUserManagementTester:
             ('Demote Non-Admin (Should Fail)', self.test_demote_non_admin),
             ('Demote by Non-Admin (Should Fail)', self.test_demote_by_non_admin),
             ('Role Change Persistence', self.test_role_persistence),
+            
+            # Phase 2 Tests (new)
+            ('Team Member Badge Grant', self.test_team_member_badge_grant),
+            ('Team Member Badge Remove', self.test_team_member_badge_remove),
+            ('Team Member Badge Non-Admin (Should Fail)', self.test_team_member_badge_non_admin),
+            ('Centralized User Management', self.test_centralized_user_management),
+            ('Centralized User Management Non-Admin (Should Fail)', self.test_centralized_user_management_non_admin),
+            ('Soft Block with Expiry', self.test_soft_block_with_expiry),
+            ('Hard Block No Expiry', self.test_hard_block_no_expiry),
+            ('Unblock User', self.test_unblock_user),
+            ('Soft Block Engagement Prevention', self.test_soft_block_engagement_prevention),
+            ('Auto-Expiry System', self.test_auto_expiry_system),
+            ('Process Expired Blocks', self.test_process_expired_blocks),
+            ('Process Expired Blocks Non-Admin (Should Fail)', self.test_process_expired_blocks_non_admin),
         ]
         
         for test_name, test_method in test_methods:
