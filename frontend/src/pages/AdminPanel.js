@@ -803,7 +803,7 @@ export default function AdminPanel() {
                     <SelectValue placeholder="Standalone space" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Standalone (No Group)</SelectItem>
+                    <SelectItem value="none">Standalone (No Group)</SelectItem>
                     {spaceGroups.map((group) => (
                       <SelectItem key={group.id} value={group.id}>
                         {group.icon} {group.name}
