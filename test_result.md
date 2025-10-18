@@ -291,6 +291,51 @@ frontend:
         agent: "testing"
         comment: "✅ PASS - Join Requests dialog working perfectly. Found 8 Join Requests buttons (🛡️ icons) in admin panel. Dialog opens successfully showing pending join requests with Approve/Reject buttons. Tested with admin account and verified proper functionality for managing join requests."
 
+  - task: "User Role Management - GET All Users"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added GET /api/users/all endpoint for admin-only access to retrieve all users with proper security (password_hash excluded)"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - GET /api/users/all working correctly. Admin access verified, non-admin access properly rejected (403 Forbidden). Retrieved 6 users with correct response structure. Security check passed: password_hash not included in response."
+
+  - task: "User Role Management - Promote to Admin"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added PUT /api/users/{user_id}/promote-to-admin endpoint with proper validation (cannot promote self, cannot promote existing admin, admin-only access)"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - User promotion to admin working correctly. Successfully promoted learner to admin with database persistence verified. Self-promotion correctly rejected (400 Bad Request). Existing admin promotion correctly rejected (400 Bad Request). Non-admin access correctly rejected (403 Forbidden)."
+
+  - task: "User Role Management - Demote from Admin"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added PUT /api/users/{user_id}/demote-from-admin endpoint with proper validation (cannot demote self, cannot demote last admin, admin-only access)"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Admin demotion to learner working correctly. Successfully demoted admin to learner with database persistence verified. Self-demotion correctly rejected (400 Bad Request). Non-admin demotion correctly rejected (400 Bad Request). Non-admin access correctly rejected (403 Forbidden). Last admin protection working."
+
 metadata:
   created_by: "main_agent"
   version: "2.1"
