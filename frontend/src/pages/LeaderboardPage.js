@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Trophy, TrendingUp, Award, Loader2, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
+import Dashboard from './Dashboard';
 
 export default function LeaderboardPage() {
   const { user } = useAuth();
@@ -16,6 +17,9 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true);
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [levels, setLevels] = useState([]);
+
+  // This will be rendered with Dashboard wrapper
+  const renderContent = () => {
 
   useEffect(() => {
     loadLeaderboard();
