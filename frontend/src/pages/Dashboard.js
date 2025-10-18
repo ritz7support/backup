@@ -167,6 +167,9 @@ export default function Dashboard({ children }) {
 
         {/* Main Content */}
         <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#F3F4F6' }}>
+          {children ? (
+            children
+          ) : (
           <div className="max-w-4xl mx-auto px-8 py-8">
             {/* Welcome Banner */}
             <div className="bg-white rounded-2xl p-8 mb-6 shadow-sm border" style={{ borderColor: '#D1D5DB' }} data-testid="welcome-banner">
