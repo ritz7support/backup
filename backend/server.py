@@ -1157,13 +1157,13 @@ async def react_to_post(post_id: str, emoji: str, user: User = Depends(require_a
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     
-    # Check if user is blocked from this space
-    membership = await db.space_memberships.find_one({
-        "user_id": user.id,
-        "space_id": post['space_id']
-    })
-    if membership and membership.get('status') == 'blocked':
-        raise HTTPException(status_code=403, detail="You are blocked from reacting in this space")
+    # Check if user is blocked from this space (handles both hard and soft blocks)
+    block_status = await get_effective_block_status(user.id, post['space_id'])
+    if block_status['is_blocked']:
+        if block_status['block_type'] == 'soft':
+            raise HTTPException(status_code=403, detail="You are temporarily blocked from reacting in this space")
+        else:
+            raise HTTPException(status_code=403, detail="You are blocked from reacting in this space")
     
     # Check if user is a member - required for ALL spaces
     space = await db.spaces.find_one({"id": post['space_id']}, {"_id": 0})
