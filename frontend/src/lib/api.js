@@ -94,6 +94,14 @@ export const adminAPI = {
   deleteMember: (userId) => api.delete(`/admin/members/${userId}`),
 };
 
+
+// User Management API
+export const usersAPI = {
+  getAllUsers: () => api.get('/users/all'),
+  promoteToAdmin: (userId) => api.put(`/users/${userId}/promote-to-admin`),
+  demoteFromAdmin: (userId) => api.put(`/users/${userId}/demote-from-admin`),
+};
+
 // Posts API
 export const postsAPI = {
   getSpacePosts: (spaceId, skip = 0, limit = 20) => api.get(`/spaces/${spaceId}/posts`, { params: { skip, limit } }),
