@@ -103,12 +103,11 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Complete the Events Page enhancements including:
-  1. Make calendar open when clicking the date input field (not just icon)
-  2. Ensure "To Date/Time" is always greater than "From Date/Time"
-  3. Enable clicking on calendar events to open them for editing (admin only)
-  4. Implement "My Events" view to see registered events
-  5. Add empty state message when no registered events exist
+  Implement comment functionality and space improvements:
+  1. Dynamic Back Button - should navigate to correct space (Introduction, Ask-Doubts, etc.) based on where user came from
+  2. Comment Submission UX - no page refresh after adding comment, smooth state update
+  3. Comment Editor - support text + images (no rich text), ~3000 character limit (LinkedIn-style)
+  4. Make All Spaces Generic - ensure Resources, Showcase, and Discussions work the same as Introduction/Ask-Doubts/Gratitude
 
 backend:
   - task: "Create Event API"
