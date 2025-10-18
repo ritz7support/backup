@@ -108,13 +108,6 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
   };
   // Admins can always post, OR members can post if space allows it
   const canCreatePost = user?.role === 'admin' || (isMember && spaceSettings.allow_member_posts);
-  
-  console.log('=== RENDER DEBUG ===');
-  console.log('isMember:', isMember);
-  console.log('user?.role:', user?.role);
-  console.log('spaceSettings.allow_member_posts:', spaceSettings.allow_member_posts);
-  console.log('canCreatePost:', canCreatePost);
-  console.log('==================');
 
   useEffect(() => {
     loadSpaceInfo();
