@@ -360,52 +360,69 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
             <p className="text-sm" style={{ color: '#8E8E8E' }}>{config.emptyMessage}</p>
           </div>
         ) : isQAMode ? (
-          // Q&A Mode - List View
-          posts.map((post) => (
-            <div 
-              key={post.id} 
-              className="bg-white rounded-lg p-4 border hover:bg-gray-50 transition-colors cursor-pointer"
-              style={{ borderColor: '#E5E7EB' }}
-              onClick={() => handlePostClick(post)}
-            >
-              <div className="flex gap-4">
-                {/* Vote/Stats Column */}
-                <div className="flex flex-col items-center gap-1 min-w-[60px]">
-                  <div className="text-sm font-semibold" style={{ color: '#6B7280' }}>
-                    {getReactionCount(post.reactions)} {getReactionCount(post.reactions) === 1 ? 'vote' : 'votes'}
-                  </div>
-                  <div className="text-xs" style={{ color: '#9CA3AF' }}>
-                    {post.comment_count || 0} {post.comment_count === 1 ? 'answer' : 'answers'}
-                  </div>
-                </div>
+          // Q&A Mode - List View (matching screenshot style)
+          posts.map((post) => {
+            // Extract question text (first line or full content up to 150 chars)
+            const questionText = post.content.replace(/<[^>]*>/g, '').substring(0, 150);
+            
+            return (
+              <div 
+                key={post.id} 
+                className="bg-white rounded-lg p-4 border hover:bg-gray-50 transition-colors cursor-pointer"
+                style={{ borderColor: '#E5E7EB' }}
+                onClick={() => handlePostClick(post)}
+              >
+                <div className="flex gap-4 items-start">
+                  {/* Avatar */}
+                  <Avatar className="h-12 w-12 flex-shrink-0">
+                    <AvatarImage src={post.author?.picture} />
+                    <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>
+                      {post.author?.name?.[0]}
+                    </AvatarFallback>
+                  </Avatar>
 
-                {/* Question Content */}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold mb-2 hover:text-blue-600 transition-colors" style={{ color: '#011328' }}>
-                    {post.title || 'Question'}
-                  </h3>
-                  <div 
-                    className="text-sm mb-2 line-clamp-2" 
-                    style={{ color: '#6B7280' }}
-                    dangerouslySetInnerHTML={{ __html: post.content }}
-                  />
-                  <div className="flex items-center gap-3 text-xs" style={{ color: '#9CA3AF' }}>
-                    <div className="flex items-center gap-1">
-                      <Avatar className="h-5 w-5">
-                        <AvatarImage src={post.author?.picture} />
-                        <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white', fontSize: '10px' }}>
-                          {post.author?.name?.[0]}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{post.author?.name}</span>
+                  {/* Question Content */}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-normal text-base mb-1 hover:text-blue-600 transition-colors" style={{ color: '#1F2937' }}>
+                      {questionText}
+                    </h3>
+                    <div className="flex items-center gap-2 text-sm" style={{ color: '#6B7280' }}>
+                      <span className="font-medium">{post.author?.name}</span>
+                      <span>posted {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
                     </div>
-                    <span>•</span>
-                    <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}</span>
+                  </div>
+
+                  {/* Stats on Right */}
+                  <div className="flex items-center gap-6 flex-shrink-0">
+                    {/* Votes */}
+                    <div className="flex items-center gap-2">
+                      <Heart className="h-5 w-5" style={{ color: '#9CA3AF' }} />
+                      <span className="text-base" style={{ color: '#1F2937' }}>
+                        {getReactionCount(post.reactions)}
+                      </span>
+                    </div>
+
+                    {/* Answers */}
+                    <div className="flex items-center gap-2">
+                      <MessageCircle className="h-5 w-5" style={{ color: '#9CA3AF' }} />
+                      <span className="text-base" style={{ color: '#1F2937' }}>
+                        {post.comment_count || 0}
+                      </span>
+                    </div>
+
+                    {/* Menu */}
+                    <button className="p-1 hover:bg-gray-100 rounded">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 6C10.5523 6 11 5.55228 11 5C11 4.44772 10.5523 4 10 4C9.44772 4 9 4.44772 9 5C9 5.55228 9.44772 6 10 6Z" fill="#9CA3AF"/>
+                        <path d="M10 11C10.5523 11 11 10.5523 11 10C11 9.44772 10.5523 9 10 9C9.44772 9 9 9.44772 9 10C9 10.5523 9.44772 11 10 11Z" fill="#9CA3AF"/>
+                        <path d="M10 16C10.5523 16 11 15.5523 11 15C11 14.4477 10.5523 14 10 14C9.44772 14 9 14.4477 9 15C9 15.5523 9.44772 16 10 16Z" fill="#9CA3AF"/>
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           // Standard Post Mode - Card View
           posts.map((post) => (
