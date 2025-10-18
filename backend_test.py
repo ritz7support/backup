@@ -27,6 +27,8 @@ class Phase2EnhancedUserManagementTester:
         self.test_admin_id = None
         self.test_space_id = None
         self.test_user_for_blocking_id = None
+        self.razorpay_order_id = None
+        self.stripe_session_id = None
         
     def log(self, message, level="INFO"):
         """Log test messages"""
