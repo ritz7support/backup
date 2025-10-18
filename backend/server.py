@@ -1468,6 +1468,78 @@ async def get_comments(post_id: str):
     
     return comments
 
+
+@api_router.post("/comments/{comment_id}/react")
+async def react_to_comment(comment_id: str, emoji: str, user: User = Depends(require_auth)):
+    """Add reaction to comment"""
+    comment = await db.comments.find_one({"id": comment_id})
+    if not comment:
+        raise HTTPException(status_code=404, detail="Comment not found")
+    
+    # Get the post to find space_id for membership check
+    post = await db.posts.find_one({"id": comment['post_id']}, {"_id": 0, "space_id": 1, "author_id": 1})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    # Check if user is blocked from this space
+    block_status = await get_effective_block_status(user.id, post['space_id'])
+    if block_status['is_blocked']:
+        if block_status['block_type'] == 'soft':
+            raise HTTPException(status_code=403, detail="You are temporarily blocked from reacting in this space")
+        else:
+            raise HTTPException(status_code=403, detail="You are blocked from reacting in this space")
+    
+    # Check if user is a member
+    space = await db.spaces.find_one({"id": post['space_id']}, {"_id": 0})
+    is_member = await is_space_member(user, post['space_id'])
+    if not is_member:
+        if space and space.get('visibility') == 'public':
+            raise HTTPException(status_code=403, detail="Please join this space to react to comments")
+        else:
+            raise HTTPException(status_code=403, detail="You must be a member to react in this space")
+    
+    reactions = comment.get('reactions', {})
+    if emoji not in reactions:
+        reactions[emoji] = []
+    
+    # Check if this is adding or removing a reaction
+    is_adding = user.id not in reactions[emoji]
+    
+    if user.id in reactions[emoji]:
+        reactions[emoji].remove(user.id)
+    else:
+        reactions[emoji].append(user.id)
+    
+    await db.comments.update_one({"id": comment_id}, {"$set": {"reactions": reactions}})
+    
+    # Award points only when adding a like (not removing)
+    if is_adding:
+        # Award 1 point to the person reacting
+        await award_points(
+            user_id=user.id,
+            points=1,
+            action_type="like_comment",
+            related_entity_type="comment",
+            related_entity_id=comment_id,
+            related_user_id=comment['author_id'],
+            description="Reacted to a comment"
+        )
+        
+        # Award 1 point to the comment author (if not self-reaction)
+        if user.id != comment['author_id']:
+            await award_points(
+                user_id=comment['author_id'],
+                points=1,
+                action_type="receive_like_comment",
+                related_entity_type="comment",
+                related_entity_id=comment_id,
+                related_user_id=user.id,
+                description="Received a reaction on comment"
+            )
+    
+    return {"reactions": reactions}
+
+
 # ==================== EVENT ENDPOINTS ====================
 
 @api_router.get("/events")
