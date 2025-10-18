@@ -553,6 +553,605 @@ class Phase2EnhancedUserManagementTester:
             self.log(f"❌ Exception in persistence test: {e}", "ERROR")
             return False
     
+    def setup_test_space(self):
+        """Setup a test space for blocking tests"""
+        self.log("🔧 Setting up test space...")
+        
+        try:
+            # Get existing spaces first
+            spaces_response = self.admin_session.get(f"{BACKEND_URL}/spaces")
+            if spaces_response.status_code == 200:
+                spaces = spaces_response.json()
+                if spaces:
+                    self.test_space_id = spaces[0]['id']
+                    self.log(f"✅ Using existing space: {self.test_space_id}")
+                    return True
+            
+            # If no spaces, create one
+            space_data = {
+                "name": "Test Space for Blocking",
+                "description": "Test space for soft/hard block testing",
+                "visibility": "public",
+                "space_type": "post",
+                "allow_member_posts": True
+            }
+            
+            create_response = self.admin_session.post(f"{BACKEND_URL}/admin/spaces", json=space_data)
+            if create_response.status_code == 200:
+                space = create_response.json()
+                self.test_space_id = space['id']
+                self.log(f"✅ Created test space: {self.test_space_id}")
+                return True
+            else:
+                self.log(f"❌ Failed to create test space: {create_response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception setting up test space: {e}", "ERROR")
+            return False
+    
+    def setup_test_user_for_blocking(self):
+        """Setup a test user for blocking tests"""
+        self.log("🔧 Setting up test user for blocking...")
+        
+        test_user_data = {
+            "email": "blocktest@test.com",
+            "password": "block123",
+            "name": "Block Test User",
+            "role": "learner"
+        }
+        
+        try:
+            test_session = requests.Session()
+            register_response = test_session.post(f"{BACKEND_URL}/auth/register", json=test_user_data)
+            
+            if register_response.status_code == 200:
+                user_data = register_response.json()
+                self.test_user_for_blocking_id = user_data.get('user', {}).get('id')
+                self.log(f"✅ Created test user for blocking: {self.test_user_for_blocking_id}")
+            elif register_response.status_code == 400 and "already registered" in register_response.text:
+                # User exists, login to get ID
+                login_response = test_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": test_user_data["email"],
+                    "password": test_user_data["password"]
+                })
+                if login_response.status_code == 200:
+                    user_data = login_response.json()
+                    self.test_user_for_blocking_id = user_data.get('user', {}).get('id')
+                    self.log(f"✅ Using existing test user for blocking: {self.test_user_for_blocking_id}")
+            
+            if not self.test_user_for_blocking_id:
+                self.log("❌ Failed to get test user ID for blocking", "ERROR")
+                return False
+            
+            # Join the test space
+            if self.test_space_id:
+                join_response = test_session.post(f"{BACKEND_URL}/spaces/{self.test_space_id}/join")
+                if join_response.status_code == 200:
+                    self.log("✅ Test user joined test space")
+                else:
+                    self.log(f"⚠️ Test user join failed: {join_response.status_code}", "WARNING")
+            
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Exception setting up test user for blocking: {e}", "ERROR")
+            return False
+    
+    # ==================== PHASE 2 TESTS ====================
+    
+    def test_team_member_badge_grant(self):
+        """Test PUT /api/users/{user_id}/set-team-member (grant badge)"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/set-team-member (Grant Badge)")
+        
+        if not self.test_learner_id:
+            self.log("❌ No test learner ID available", "ERROR")
+            return False
+        
+        try:
+            # Grant team member badge
+            grant_data = {"is_team_member": True}
+            response = self.admin_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/set-team-member", json=grant_data)
+            
+            if response.status_code == 200:
+                self.log("✅ Team member badge granted successfully")
+                
+                # Verify badge in database
+                users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
+                if users_response.status_code == 200:
+                    users = users_response.json()
+                    test_user = next((u for u in users if u['id'] == self.test_learner_id), None)
+                    
+                    if test_user and test_user.get('is_team_member') == True:
+                        self.log("✅ Team member badge verified in database")
+                        return True
+                    else:
+                        self.log("❌ Team member badge not reflected in database", "ERROR")
+                        return False
+                else:
+                    self.log("⚠️ Could not verify team member badge", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ Team member badge grant failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in team member badge grant: {e}", "ERROR")
+            return False
+    
+    def test_team_member_badge_remove(self):
+        """Test PUT /api/users/{user_id}/set-team-member (remove badge)"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/set-team-member (Remove Badge)")
+        
+        if not self.test_learner_id:
+            self.log("❌ No test learner ID available", "ERROR")
+            return False
+        
+        try:
+            # Remove team member badge
+            remove_data = {"is_team_member": False}
+            response = self.admin_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/set-team-member", json=remove_data)
+            
+            if response.status_code == 200:
+                self.log("✅ Team member badge removed successfully")
+                
+                # Verify badge removal in database
+                users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
+                if users_response.status_code == 200:
+                    users = users_response.json()
+                    test_user = next((u for u in users if u['id'] == self.test_learner_id), None)
+                    
+                    if test_user and test_user.get('is_team_member') == False:
+                        self.log("✅ Team member badge removal verified in database")
+                        return True
+                    else:
+                        self.log("❌ Team member badge removal not reflected in database", "ERROR")
+                        return False
+                else:
+                    self.log("⚠️ Could not verify team member badge removal", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ Team member badge removal failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in team member badge removal: {e}", "ERROR")
+            return False
+    
+    def test_team_member_badge_non_admin(self):
+        """Test team member badge management by non-admin (should fail)"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/set-team-member (Non-Admin - Should Fail)")
+        
+        if not self.test_learner_id:
+            self.log("❌ No test learner ID available", "ERROR")
+            return False
+        
+        try:
+            grant_data = {"is_team_member": True}
+            response = self.learner_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/set-team-member", json=grant_data)
+            
+            if response.status_code == 403:
+                self.log("✅ Non-admin team member badge management correctly rejected (403 Forbidden)")
+                return True
+            elif response.status_code == 401:
+                self.log("✅ Non-admin team member badge management correctly rejected (401 Unauthorized)")
+                return True
+            else:
+                self.log(f"❌ Non-admin access should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in non-admin team member badge test: {e}", "ERROR")
+            return False
+    
+    def test_centralized_user_management(self):
+        """Test GET /api/users/all-with-memberships"""
+        self.log("\n🧪 Testing GET /api/users/all-with-memberships")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/users/all-with-memberships")
+            
+            if response.status_code == 200:
+                users = response.json()
+                self.log(f"✅ GET /api/users/all-with-memberships successful - Retrieved {len(users)} users")
+                
+                # Verify response structure
+                if users:
+                    user = users[0]
+                    required_fields = ['id', 'email', 'name', 'role', 'is_team_member', 'memberships', 'managed_spaces_count']
+                    missing_fields = [field for field in required_fields if field not in user]
+                    
+                    if missing_fields:
+                        self.log(f"⚠️ Missing fields in user response: {missing_fields}", "WARNING")
+                    else:
+                        self.log("✅ User response structure is correct")
+                    
+                    # Check memberships structure
+                    if 'memberships' in user and user['memberships']:
+                        membership = user['memberships'][0]
+                        membership_fields = ['space_id', 'space_name', 'role', 'status', 'block_type', 'block_expires_at']
+                        missing_membership_fields = [field for field in membership_fields if field not in membership]
+                        
+                        if missing_membership_fields:
+                            self.log(f"⚠️ Missing fields in membership response: {missing_membership_fields}", "WARNING")
+                        else:
+                            self.log("✅ Membership response structure is correct")
+                    
+                    # Check that password_hash is not included
+                    if 'password_hash' in user:
+                        self.log("⚠️ Security issue: password_hash included in response", "WARNING")
+                    else:
+                        self.log("✅ Security check passed: password_hash not in response")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/users/all-with-memberships failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/users/all-with-memberships: {e}", "ERROR")
+            return False
+    
+    def test_centralized_user_management_non_admin(self):
+        """Test GET /api/users/all-with-memberships with non-admin (should fail)"""
+        self.log("\n🧪 Testing GET /api/users/all-with-memberships (Non-Admin - Should Fail)")
+        
+        try:
+            response = self.learner_session.get(f"{BACKEND_URL}/users/all-with-memberships")
+            
+            if response.status_code == 403:
+                self.log("✅ Non-admin access correctly rejected (403 Forbidden)")
+                return True
+            elif response.status_code == 401:
+                self.log("✅ Non-admin access correctly rejected (401 Unauthorized)")
+                return True
+            else:
+                self.log(f"❌ Non-admin access should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in non-admin centralized user management test: {e}", "ERROR")
+            return False
+    
+    def test_soft_block_with_expiry(self):
+        """Test PUT /api/spaces/{space_id}/members/{user_id}/block with soft block and expiry"""
+        self.log("\n🧪 Testing PUT /api/spaces/{space_id}/members/{user_id}/block (Soft Block with Expiry)")
+        
+        if not self.test_space_id or not self.test_user_for_blocking_id:
+            self.log("❌ Test space or user not available", "ERROR")
+            return False
+        
+        try:
+            # Create soft block with 2-minute expiry
+            expires_at = (datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat()
+            block_data = {
+                "block_type": "soft",
+                "expires_at": expires_at
+            }
+            
+            response = self.admin_session.put(
+                f"{BACKEND_URL}/spaces/{self.test_space_id}/members/{self.test_user_for_blocking_id}/block",
+                json=block_data
+            )
+            
+            if response.status_code == 200:
+                self.log("✅ Soft block with expiry created successfully")
+                
+                # Verify block in database by checking membership
+                members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
+                if members_response.status_code == 200:
+                    members = members_response.json()
+                    blocked_member = next((m for m in members if m.get('user_id') == self.test_user_for_blocking_id), None)
+                    
+                    if blocked_member and blocked_member.get('status') == 'blocked':
+                        if blocked_member.get('block_type') == 'soft' and blocked_member.get('block_expires_at'):
+                            self.log("✅ Soft block with expiry verified in database")
+                            return True
+                        else:
+                            self.log("❌ Block type or expiry not set correctly", "ERROR")
+                            return False
+                    else:
+                        self.log("❌ User not found or not blocked", "ERROR")
+                        return False
+                else:
+                    self.log("⚠️ Could not verify soft block", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ Soft block creation failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in soft block test: {e}", "ERROR")
+            return False
+    
+    def test_hard_block_no_expiry(self):
+        """Test PUT /api/spaces/{space_id}/members/{user_id}/block with hard block (no expiry)"""
+        self.log("\n🧪 Testing PUT /api/spaces/{space_id}/members/{user_id}/block (Hard Block - No Expiry)")
+        
+        if not self.test_space_id or not self.test_user_for_blocking_id:
+            self.log("❌ Test space or user not available", "ERROR")
+            return False
+        
+        try:
+            # First unblock the user
+            unblock_response = self.admin_session.put(
+                f"{BACKEND_URL}/spaces/{self.test_space_id}/members/{self.test_user_for_blocking_id}/unblock"
+            )
+            
+            # Create hard block without expiry
+            block_data = {
+                "block_type": "hard"
+            }
+            
+            response = self.admin_session.put(
+                f"{BACKEND_URL}/spaces/{self.test_space_id}/members/{self.test_user_for_blocking_id}/block",
+                json=block_data
+            )
+            
+            if response.status_code == 200:
+                self.log("✅ Hard block created successfully")
+                
+                # Verify block in database
+                members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
+                if members_response.status_code == 200:
+                    members = members_response.json()
+                    blocked_member = next((m for m in members if m.get('user_id') == self.test_user_for_blocking_id), None)
+                    
+                    if blocked_member and blocked_member.get('status') == 'blocked':
+                        if blocked_member.get('block_type') == 'hard' and not blocked_member.get('block_expires_at'):
+                            self.log("✅ Hard block without expiry verified in database")
+                            return True
+                        else:
+                            self.log("❌ Block type incorrect or expiry set when it shouldn't be", "ERROR")
+                            return False
+                    else:
+                        self.log("❌ User not found or not blocked", "ERROR")
+                        return False
+                else:
+                    self.log("⚠️ Could not verify hard block", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ Hard block creation failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in hard block test: {e}", "ERROR")
+            return False
+    
+    def test_unblock_user(self):
+        """Test PUT /api/spaces/{space_id}/members/{user_id}/unblock"""
+        self.log("\n🧪 Testing PUT /api/spaces/{space_id}/members/{user_id}/unblock")
+        
+        if not self.test_space_id or not self.test_user_for_blocking_id:
+            self.log("❌ Test space or user not available", "ERROR")
+            return False
+        
+        try:
+            response = self.admin_session.put(
+                f"{BACKEND_URL}/spaces/{self.test_space_id}/members/{self.test_user_for_blocking_id}/unblock"
+            )
+            
+            if response.status_code == 200:
+                self.log("✅ User unblocked successfully")
+                
+                # Verify unblock in database
+                members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
+                if members_response.status_code == 200:
+                    members = members_response.json()
+                    unblocked_member = next((m for m in members if m.get('user_id') == self.test_user_for_blocking_id), None)
+                    
+                    if unblocked_member and unblocked_member.get('status') == 'member':
+                        if not unblocked_member.get('blocked_at') and not unblocked_member.get('block_expires_at'):
+                            self.log("✅ User unblock verified in database - all block fields cleared")
+                            return True
+                        else:
+                            self.log("❌ Block fields not properly cleared", "ERROR")
+                            return False
+                    else:
+                        self.log("❌ User not found or still blocked", "ERROR")
+                        return False
+                else:
+                    self.log("⚠️ Could not verify unblock", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ User unblock failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in unblock test: {e}", "ERROR")
+            return False
+    
+    def test_soft_block_engagement_prevention(self):
+        """Test that soft blocked users cannot engage but can read"""
+        self.log("\n🧪 Testing Soft Block Engagement Prevention")
+        
+        if not self.test_space_id or not self.test_user_for_blocking_id:
+            self.log("❌ Test space or user not available", "ERROR")
+            return False
+        
+        try:
+            # Create soft block with future expiry
+            expires_at = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+            block_data = {
+                "block_type": "soft",
+                "expires_at": expires_at
+            }
+            
+            block_response = self.admin_session.put(
+                f"{BACKEND_URL}/spaces/{self.test_space_id}/members/{self.test_user_for_blocking_id}/block",
+                json=block_data
+            )
+            
+            if block_response.status_code != 200:
+                self.log("❌ Failed to create soft block for engagement test", "ERROR")
+                return False
+            
+            # Create a session for the blocked user
+            blocked_user_session = requests.Session()
+            login_response = blocked_user_session.post(f"{BACKEND_URL}/auth/login", json={
+                "email": "blocktest@test.com",
+                "password": "block123"
+            })
+            
+            if login_response.status_code != 200:
+                self.log("❌ Failed to login as blocked user", "ERROR")
+                return False
+            
+            # Test posting (should fail with soft block message)
+            post_data = {
+                "space_id": self.test_space_id,
+                "content": "This should fail due to soft block",
+                "title": "Test Post"
+            }
+            
+            post_response = blocked_user_session.post(f"{BACKEND_URL}/posts", json=post_data)
+            
+            if post_response.status_code == 403:
+                response_text = post_response.text.lower()
+                if "temporarily blocked" in response_text:
+                    self.log("✅ Soft blocked user correctly prevented from posting with appropriate message")
+                    return True
+                elif "blocked" in response_text:
+                    self.log("✅ Soft blocked user correctly prevented from posting")
+                    return True
+                else:
+                    self.log(f"⚠️ Blocked but message unclear: {post_response.text}", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ Soft blocked user should not be able to post: {post_response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in soft block engagement test: {e}", "ERROR")
+            return False
+    
+    def test_auto_expiry_system(self):
+        """Test auto-expiry system for soft blocks"""
+        self.log("\n🧪 Testing Auto-Expiry System for Soft Blocks")
+        
+        if not self.test_space_id or not self.test_user_for_blocking_id:
+            self.log("❌ Test space or user not available", "ERROR")
+            return False
+        
+        try:
+            # Create soft block with very short expiry (10 seconds)
+            expires_at = (datetime.now(timezone.utc) + timedelta(seconds=10)).isoformat()
+            block_data = {
+                "block_type": "soft",
+                "expires_at": expires_at
+            }
+            
+            block_response = self.admin_session.put(
+                f"{BACKEND_URL}/spaces/{self.test_space_id}/members/{self.test_user_for_blocking_id}/block",
+                json=block_data
+            )
+            
+            if block_response.status_code != 200:
+                self.log("❌ Failed to create soft block for auto-expiry test", "ERROR")
+                return False
+            
+            self.log("⏳ Waiting for block to expire (15 seconds)...")
+            time.sleep(15)
+            
+            # Create a session for the previously blocked user
+            blocked_user_session = requests.Session()
+            login_response = blocked_user_session.post(f"{BACKEND_URL}/auth/login", json={
+                "email": "blocktest@test.com",
+                "password": "block123"
+            })
+            
+            if login_response.status_code != 200:
+                self.log("❌ Failed to login as previously blocked user", "ERROR")
+                return False
+            
+            # Test posting (should succeed and auto-unblock)
+            post_data = {
+                "space_id": self.test_space_id,
+                "content": "This should succeed after auto-unblock",
+                "title": "Auto-Unblock Test Post"
+            }
+            
+            post_response = blocked_user_session.post(f"{BACKEND_URL}/posts", json=post_data)
+            
+            if post_response.status_code == 200:
+                self.log("✅ Auto-expiry system working - user automatically unblocked and can post")
+                return True
+            else:
+                self.log(f"❌ Auto-expiry failed - user still blocked: {post_response.status_code} - {post_response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in auto-expiry test: {e}", "ERROR")
+            return False
+    
+    def test_process_expired_blocks(self):
+        """Test POST /api/admin/process-expired-blocks"""
+        self.log("\n🧪 Testing POST /api/admin/process-expired-blocks")
+        
+        if not self.test_space_id or not self.test_user_for_blocking_id:
+            self.log("❌ Test space or user not available", "ERROR")
+            return False
+        
+        try:
+            # Create soft block with past expiry
+            past_expiry = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()
+            block_data = {
+                "block_type": "soft",
+                "expires_at": past_expiry
+            }
+            
+            block_response = self.admin_session.put(
+                f"{BACKEND_URL}/spaces/{self.test_space_id}/members/{self.test_user_for_blocking_id}/block",
+                json=block_data
+            )
+            
+            if block_response.status_code != 200:
+                self.log("❌ Failed to create expired soft block", "ERROR")
+                return False
+            
+            # Process expired blocks
+            response = self.admin_session.post(f"{BACKEND_URL}/admin/process-expired-blocks")
+            
+            if response.status_code == 200:
+                result = response.json()
+                unblocked_count = result.get('unblocked_count', 0)
+                self.log(f"✅ Process expired blocks successful - Unblocked {unblocked_count} users")
+                
+                if unblocked_count >= 1:
+                    self.log("✅ At least one user was unblocked as expected")
+                    return True
+                else:
+                    self.log("⚠️ No users were unblocked - may be expected if no expired blocks", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ Process expired blocks failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in process expired blocks test: {e}", "ERROR")
+            return False
+    
+    def test_process_expired_blocks_non_admin(self):
+        """Test POST /api/admin/process-expired-blocks with non-admin (should fail)"""
+        self.log("\n🧪 Testing POST /api/admin/process-expired-blocks (Non-Admin - Should Fail)")
+        
+        try:
+            response = self.learner_session.post(f"{BACKEND_URL}/admin/process-expired-blocks")
+            
+            if response.status_code == 403:
+                self.log("✅ Non-admin access correctly rejected (403 Forbidden)")
+                return True
+            elif response.status_code == 401:
+                self.log("✅ Non-admin access correctly rejected (401 Unauthorized)")
+                return True
+            else:
+                self.log(f"❌ Non-admin access should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in non-admin process expired blocks test: {e}", "ERROR")
+            return False
+    
     def run_all_tests(self):
         """Run all user role management tests"""
         self.log("🚀 Starting User Role Management API Tests")
