@@ -44,13 +44,19 @@ export default function PostDetailPage() {
 
   const fetchSpaces = async () => {
     try {
-      const response = await postsAPI.getSpacePosts(spaceId);
-      // This will fail, let me use the correct API
       const spacesResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces`, {
         credentials: 'include'
       });
       const spacesData = await spacesResponse.json();
       setSpaces(spacesData || []);
+      
+      // If space name not set from route state, get it from spaces data
+      if (!spaceName && spacesData) {
+        const currentSpace = spacesData.find(s => s.id === spaceId);
+        if (currentSpace) {
+          setSpaceName(currentSpace.name);
+        }
+      }
     } catch (error) {
       console.error('Error fetching spaces:', error);
       setSpaces([]);
