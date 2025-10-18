@@ -332,6 +332,74 @@ async def is_space_member(user: User, space_id: str) -> bool:
     return bool(membership)
 
 
+async def check_and_unblock_expired_memberships(user_id: str, space_id: str):
+    """Check if a user's block has expired and auto-unblock them"""
+    membership = await db.space_memberships.find_one({
+        "user_id": user_id,
+        "space_id": space_id,
+        "status": "blocked"
+    })
+    
+    if not membership:
+        return None
+    
+    # Check if block has an expiry date
+    block_expires_at = membership.get('block_expires_at')
+    if block_expires_at:
+        try:
+            expiry_datetime = datetime.fromisoformat(block_expires_at.replace('Z', '+00:00'))
+            now = datetime.now(timezone.utc)
+            
+            # If block has expired, auto-unblock
+            if now >= expiry_datetime:
+                await db.space_memberships.update_one(
+                    {
+                        "user_id": user_id,
+                        "space_id": space_id
+                    },
+                    {
+                        "$set": {
+                            "status": "member",
+                            "blocked_at": None,
+                            "blocked_by": None,
+                            "block_type": "hard",
+                            "block_expires_at": None
+                        }
+                    }
+                )
+                return "unblocked"
+        except Exception as e:
+            logger.error(f"Error checking block expiry: {e}")
+    
+    return "blocked"
+
+async def get_effective_block_status(user_id: str, space_id: str) -> dict:
+    """Get the effective block status for a user in a space, checking for expiry"""
+    # First, check and auto-unblock if expired
+    status = await check_and_unblock_expired_memberships(user_id, space_id)
+    
+    # Re-fetch membership to get current status
+    membership = await db.space_memberships.find_one({
+        "user_id": user_id,
+        "space_id": space_id
+    })
+    
+    if not membership:
+        return {"is_blocked": False, "block_type": None}
+    
+    if membership.get('status') != 'blocked':
+        return {"is_blocked": False, "block_type": None}
+    
+    block_type = membership.get('block_type', 'hard')
+    return {
+        "is_blocked": True,
+        "block_type": block_type,
+        "blocked_at": membership.get('blocked_at'),
+        "block_expires_at": membership.get('block_expires_at')
+    }
+
+
+
 # ==================== AUTH ENDPOINTS ====================
 
 @api_router.post("/auth/register")
