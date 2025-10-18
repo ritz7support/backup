@@ -590,6 +590,15 @@ export default function AdminPanel() {
             Spaces & Groups ({spaceGroups.length + spaces.length})
           </Button>
           <Button
+            variant={activeTab === 'users' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('users')}
+            className="flex items-center gap-2"
+            style={activeTab === 'users' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
+          >
+            <UsersIcon className="h-4 w-4" />
+            User Management ({allUsers.length})
+          </Button>
+          <Button
             variant={activeTab === 'subscriptions' ? 'default' : 'outline'}
             onClick={() => setActiveTab('subscriptions')}
             className="flex items-center gap-2"
