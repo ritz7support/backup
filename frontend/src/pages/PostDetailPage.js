@@ -110,13 +110,42 @@ export default function PostDetailPage() {
 
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!comment.trim()) return;
+    if (!comment.trim() && !commentImage) return;
 
     setSubmittingComment(true);
     try {
-      await postsAPI.addComment(postId, comment);
+      // Prepare comment content
+      let commentContent = comment;
+      
+      // If there's an image, append it to the content
+      if (commentImage) {
+        commentContent += `<br/><img src="${commentImage}" alt="Comment image" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 8px;" />`;
+      }
+      
+      const response = await postsAPI.addComment(postId, commentContent);
+      
+      // Update comments list directly without full page reload
+      const newComment = {
+        id: response.data?.id || Date.now().toString(),
+        content: commentContent,
+        author_name: user?.name,
+        created_at: new Date().toISOString(),
+        author: user
+      };
+      
+      setComments(prevComments => [...prevComments, newComment]);
+      
+      // Update post comment count
+      if (post) {
+        setPost(prevPost => ({
+          ...prevPost,
+          comment_count: (prevPost.comment_count || 0) + 1
+        }));
+      }
+      
+      // Reset form
       setComment('');
-      await fetchPost();
+      setCommentImage(null);
       toast.success('Comment added!');
     } catch (error) {
       console.error('Error adding comment:', error);
