@@ -1366,6 +1366,48 @@ async def create_space_group(request: Request, user: User = Depends(require_auth
     
     return group
 
+@api_router.put("/admin/space-groups/{group_id}")
+async def update_space_group(group_id: str, request: Request, user: User = Depends(require_auth)):
+    """Update space group (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    update_fields = {}
+    
+    if 'name' in data:
+        update_fields['name'] = data['name']
+    if 'description' in data:
+        update_fields['description'] = data['description']
+    if 'icon' in data:
+        update_fields['icon'] = data['icon']
+    if 'order' in data:
+        update_fields['order'] = data['order']
+    
+    if update_fields:
+        result = await db.space_groups.update_one({"id": group_id}, {"$set": update_fields})
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Space group not found")
+    
+    return {"message": "Space group updated successfully"}
+
+@api_router.delete("/admin/space-groups/{group_id}")
+async def delete_space_group(group_id: str, user: User = Depends(require_auth)):
+    """Delete space group (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check if any spaces belong to this group
+    spaces_count = await db.spaces.count_documents({"space_group_id": group_id})
+    if spaces_count > 0:
+        raise HTTPException(status_code=400, detail=f"Cannot delete space group with {spaces_count} spaces. Move or delete spaces first.")
+    
+    result = await db.space_groups.delete_one({"id": group_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Space group not found")
+    
+    return {"message": "Space group deleted successfully"}
+
 @api_router.post("/admin/spaces")
 async def create_space(request: Request, user: User = Depends(require_auth)):
     """Create space (admin only)"""
