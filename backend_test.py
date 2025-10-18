@@ -1208,7 +1208,27 @@ class Phase2EnhancedUserManagementTester:
         self.log("\n🧪 Testing POST /api/admin/process-expired-blocks (Non-Admin - Should Fail)")
         
         try:
-            response = self.learner_session.post(f"{BACKEND_URL}/admin/process-expired-blocks")
+            # Create a fresh non-admin user for this test
+            fresh_session = requests.Session()
+            fresh_user_data = {
+                "email": "fresh_learner4@test.com",
+                "password": "fresh123",
+                "name": "Fresh Learner User 4",
+                "role": "learner"
+            }
+            
+            register_response = fresh_session.post(f"{BACKEND_URL}/auth/register", json=fresh_user_data)
+            if register_response.status_code == 400:
+                # User exists, just login
+                login_response = fresh_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": fresh_user_data["email"],
+                    "password": fresh_user_data["password"]
+                })
+                if login_response.status_code != 200:
+                    self.log("❌ Failed to login fresh user", "ERROR")
+                    return False
+            
+            response = fresh_session.post(f"{BACKEND_URL}/admin/process-expired-blocks")
             
             if response.status_code == 403:
                 self.log("✅ Non-admin access correctly rejected (403 Forbidden)")
