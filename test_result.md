@@ -157,15 +157,18 @@ backend:
 
   - task: "Member Management Endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added endpoints: GET /spaces/{space_id}/members-detailed, DELETE /spaces/{space_id}/members/{user_id}, PUT /spaces/{space_id}/members/{user_id}/block, PUT /spaces/{space_id}/members/{user_id}/unblock, PUT /spaces/{space_id}/members/{user_id}/promote, PUT /spaces/{space_id}/members/{user_id}/demote"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - All member management endpoints working correctly. GET members-detailed returns proper structure with user data. DELETE removes members successfully. PUT block/unblock updates status correctly. PUT promote/demote changes roles between member/manager properly. All operations verified through database checks."
 
   - task: "Join Request Approval - Support Managers"
     implemented: true
