@@ -182,13 +182,13 @@ export default function Sidebar({ spaceGroups, spaces }) {
 
         {/* Discussions */}
         <Link
-          to="/space/general-chat"
+          to="/space/discussions"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-            location.pathname === '/space/general-chat'
+            location.pathname === '/space/discussions'
               ? 'text-white font-medium'
               : 'text-gray-300 hover:text-white'
           }`}
-          style={location.pathname === '/space/general-chat' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
+          style={location.pathname === '/space/discussions' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
           data-testid="sidebar-discussions"
         >
           <MessageCircle className="h-5 w-5" />
