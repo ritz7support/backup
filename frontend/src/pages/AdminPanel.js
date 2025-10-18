@@ -853,6 +853,49 @@ export default function AdminPanel() {
             </div>
 
             <div className="border-t pt-4" style={{ borderColor: '#E5E7EB' }}>
+              <h4 className="font-semibold mb-3" style={{ color: '#011328' }}>Space Type & Behavior</h4>
+              
+              <div className="mb-4">
+                <Label>Space Type</Label>
+                <Select value={spaceForm.space_type} onValueChange={(value) => setSpaceForm({ ...spaceForm, space_type: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="post">📝 Post - Social media style feed</SelectItem>
+                    <SelectItem value="qa">❓ Q&A - Question & Answer format</SelectItem>
+                    <SelectItem value="announcement">📢 Announcement - Admin updates only</SelectItem>
+                    <SelectItem value="resource">📚 Resource - Shared resources/links</SelectItem>
+                    <SelectItem value="event">📅 Event - Event listings</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs mt-1" style={{ color: '#8E8E8E' }}>
+                  {spaceForm.space_type === 'post' && 'Standard social media feed with posts, likes, and comments'}
+                  {spaceForm.space_type === 'qa' && 'Question-based format with answers and voting'}
+                  {spaceForm.space_type === 'announcement' && 'One-way communication for important updates'}
+                  {spaceForm.space_type === 'resource' && 'Curated collection of resources and links'}
+                  {spaceForm.space_type === 'event' && 'Event calendar and RSVP management'}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="allow_member_posts"
+                  checked={spaceForm.allow_member_posts}
+                  onChange={(e) => setSpaceForm({ ...spaceForm, allow_member_posts: e.target.checked })}
+                  className="rounded"
+                />
+                <Label htmlFor="allow_member_posts" className="cursor-pointer">Allow members to create posts</Label>
+              </div>
+              <p className="text-xs mt-1 ml-6" style={{ color: '#8E8E8E' }}>
+                {spaceForm.allow_member_posts 
+                  ? 'All members can create posts in this space' 
+                  : 'Only admins can create posts. Members can comment and react'}
+              </p>
+            </div>
+
+            <div className="border-t pt-4" style={{ borderColor: '#E5E7EB' }}>
               <div className="flex items-center gap-2 mb-3">
                 <input
                   type="checkbox"
