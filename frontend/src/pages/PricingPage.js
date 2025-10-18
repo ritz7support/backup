@@ -313,9 +313,6 @@ export default function PricingPage() {
           </div>
         </div>
       </footer>
-
-      {/* Load Razorpay SDK */}
-      <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     </div>
   );
 }
