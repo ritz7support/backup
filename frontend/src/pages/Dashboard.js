@@ -134,10 +134,6 @@ export default function Dashboard() {
                 <DropdownMenuItem onClick={() => navigate(`/profile/${user?.id}`)} data-testid="menu-profile">
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/leaderboard')} data-testid="menu-leaderboard">
-                  <Trophy className="h-4 w-4 mr-2" />
-                  Leaderboard
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/pricing')} data-testid="menu-upgrade">
                   Upgrade Plan
                 </DropdownMenuItem>
