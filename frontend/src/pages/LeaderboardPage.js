@@ -18,9 +18,6 @@ export default function LeaderboardPage() {
   const [showHowItWorks, setShowHowItWorks] = useState(false);
   const [levels, setLevels] = useState([]);
 
-  // This will be rendered with Dashboard wrapper
-  const renderContent = () => {
-
   useEffect(() => {
     loadLeaderboard();
     loadLevels();
