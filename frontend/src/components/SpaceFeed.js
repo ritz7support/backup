@@ -143,18 +143,47 @@ export default function SpaceFeed({ spaceId }) {
 
   const handleAddComment = async (e) => {
     e.preventDefault();
-    if (!commentContent.trim() || !selectedPost) return;
+    if (!commentContent.trim() && !commentImage || !selectedPost) return;
 
     try {
-      await postsAPI.addComment(selectedPost.id, commentContent);
+      // Prepare comment content
+      let fullCommentContent = commentContent;
+      
+      // If there's an image, append it to the content
+      if (commentImage) {
+        fullCommentContent += `<br/><img src="${commentImage}" alt="Comment image" style="max-width: 100%; height: auto; border-radius: 8px; margin-top: 8px;" />`;
+      }
+      
+      const response = await postsAPI.addComment(selectedPost.id, fullCommentContent);
+      
+      // Create new comment object
+      const newComment = {
+        id: response.data?.id || Date.now().toString(),
+        content: fullCommentContent,
+        author_name: user?.name,
+        created_at: new Date().toISOString(),
+        author: user
+      };
+      
+      // Update comments list directly
+      setComments(prevComments => [...prevComments, newComment]);
+      
+      // Update selected post's comment count
+      setSelectedPost(prevPost => ({
+        ...prevPost,
+        comment_count: (prevPost.comment_count || 0) + 1
+      }));
+      
+      // Update posts list comment count
+      setPosts(prevPosts => prevPosts.map(p => 
+        p.id === selectedPost.id 
+          ? { ...p, comment_count: (p.comment_count || 0) + 1 }
+          : p
+      ));
+      
+      // Reset form
       setCommentContent('');
-      
-      // Reload comments
-      const response = await postsAPI.getComments(selectedPost.id);
-      setComments(response.data || []);
-      
-      // Reload posts to update count
-      loadPosts();
+      setCommentImage(null);
       toast.success('Comment added!');
     } catch (error) {
       toast.error('Failed to add comment');
