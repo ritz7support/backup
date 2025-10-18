@@ -454,15 +454,18 @@ frontend:
 
   - task: "Soft Block - Enhanced Block/Unblock Endpoints"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Updated PUT /api/spaces/{space_id}/members/{user_id}/block endpoint to accept block_type and expires_at parameters. Updated PUT /api/spaces/{space_id}/members/{user_id}/unblock to reset block fields. Both endpoints support soft blocks with expiry."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Enhanced block/unblock endpoints working correctly. PUT /api/spaces/{space_id}/members/{user_id}/block accepts block_type ('hard'/'soft') and expires_at parameters. Soft blocks with expiry are properly created and stored. Hard blocks without expiry work correctly. PUT /api/spaces/{space_id}/members/{user_id}/unblock successfully resets all block fields (blocked_at, blocked_by, block_type, block_expires_at). All changes verified through database persistence."
 
   - task: "Soft Block - Auto-Expiry Helper Functions"
     implemented: true
