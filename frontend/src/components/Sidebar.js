@@ -122,13 +122,13 @@ export default function Sidebar({ spaceGroups, spaces }) {
 
         {/* Ask-Doubts */}
         <Link
-          to="/space/qa-lounge"
+          to="/space/ask-doubts"
           className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-            location.pathname === '/space/qa-lounge'
+            location.pathname === '/space/ask-doubts'
               ? 'text-white font-medium'
               : 'text-gray-300 hover:text-white'
           }`}
-          style={location.pathname === '/space/qa-lounge' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
+          style={location.pathname === '/space/ask-doubts' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
           data-testid="sidebar-qa"
         >
           <HelpCircle className="h-5 w-5" />
