@@ -439,15 +439,18 @@ frontend:
 
   - task: "Soft Block with Expiry - SpaceMembership Model Update"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Enhanced SpaceMembership model with block_type ('hard' or 'soft') and block_expires_at (datetime) fields. Hard blocks prevent reading and engagement, soft blocks only prevent engagement."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - SpaceMembership model enhancements working correctly. block_type field accepts 'hard' and 'soft' values. block_expires_at field stores datetime for automatic expiry. Model changes properly integrated with blocking endpoints and verified through database persistence checks."
 
   - task: "Soft Block - Enhanced Block/Unblock Endpoints"
     implemented: true
