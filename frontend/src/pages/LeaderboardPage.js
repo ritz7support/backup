@@ -255,6 +255,132 @@ export default function LeaderboardPage() {
           )}
         </div>
       </div>
+
+      {/* How It Works Dialog */}
+      <Dialog open={showHowItWorks} onOpenChange={setShowHowItWorks}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl flex items-center gap-2">
+              <Trophy className="h-6 w-6" style={{ color: '#0462CB' }} />
+              How the Leaderboard Works
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Points Earning Section */}
+            <div>
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#011328' }}>📈 Earn Points by Engaging</h3>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                  <div className="text-2xl">❤️</div>
+                  <div className="flex-1">
+                    <p className="font-semibold" style={{ color: '#011328' }}>Like a Post</p>
+                    <p className="text-sm" style={{ color: '#8E8E8E' }}>You get <strong>+1 point</strong> for liking, and the post author gets <strong>+1 point</strong></p>
+                  </div>
+                  <div className="text-2xl font-bold" style={{ color: '#0462CB' }}>+1</div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                  <div className="text-2xl">💬</div>
+                  <div className="flex-1">
+                    <p className="font-semibold" style={{ color: '#011328' }}>Comment on a Post</p>
+                    <p className="text-sm" style={{ color: '#8E8E8E' }}>You get <strong>+2 points</strong> for commenting, and the post author gets <strong>+2 points</strong></p>
+                  </div>
+                  <div className="text-2xl font-bold" style={{ color: '#0462CB' }}>+2</div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                  <div className="text-2xl">✍️</div>
+                  <div className="flex-1">
+                    <p className="font-semibold" style={{ color: '#011328' }}>Create a Post</p>
+                    <p className="text-sm" style={{ color: '#8E8E8E' }}>You get <strong>+3 points</strong> for creating a post</p>
+                  </div>
+                  <div className="text-2xl font-bold" style={{ color: '#0462CB' }}>+3</div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: '#EFF6FF', border: '1px solid #DBEAFE' }}>
+                <p className="text-sm" style={{ color: '#1E40AF' }}>
+                  💡 <strong>Pro Tip:</strong> Both you and the person you engage with earn points! The more you interact, the more everyone benefits.
+                </p>
+              </div>
+            </div>
+
+            {/* Levels Section */}
+            <div>
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#011328' }}>🏆 Levels & Requirements</h3>
+              <div className="space-y-2">
+                {levels.length > 0 ? (
+                  levels.sort((a, b) => a.level_number - b.level_number).map((level) => (
+                    <div key={level.id} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-white"
+                          style={{
+                            background: level.level_number >= 10 ? '#9333EA' :
+                                       level.level_number >= 9 ? '#DC2626' :
+                                       level.level_number >= 8 ? '#EA580C' :
+                                       level.level_number >= 7 ? '#D97706' :
+                                       level.level_number >= 6 ? '#0891B2' :
+                                       level.level_number >= 5 ? '#059669' :
+                                       level.level_number >= 4 ? '#0284C7' :
+                                       level.level_number >= 3 ? '#4F46E5' :
+                                       level.level_number >= 2 ? '#7C3AED' : '#6B7280'
+                          }}
+                        >
+                          {level.level_number}
+                        </div>
+                        <div>
+                          <p className="font-semibold" style={{ color: '#011328' }}>{level.level_name || `Level ${level.level_number}`}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold" style={{ color: '#0462CB' }}>{level.points_required} points</p>
+                        <p className="text-xs" style={{ color: '#8E8E8E' }}>required</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <p style={{ color: '#8E8E8E' }}>Loading levels...</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Time Filters Explanation */}
+            <div>
+              <h3 className="text-xl font-bold mb-4" style={{ color: '#011328' }}>📅 Leaderboard Filters</h3>
+              <div className="space-y-2">
+                <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                  <div className="font-bold" style={{ color: '#0462CB' }}>Last 7 Days</div>
+                  <p className="text-sm" style={{ color: '#8E8E8E' }}>See who's been most active in the past week</p>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                  <div className="font-bold" style={{ color: '#0462CB' }}>Last 30 Days</div>
+                  <p className="text-sm" style={{ color: '#8E8E8E' }}>Monthly leaderboard for recent activity</p>
+                </div>
+                <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                  <div className="font-bold" style={{ color: '#0462CB' }}>All Time</div>
+                  <p className="text-sm" style={{ color: '#8E8E8E' }}>Overall leaderboard showing total points earned</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Call to Action */}
+            <div className="text-center p-6 rounded-lg" style={{ background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)' }}>
+              <p className="text-lg font-bold mb-2" style={{ color: '#011328' }}>Start Climbing the Leaderboard! 🚀</p>
+              <p style={{ color: '#8E8E8E' }}>Engage with posts, share your thoughts, and help others in the community.</p>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4 border-t" style={{ borderColor: '#E5E7EB' }}>
+            <Button onClick={() => setShowHowItWorks(false)} style={{ background: 'linear-gradient(135deg, #0462CB 0%, #0284C7 100%)' }} className="text-white">
+              Got It!
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
