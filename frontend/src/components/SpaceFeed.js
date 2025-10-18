@@ -370,7 +370,7 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
                 key={post.id} 
                 className="bg-white rounded-lg p-4 border hover:bg-gray-50 transition-colors cursor-pointer"
                 style={{ borderColor: '#E5E7EB' }}
-                onClick={() => handlePostClick(post)}
+                onClick={() => openComments(post)}
               >
                 <div className="flex gap-4 items-start">
                   {/* Avatar */}
@@ -395,23 +395,41 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
                   {/* Stats on Right */}
                   <div className="flex items-center gap-6 flex-shrink-0">
                     {/* Votes */}
-                    <div className="flex items-center gap-2">
-                      <Heart className="h-5 w-5" style={{ color: '#9CA3AF' }} />
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReact(post.id);
+                      }}
+                      className="flex items-center gap-2 hover:text-red-500 transition-colors"
+                    >
+                      <Heart 
+                        className={`h-5 w-5 ${hasUserReacted(post.reactions) ? 'fill-red-500 text-red-500' : ''}`}
+                        style={{ color: hasUserReacted(post.reactions) ? '#EF4444' : '#9CA3AF' }} 
+                      />
                       <span className="text-base" style={{ color: '#1F2937' }}>
                         {getReactionCount(post.reactions)}
                       </span>
-                    </div>
+                    </button>
 
                     {/* Answers */}
-                    <div className="flex items-center gap-2">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openComments(post);
+                      }}
+                      className="flex items-center gap-2 hover:text-blue-500 transition-colors"
+                    >
                       <MessageCircle className="h-5 w-5" style={{ color: '#9CA3AF' }} />
                       <span className="text-base" style={{ color: '#1F2937' }}>
                         {post.comment_count || 0}
                       </span>
-                    </div>
+                    </button>
 
                     {/* Menu */}
-                    <button className="p-1 hover:bg-gray-100 rounded">
+                    <button 
+                      onClick={(e) => e.stopPropagation()}
+                      className="p-1 hover:bg-gray-100 rounded"
+                    >
                       <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10 6C10.5523 6 11 5.55228 11 5C11 4.44772 10.5523 4 10 4C9.44772 4 9 4.44772 9 5C9 5.55228 9.44772 6 10 6Z" fill="#9CA3AF"/>
                         <path d="M10 11C10.5523 11 11 10.5523 11 10C11 9.44772 10.5523 9 10 9C9.44772 9 9 9.44772 9 10C9 10.5523 9.44772 11 10 11Z" fill="#9CA3AF"/>
