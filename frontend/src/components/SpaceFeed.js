@@ -252,6 +252,11 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     e.preventDefault();
     if (!commentContent.trim() && !commentImage || !selectedPost) return;
 
+    if (!isMember) {
+      toast.error('Please join the space to comment');
+      return;
+    }
+
     try {
       // Prepare comment content
       let fullCommentContent = commentContent;
