@@ -24,6 +24,7 @@ export default function PostDetailPage() {
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [spaces, setSpaces] = useState([]);
+  const [spaceGroups, setSpaceGroups] = useState([]);
   const [spaceName, setSpaceName] = useState('');
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
