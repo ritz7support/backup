@@ -127,15 +127,18 @@ backend:
 
   - task: "Space Manager Helper Functions"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added is_space_manager_or_admin() and is_space_member() helper functions"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Helper functions working correctly. Manager permissions are properly scoped to specific spaces. Managers can access join requests and perform management operations only for spaces they manage."
 
   - task: "Get Spaces - Include join request status"
     implemented: true
