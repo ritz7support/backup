@@ -304,6 +304,31 @@ async def require_auth(request: Request, authorization: Optional[str] = Header(N
         raise HTTPException(status_code=401, detail="Authentication required")
     return user
 
+async def is_space_manager_or_admin(user: User, space_id: str) -> bool:
+    """Check if user is an admin or manager of the space"""
+    if user.role == 'admin':
+        return True
+    
+    membership = await db.space_memberships.find_one({
+        "user_id": user.id,
+        "space_id": space_id,
+        "role": "manager"
+    })
+    return bool(membership)
+
+async def is_space_member(user: User, space_id: str) -> bool:
+    """Check if user is a member of the space"""
+    if user.role == 'admin':
+        return True
+    
+    membership = await db.space_memberships.find_one({
+        "user_id": user.id,
+        "space_id": space_id,
+        "status": "member"
+    })
+    return bool(membership)
+
+
 # ==================== AUTH ENDPOINTS ====================
 
 @api_router.post("/auth/register")
