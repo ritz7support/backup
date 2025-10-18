@@ -428,6 +428,94 @@ async def get_effective_block_status(user_id: str, space_id: str) -> dict:
         return {"is_blocked": False, "block_type": None}
     
     if membership.get('status') != 'blocked':
+
+
+# ==================== POINTS & LEADERBOARD HELPERS ====================
+
+async def award_points(user_id: str, points: int, action_type: str, related_entity_type: str = None, 
+                       related_entity_id: str = None, related_user_id: str = None, description: str = None):
+    """Award points to a user and create a transaction record"""
+    # Create point transaction
+    transaction = PointTransaction(
+        user_id=user_id,
+        points=points,
+        action_type=action_type,
+        related_entity_type=related_entity_type,
+        related_entity_id=related_entity_id,
+        related_user_id=related_user_id,
+        description=description
+    )
+    
+    transaction_dict = transaction.model_dump()
+    transaction_dict['created_at'] = transaction_dict['created_at'].isoformat()
+    await db.point_transactions.insert_one(transaction_dict)
+    
+    # Update user's total points
+    await db.users.update_one(
+        {"id": user_id},
+        {"$inc": {"total_points": points}}
+    )
+    
+    # Check and update level
+    await update_user_level(user_id)
+
+async def update_user_level(user_id: str):
+    """Update user's level based on their total points"""
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        return
+    
+    total_points = user.get('total_points', 0)
+    
+    # Get all levels sorted by points_required descending
+    levels = await db.levels.find({}, {"_id": 0}).sort("points_required", -1).to_list(100)
+    
+    # Find the highest level the user qualifies for
+    new_level = 1
+    for level in levels:
+        if total_points >= level['points_required']:
+            new_level = level['level_number']
+            break
+    
+    # Update user's level if it changed
+    current_level = user.get('current_level', 1)
+    if new_level != current_level:
+        await db.users.update_one(
+            {"id": user_id},
+            {"$set": {"current_level": new_level}}
+        )
+
+async def get_user_leaderboard_stats(user_id: str):
+    """Get user's leaderboard statistics including next level info"""
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        return None
+    
+    total_points = user.get('total_points', 0)
+    current_level = user.get('current_level', 1)
+    
+    # Get current level details
+    current_level_obj = await db.levels.find_one({"level_number": current_level}, {"_id": 0})
+    
+    # Get next level
+    next_level_obj = await db.levels.find_one({"level_number": current_level + 1}, {"_id": 0})
+    
+    points_to_next_level = None
+    next_level_points = None
+    if next_level_obj:
+        next_level_points = next_level_obj['points_required']
+        points_to_next_level = next_level_points - total_points
+    
+    return {
+        "user_id": user_id,
+        "total_points": total_points,
+        "current_level": current_level,
+        "current_level_name": current_level_obj.get('level_name') if current_level_obj else f"Level {current_level}",
+        "next_level": current_level + 1 if next_level_obj else None,
+        "next_level_points": next_level_points,
+        "points_to_next_level": points_to_next_level
+    }
+
         return {"is_blocked": False, "block_type": None}
     
     block_type = membership.get('block_type', 'hard')
