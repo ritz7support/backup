@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Crown, Lightbulb, Lock, LockOpen, Key } from 'lucide-react';
+import { ChevronDown, ChevronRight, Crown, Lightbulb, Lock, LockOpen, Key, UserPlus, CheckCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 export default function Sidebar({ spaceGroups, spaces }) {
