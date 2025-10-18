@@ -59,6 +59,8 @@ export default function Sidebar({ spaceGroups, spaces }) {
     const isPrivateNotMember = space.visibility === 'private' && !space.is_member;
     const isPrivateMember = space.visibility === 'private' && space.is_member;
     const isSecretMember = space.visibility === 'secret' && space.is_member;
+    const isPublicNotMember = space.visibility === 'public' && !space.is_member;
+    const isPublicMember = space.visibility === 'public' && space.is_member;
 
     return (
       <Link
@@ -85,6 +87,12 @@ export default function Sidebar({ spaceGroups, spaces }) {
         )}
         {isSecretMember && (
           <Key className="h-3.5 w-3.5" style={{ color: '#8B5CF6' }} data-testid={`secret-key-icon-${space.id}`} />
+        )}
+        {isPublicNotMember && (
+          <UserPlus className="h-3.5 w-3.5" style={{ color: '#3B82F6' }} data-testid={`public-join-icon-${space.id}`} />
+        )}
+        {isPublicMember && (
+          <CheckCircle className="h-3.5 w-3.5" style={{ color: '#10B981' }} data-testid={`public-joined-icon-${space.id}`} />
         )}
       </Link>
     );
