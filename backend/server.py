@@ -1682,7 +1682,33 @@ async def update_profile(request: Request, user: User = Depends(require_auth)):
             update_fields[field] = data[field]
     
     if update_fields:
+        # Get current user data before update
+        current_user = await db.users.find_one({"id": user.id}, {"_id": 0})
+        
+        # Check if profile was incomplete before
+        was_incomplete = not (current_user.get('bio') and current_user.get('location'))
+        
         await db.users.update_one({"id": user.id}, {"$set": update_fields})
+        
+        # Check if profile is now complete (after update)
+        updated_user = await db.users.find_one({"id": user.id}, {"_id": 0})
+        is_now_complete = updated_user.get('bio') and updated_user.get('location')
+        
+        # Award 5 points for completing profile (one-time only)
+        if was_incomplete and is_now_complete:
+            # Check if already awarded
+            existing_award = await db.point_transactions.find_one({
+                "user_id": user.id,
+                "action_type": "complete_profile"
+            })
+            
+            if not existing_award:
+                await award_points(
+                    user_id=user.id,
+                    points=5,
+                    action_type="complete_profile",
+                    description="Completed profile (bio + location)"
+                )
     
     return {"message": "Profile updated"}
 
