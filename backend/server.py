@@ -1083,6 +1083,21 @@ async def react_to_post(post_id: str, emoji: str, user: User = Depends(require_a
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     
+    # Check if user is blocked from this space
+    membership = await db.space_memberships.find_one({
+        "user_id": user.id,
+        "space_id": post['space_id']
+    })
+    if membership and membership.get('status') == 'blocked':
+        raise HTTPException(status_code=403, detail="You are blocked from reacting in this space")
+    
+    # Check if user is a member for non-public spaces
+    space = await db.spaces.find_one({"id": post['space_id']}, {"_id": 0})
+    if space and space.get('visibility') != 'public':
+        is_member = await is_space_member(user, post['space_id'])
+        if not is_member:
+            raise HTTPException(status_code=403, detail="You must be a member to react in this space")
+    
     reactions = post.get('reactions', {})
     if emoji not in reactions:
         reactions[emoji] = []
