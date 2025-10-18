@@ -828,12 +828,15 @@ export default function AdminPanel() {
               </div>
 
               <div>
-                <Label>Order</Label>
+                <Label>Order (Sidebar Position)</Label>
                 <Input
                   type="number"
                   value={spaceForm.order}
                   onChange={(e) => setSpaceForm({ ...spaceForm, order: parseInt(e.target.value) || 0 })}
                 />
+                <p className="text-xs mt-1" style={{ color: '#8E8E8E' }}>
+                  Controls position in sidebar. Lower numbers appear first. Spaces & groups share the same ordering.
+                </p>
               </div>
             </div>
 
