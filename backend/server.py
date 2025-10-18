@@ -1200,6 +1200,16 @@ async def join_space(space_id: str, user: User = Depends(require_auth)):
     # Update member count if approved
     if status == "member":
         await db.spaces.update_one({"id": space_id}, {"$inc": {"member_count": 1}})
+        
+        # Award 1 point for joining a space
+        await award_points(
+            user_id=user.id,
+            points=1,
+            action_type="join_space",
+            related_entity_type="space",
+            related_entity_id=space_id,
+            description=f"Joined space: {space.get('name', 'Unknown')}"
+        )
     
     return {"message": f"{'Join request sent' if status == 'pending' else 'Joined space successfully'}", "status": status}
 
