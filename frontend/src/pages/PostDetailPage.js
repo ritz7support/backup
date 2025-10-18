@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { postsAPI } from '../lib/api';
 import { Button } from '../components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '../components/ui/avatar';
 import Sidebar from '../components/Sidebar';
 import CommentEditor from '../components/CommentEditor';
-import { Heart, MessageCircle, User, ChevronDown, LogOut, Settings } from 'lucide-react';
+import { Heart, MessageCircle, User, ChevronDown, LogOut, Settings, Home, Users, Bell, Crown } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
 
