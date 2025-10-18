@@ -359,6 +359,92 @@ frontend:
         agent: "testing"
         comment: "✅ COMPREHENSIVE UI TESTING COMPLETE - Enhanced member and space manager management system fully functional in Admin Panel. Members Dialog (👥): 16 buttons found, opens successfully, shows 15 members with role badges (Admin/Manager/Blocked), all action buttons present (Make Global Admin, Make Manager, Remove Manager, Block, Remove). Space Managers Dialog (🛡️): 16 buttons found, opens successfully, shows Current Managers section (0 managers) and Add New Manager section (15 available members with Add as Manager buttons). All dialogs open/close properly, buttons are clickable and styled correctly. Minor issue: 8 users showing as 'Unknown' - user name display needs attention but functionality works. Visibility badges working (Public: 11, Private: 4, Secret: 1). System is fully functional with minor display issue."
 
+
+  - task: "Team Member Badge - User Model Update"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added is_team_member field to User model. Added PUT /api/users/{user_id}/set-team-member endpoint for admins to grant/remove team member badge."
+
+  - task: "Soft Block with Expiry - SpaceMembership Model Update"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced SpaceMembership model with block_type ('hard' or 'soft') and block_expires_at (datetime) fields. Hard blocks prevent reading and engagement, soft blocks only prevent engagement."
+
+  - task: "Soft Block - Enhanced Block/Unblock Endpoints"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated PUT /api/spaces/{space_id}/members/{user_id}/block endpoint to accept block_type and expires_at parameters. Updated PUT /api/spaces/{space_id}/members/{user_id}/unblock to reset block fields. Both endpoints support soft blocks with expiry."
+
+  - task: "Soft Block - Auto-Expiry Helper Functions"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added check_and_unblock_expired_memberships() and get_effective_block_status() helper functions. These check block expiry and auto-unblock users when blocks expire. Integrated into all engagement endpoints (post/comment/react)."
+
+  - task: "Soft Block - Engagement Endpoint Updates"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated create_post, react_to_post, and add_comment endpoints to use get_effective_block_status(). Soft blocks now allow reading but prevent engagement with appropriate error messages."
+
+  - task: "Centralized User Management - Enhanced API Endpoint"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added GET /api/users/all-with-memberships endpoint. Returns all users with enriched space memberships, manager counts, and block status information. Admin-only access."
+
+  - task: "Process Expired Blocks - Admin Endpoint"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added POST /api/admin/process-expired-blocks endpoint for manual processing of all expired blocks. Returns count of unblocked users. Admin-only access."
+
+
 metadata:
   created_by: "main_agent"
   version: "2.2"
