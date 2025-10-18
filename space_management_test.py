@@ -563,7 +563,8 @@ class SpaceManagementTester:
                     # Verify the user was added to the space
                     members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.private_space_id}/members-detailed")
                     if members_response.status_code == 200:
-                        members = members_response.json()
+                        response_data = members_response.json()
+                        members = response_data.get('members', [])
                         approved_member = None
                         for m in members:
                             if isinstance(m, dict) and m.get('user_id') == self.blocked_user_id:
