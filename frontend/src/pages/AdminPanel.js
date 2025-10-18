@@ -58,7 +58,8 @@ export default function AdminPanel() {
       await Promise.all([
         loadSpaceGroups(),
         loadSpaces(),
-        loadSubscriptionTiers()
+        loadSubscriptionTiers(),
+        loadAllUsers()
       ]);
     } catch (error) {
       toast.error('Failed to load data');
