@@ -948,7 +948,8 @@ class Phase2EnhancedUserManagementTester:
                 # Verify unblock in database
                 members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
                 if members_response.status_code == 200:
-                    members = members_response.json()
+                    members_data = members_response.json()
+                    members = members_data.get('members', [])
                     unblocked_member = next((m for m in members if m.get('user_id') == self.test_user_for_blocking_id), None)
                     
                     if unblocked_member and unblocked_member.get('status') == 'member':
