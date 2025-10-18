@@ -289,12 +289,12 @@ export default function PostDetailPage() {
       </header>
 
       {/* Main Content Area with Sidebar */}
-      <div className="flex flex-1">
+      <div className="flex flex-1 min-h-0">
         {/* Sidebar */}
         <Sidebar spaces={spaces} spaceGroups={[]} />
 
         {/* Post Content Area */}
-        <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#E6EFFA' }}>
+        <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#F3F4F6' }}>
           {/* Back Button - Sticky at top left of content area */}
           <div className="sticky top-0 z-10 bg-transparent pt-4 pl-6">
             <Button
