@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Phase 2 Enhanced User Management Features
-Tests team member badge management, centralized user management, soft blocks with expiry, and auto-expiry system
+Backend API Testing for Phase 2 Enhanced User Management Features and Phase 3 Payment Gateway Integration
+Tests team member badge management, centralized user management, soft blocks with expiry, auto-expiry system,
+and payment gateway integrations (Razorpay and Stripe)
 """
 
 import requests
