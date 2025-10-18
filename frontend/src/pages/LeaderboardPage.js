@@ -324,7 +324,7 @@ export default function LeaderboardPage() {
                   <div className="text-2xl">✅</div>
                   <div className="flex-1">
                     <p className="font-semibold" style={{ color: '#011328' }}>Complete Your Profile</p>
-                    <p className="text-sm" style={{ color: '#8E8E8E' }}>You get <strong>+5 points</strong> (one-time) for adding bio and location</p>
+                    <p className="text-sm" style={{ color: '#8E8E8E' }}>You get <strong>+5 points</strong> (one-time) for uploading a profile picture</p>
                   </div>
                   <div className="text-2xl font-bold" style={{ color: '#0462CB' }}>+5</div>
                 </div>
