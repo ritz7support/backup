@@ -274,6 +274,63 @@ export default function AdminPanel() {
   };
 
 
+  // Space managers management
+  const handleViewManagers = async (spaceId, spaceName) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members-detailed`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch members');
+      const data = await response.json();
+      
+      const allMembers = data.members || [];
+      const managers = allMembers.filter(m => m.role === 'manager');
+      const regularMembers = allMembers.filter(m => m.role === 'member');
+      
+      setManagersDialog({ 
+        open: true, 
+        spaceId, 
+        spaceName, 
+        managers, 
+        allMembers: regularMembers 
+      });
+    } catch (error) {
+      toast.error('Failed to load managers');
+    }
+  };
+
+  const handleAddManager = async (spaceId, userId, userName) => {
+    if (!window.confirm(`Promote ${userName} to Space Manager? They can moderate content, approve join requests, and manage members.`)) return;
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/promote`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to promote member');
+      toast.success(`${userName} promoted to Space Manager`);
+      handleViewManagers(spaceId, managersDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleRemoveManager = async (spaceId, userId, userName) => {
+    if (!window.confirm(`Remove ${userName} from Space Manager role?`)) return;
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/demote`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to demote manager');
+      toast.success(`${userName} removed from Space Manager role`);
+      handleViewManagers(spaceId, managersDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+
+
   // Space Group handlers
   const handleCreateGroup = () => {
     setGroupForm({ name: '', description: '', icon: '', order: 0 });
