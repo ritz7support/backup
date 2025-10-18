@@ -155,8 +155,11 @@ class SpaceMembership(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     space_id: str
     user_id: str
-    status: str = "member"  # pending, member
+    role: str = "member"  # member, manager
+    status: str = "member"  # pending, member, blocked
     joined_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    blocked_at: Optional[datetime] = None
+    blocked_by: Optional[str] = None
 
 class JoinRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
