@@ -871,6 +871,7 @@ export default function AdminPanel() {
                       <SelectValue placeholder="Select tier" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">No tier selected</SelectItem>
                       {subscriptionTiers.filter(t => t.is_active).map((tier) => (
                         <SelectItem key={tier.id} value={tier.id}>
                           {tier.name} - ${tier.price}/{tier.currency}
