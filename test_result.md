@@ -434,3 +434,38 @@ agent_communication:
       - Visibility badges (public/private/secret) display correctly
       
       **Frontend system is fully functional and ready for production use.**
+  - agent: "testing"
+    message: |
+      **User Role Management System Testing Complete - All Tests Passed ✅**
+      
+      Conducted comprehensive testing of the new user role management system:
+      
+      **Test Coverage Completed:**
+      ✅ GET /api/users/all - Get all users (admin only)
+      ✅ PUT /api/users/{user_id}/promote-to-admin - Promote user to admin
+      ✅ PUT /api/users/{user_id}/demote-from-admin - Demote admin to learner
+      
+      **Test Results Summary:**
+      ✅ GET All Users (Admin Access) - Working correctly
+      ✅ GET All Users (Non-Admin Access) - Properly rejected (403 Forbidden)
+      ✅ Promote User to Admin - Working with database persistence
+      ✅ Promote Self (Should Fail) - Correctly rejected (400 Bad Request)
+      ✅ Promote Existing Admin (Should Fail) - Correctly rejected (400 Bad Request)
+      ✅ Promote by Non-Admin (Should Fail) - Correctly rejected (403 Forbidden)
+      ✅ Demote Admin to Learner - Working with database persistence
+      ✅ Demote Self (Should Fail) - Correctly rejected (400 Bad Request)
+      ✅ Demote Non-Admin (Should Fail) - Correctly rejected (400 Bad Request)
+      ✅ Demote by Non-Admin (Should Fail) - Correctly rejected (403 Forbidden)
+      ✅ Role Change Persistence - All changes properly persisted in database
+      
+      **Key Findings:**
+      - All user role management endpoints responding correctly with proper status codes
+      - Admin-only access properly enforced for all endpoints (403/401 for non-admins)
+      - Self-promotion and self-demotion correctly prevented (400 Bad Request)
+      - Cannot promote existing admins or demote non-admins (400 Bad Request)
+      - Last admin protection working (cannot demote if only one admin exists)
+      - Role changes are immediately persisted in database and verified
+      - Security check passed: password_hash not included in user responses
+      - Retrieved 6 users successfully with correct response structure
+      
+      **All 11/11 user role management tests passed successfully. System is fully functional and ready for production use.**
