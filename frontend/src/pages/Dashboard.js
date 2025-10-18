@@ -233,6 +233,7 @@ export default function Dashboard({ children }) {
               </div>
             )}
           </div>
+          )}
         </main>
       </div>
     </div>
