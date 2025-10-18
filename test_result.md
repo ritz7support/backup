@@ -344,9 +344,8 @@ metadata:
 
 test_plan:
   current_focus:
-    - "User Role Management - GET All Users"
-    - "User Role Management - Promote to Admin"
-    - "User Role Management - Demote from Admin"
+    - "Enhanced Member and Space Manager Management System"
+    - "GET /api/users/{user_id}/managed-spaces endpoint"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
