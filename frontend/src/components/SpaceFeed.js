@@ -92,6 +92,9 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
   const [commentInputRef, setCommentInputRef] = useState(null);
   const [isMember, setIsMember] = useState(false);
   const [joiningSpace, setJoiningSpace] = useState(false);
+  const [spaceVisibility, setSpaceVisibility] = useState('public');
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
+  const [pendingRequestId, setPendingRequestId] = useState(null);
 
   const config = SPACE_CONFIG[spaceId] || {
     title: spaceSettings.name || 'Space',
@@ -103,7 +106,7 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     emptyState: spaceSettings.space_type === 'qa' ? 'No questions yet' : 'No posts yet',
     emptyMessage: spaceSettings.space_type === 'qa' ? 'Be the first to ask a question!' : 'Be the first to post!'
   };
-  const canCreatePost = user?.role === 'admin' || spaceSettings.allow_member_posts;
+  const canCreatePost = (isMember && (user?.role === 'admin' || spaceSettings.allow_member_posts));
 
   useEffect(() => {
     loadSpaceInfo();
@@ -116,13 +119,18 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
       const space = spaces.find(s => s.id === spaceId);
       if (space) {
         setMemberCount(space.member_count || 0);
+        setIsMember(space.is_member || false);
+        setSpaceVisibility(space.visibility || 'public');
+        setHasPendingRequest(space.has_pending_request || false);
+        setPendingRequestId(space.pending_request_id || null);
         setSpaceSettings({
           allow_member_posts: space.allow_member_posts !== false,
           space_type: space.space_type || 'post',
           name: space.name,
           description: space.description,
           welcome_title: space.welcome_title,
-          welcome_message: space.welcome_message
+          welcome_message: space.welcome_message,
+          visibility: space.visibility
         });
       }
     } catch (error) {
