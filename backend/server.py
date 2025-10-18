@@ -976,6 +976,15 @@ async def create_post(request: Request, user: User = Depends(require_auth)):
     """Create a new post"""
     data = await request.json()
     
+    # Check if space allows member posts
+    space = await db.spaces.find_one({"id": data['space_id']}, {"_id": 0})
+    if not space:
+        raise HTTPException(status_code=404, detail="Space not found")
+    
+    # If space doesn't allow member posts, only admins can post
+    if not space.get('allow_member_posts', True) and user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can create posts in this space")
+    
     post = Post(
         space_id=data['space_id'],
         author_id=user.id,
