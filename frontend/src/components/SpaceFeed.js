@@ -106,7 +106,8 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     emptyState: spaceSettings.space_type === 'qa' ? 'No questions yet' : 'No posts yet',
     emptyMessage: spaceSettings.space_type === 'qa' ? 'Be the first to ask a question!' : 'Be the first to post!'
   };
-  const canCreatePost = (isMember && (user?.role === 'admin' || spaceSettings.allow_member_posts));
+  // Admins can always post, OR members can post if space allows it
+  const canCreatePost = user?.role === 'admin' || (isMember && spaceSettings.allow_member_posts);
 
   useEffect(() => {
     loadSpaceInfo();
