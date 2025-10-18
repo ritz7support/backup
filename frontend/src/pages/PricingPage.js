@@ -102,9 +102,19 @@ export default function PricingPage() {
           name: 'ABCD Community',
           description: 'Membership Subscription',
           order_id: data.order_id,
-          handler: function (response) {
-            toast.success('Payment successful! Welcome to the community! 🎉');
-            navigate('/dashboard');
+          handler: async function (response) {
+            try {
+              // Verify payment on backend
+              await paymentsAPI.verifyRazorpayPayment({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              });
+              toast.success('Payment successful! Welcome to the community! 🎉');
+              navigate('/dashboard');
+            } catch (error) {
+              toast.error('Payment verification failed. Please contact support.');
+            }
           },
           prefill: {
             name: user.name,
