@@ -2048,6 +2048,81 @@ async def get_user_managed_spaces(user_id: str, user: User = Depends(require_aut
     
     return managed_spaces
 
+
+# ==================== TEAM MEMBER BADGE MANAGEMENT (ADMIN ONLY) ====================
+
+@api_router.put("/users/{user_id}/set-team-member")
+async def set_user_team_member_status(user_id: str, request: Request, user: User = Depends(require_auth)):
+    """Set or unset team member badge for a user (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can manage team member badges")
+    
+    data = await request.json()
+    is_team_member = data.get('is_team_member', False)
+    
+    # Check if user exists
+    target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update user team member status
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"is_team_member": is_team_member}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    action = "granted" if is_team_member else "removed"
+    return {"message": f"Team member badge {action} successfully"}
+
+
+# ==================== CENTRALIZED USER MANAGEMENT WITH MEMBERSHIPS (ADMIN ONLY) ====================
+
+@api_router.get("/users/all-with-memberships")
+async def get_all_users_with_memberships(user: User = Depends(require_auth)):
+    """Get all users with their space memberships and roles (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Get all users (excluding password)
+    users = await db.users.find({}, {"_id": 0, "password_hash": 0}).to_list(1000)
+    
+    # For each user, get their space memberships
+    for user_obj in users:
+        user_id = user_obj['id']
+        
+        # Get memberships
+        memberships = await db.space_memberships.find({
+            "user_id": user_id
+        }, {"_id": 0}).to_list(100)
+        
+        # Enrich memberships with space names
+        enriched_memberships = []
+        for membership in memberships:
+            space = await db.spaces.find_one({"id": membership['space_id']}, {"_id": 0, "id": 1, "name": 1})
+            if space:
+                enriched_memberships.append({
+                    "space_id": membership['space_id'],
+                    "space_name": space['name'],
+                    "role": membership.get('role', 'member'),
+                    "status": membership.get('status', 'member'),
+                    "joined_at": membership.get('joined_at'),
+                    "blocked_at": membership.get('blocked_at'),
+                    "block_type": membership.get('block_type', 'hard'),
+                    "block_expires_at": membership.get('block_expires_at')
+                })
+        
+        user_obj['memberships'] = enriched_memberships
+        
+        # Count managed spaces
+        manager_count = sum(1 for m in enriched_memberships if m['role'] == 'manager')
+        user_obj['managed_spaces_count'] = manager_count
+    
+    return users
+
+
 # Subscription Tiers Management
 @api_router.get("/subscription-tiers")
 async def get_subscription_tiers():
