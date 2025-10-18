@@ -105,6 +105,10 @@ export default function SpaceFeed({ spaceId }) {
       const space = spaces.find(s => s.id === spaceId);
       if (space) {
         setMemberCount(space.member_count || 0);
+        setSpaceSettings({
+          allow_member_posts: space.allow_member_posts !== false,
+          space_type: space.space_type || 'post'
+        });
       }
     } catch (error) {
       console.error('Failed to load space info');
