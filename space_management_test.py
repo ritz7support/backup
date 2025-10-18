@@ -346,7 +346,8 @@ class SpaceManagementTester:
             members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
             
             if members_response.status_code == 200:
-                members = members_response.json()
+                response_data = members_response.json()
+                members = response_data.get('members', [])
                 self.log(f"✅ GET members-detailed successful - {len(members)} members")
                 
                 # Verify response structure
