@@ -18,6 +18,8 @@ export const authAPI = {
   processSession: (sessionId) => api.post('/auth/session', {}, { headers: { 'X-Session-ID': sessionId } }),
   getMe: () => api.get('/auth/me'),
   logout: () => api.post('/auth/logout'),
+  updateProfilePicture: (pictureData) => api.put('/users/profile-picture', { picture: pictureData }),
+  removeProfilePicture: () => api.delete('/users/profile-picture'),
 };
 
 // Spaces API
