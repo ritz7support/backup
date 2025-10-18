@@ -1379,28 +1379,40 @@ export default function AdminPanel() {
             <div className="bg-white rounded-2xl p-6 shadow-sm border" style={{ borderColor: '#D1D5DB' }}>
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold" style={{ color: '#011328' }}>Levels Management</h2>
-                <Button
-                  onClick={async () => {
-                    try {
-                      await leaderboardAPI.seedDefaultLevels();
-                      toast.success('Default levels created successfully!');
-                      loadLevels();
-                    } catch (error) {
-                      toast.error(error.response?.data?.detail || 'Failed to seed levels');
-                    }
-                  }}
-                  style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}
-                  className="text-white"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Seed Default Levels
-                </Button>
+                <div className="flex gap-2">
+                  {levels.length === 0 && (
+                    <Button
+                      onClick={async () => {
+                        try {
+                          await leaderboardAPI.seedDefaultLevels();
+                          toast.success('Default levels created successfully!');
+                          loadLevels();
+                        } catch (error) {
+                          toast.error(error.response?.data?.detail || 'Failed to seed levels');
+                        }
+                      }}
+                      variant="outline"
+                      className="text-blue-600 border-blue-300"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Seed Default Levels
+                    </Button>
+                  )}
+                  <Button
+                    onClick={handleCreateLevel}
+                    style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}
+                    className="text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Level
+                  </Button>
+                </div>
               </div>
 
               {levels.length === 0 ? (
                 <div className="text-center py-12">
                   <p className="text-lg font-medium mb-2" style={{ color: '#8E8E8E' }}>No levels configured</p>
-                  <p className="text-sm mb-4" style={{ color: '#8E8E8E' }}>Click "Seed Default Levels" to create 10 default levels</p>
+                  <p className="text-sm mb-4" style={{ color: '#8E8E8E' }}>Click "Seed Default Levels" to create 10 default levels or "Create Level" to add custom levels</p>
                 </div>
               ) : (
                 <div className="space-y-3">
