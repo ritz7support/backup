@@ -41,6 +41,36 @@ const SPACE_CONFIG = {
     postButtonText: 'Post Gratitude',
     emptyState: 'No gratitude posts yet',
     emptyMessage: 'Be the first to share your appreciation!'
+  },
+  'resources': {
+    title: 'Resources',
+    description: 'Share helpful resources and learning materials',
+    placeholder: 'Share a resource... 📚',
+    welcomeTitle: 'Share Knowledge!',
+    welcomeMessage: 'Found something useful? Share resources, guides, and learning materials with the community!',
+    postButtonText: 'Share Resource',
+    emptyState: 'No resources yet',
+    emptyMessage: 'Be the first to share a helpful resource!'
+  },
+  'showcase': {
+    title: 'Showcase',
+    description: 'Show off your amazing projects',
+    placeholder: 'Share your project... 🎨',
+    welcomeTitle: 'Showcase Your Work!',
+    welcomeMessage: 'Built something awesome? Share your projects, achievements, and creative work with the community!',
+    postButtonText: 'Share Project',
+    emptyState: 'No showcases yet',
+    emptyMessage: 'Be the first to showcase your work!'
+  },
+  'discussions': {
+    title: 'Discussions',
+    description: 'Community discussions and debates',
+    placeholder: 'Start a discussion... 💬',
+    welcomeTitle: 'Join the Discussion!',
+    welcomeMessage: 'Share ideas, debate topics, and engage in meaningful conversations with the community!',
+    postButtonText: 'Start Discussion',
+    emptyState: 'No discussions yet',
+    emptyMessage: 'Be the first to start a discussion!'
   }
 };
 
