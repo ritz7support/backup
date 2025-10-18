@@ -24,6 +24,7 @@ export default function AdminPanel() {
   const [spaces, setSpaces] = useState([]);
   const [subscriptionTiers, setSubscriptionTiers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [levels, setLevels] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Dialog states
