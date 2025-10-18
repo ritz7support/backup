@@ -107,12 +107,6 @@ class Phase2EnhancedUserManagementTester:
         except Exception as e:
             self.log(f"❌ Exception during learner login: {e}", "ERROR")
             return False
-            else:
-                self.log(f"❌ Failed to register learner user: {response.status_code} - {response.text}", "ERROR")
-                return False
-        except Exception as e:
-            self.log(f"❌ Exception during learner registration: {e}", "ERROR")
-            return False
         
         if not self.test_learner_id:
             self.log("❌ Failed to get learner user ID", "ERROR")
