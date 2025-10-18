@@ -1433,6 +1433,29 @@ async def add_comment(post_id: str, request: Request, user: User = Depends(requi
     # Update comment count
     await db.posts.update_one({"id": post_id}, {"$inc": {"comment_count": 1}})
     
+    # Award points for commenting (2 points to commenter)
+    await award_points(
+        user_id=user.id,
+        points=2,
+        action_type="comment",
+        related_entity_type="post",
+        related_entity_id=post_id,
+        related_user_id=post['author_id'],
+        description="Commented on a post"
+    )
+    
+    # Award 2 points to the post author (if not self-comment)
+    if user.id != post['author_id']:
+        await award_points(
+            user_id=post['author_id'],
+            points=2,
+            action_type="receive_comment",
+            related_entity_type="post",
+            related_entity_id=post_id,
+            related_user_id=user.id,
+            description="Received a comment on post"
+        )
+    
     return comment
 
 @api_router.get("/posts/{post_id}/comments")
