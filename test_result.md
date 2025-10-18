@@ -336,6 +336,21 @@ frontend:
         agent: "testing"
         comment: "✅ PASS - Admin demotion to learner working correctly. Successfully demoted admin to learner with database persistence verified. Self-demotion correctly rejected (400 Bad Request). Non-admin demotion correctly rejected (400 Bad Request). Non-admin access correctly rejected (403 Forbidden). Last admin protection working."
 
+  - task: "Enhanced Member and Space Manager Management System"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added GET /api/users/{user_id}/managed-spaces endpoint to get spaces where user is a manager. Enhanced existing manager promotion/demotion endpoints."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Enhanced member and space manager management system working correctly. GET /api/users/{user_id}/managed-spaces endpoint returns correct spaces for managers and empty list for non-managers. Admin-only access properly enforced (403 for non-admins). Manager promotion/demotion endpoints working correctly with proper validation and database persistence. Fixed bug in GET /api/users/all endpoint (missing return statement)."
+
 metadata:
   created_by: "main_agent"
   version: "2.2"
