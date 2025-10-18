@@ -56,8 +56,9 @@ export default function Sidebar({ spaceGroups, spaces }) {
   const renderSpaceItem = (space) => {
     const isActive = isSpaceActive(space.id);
     const isLocked = space.requires_payment && user?.membership_tier === 'free';
-    const isPrivate = space.visibility === 'private' && !space.is_member;
-    const isSecret = space.visibility === 'secret'; // Secret spaces shouldn't appear here (filtered by backend)
+    const isPrivateNotMember = space.visibility === 'private' && !space.is_member;
+    const isPrivateMember = space.visibility === 'private' && space.is_member;
+    const isSecretMember = space.visibility === 'secret' && space.is_member;
 
     return (
       <Link
@@ -76,8 +77,14 @@ export default function Sidebar({ spaceGroups, spaces }) {
         {isLocked && (
           <Crown className="h-3.5 w-3.5" style={{ color: '#FFB91A' }} data-testid={`locked-icon-${space.id}`} />
         )}
-        {isPrivate && (
-          <Lock className="h-3.5 w-3.5" style={{ color: '#9CA3AF' }} data-testid={`private-icon-${space.id}`} />
+        {isPrivateNotMember && (
+          <Lock className="h-3.5 w-3.5" style={{ color: '#9CA3AF' }} data-testid={`private-locked-icon-${space.id}`} />
+        )}
+        {isPrivateMember && (
+          <LockOpen className="h-3.5 w-3.5" style={{ color: '#10B981' }} data-testid={`private-unlocked-icon-${space.id}`} />
+        )}
+        {isSecretMember && (
+          <Key className="h-3.5 w-3.5" style={{ color: '#8B5CF6' }} data-testid={`secret-key-icon-${space.id}`} />
         )}
       </Link>
     );
