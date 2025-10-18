@@ -186,12 +186,16 @@ export default function AdminPanel() {
         body: JSON.stringify(payload)
       });
 
-      if (!response.ok) throw new Error('Failed to save space');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to save space');
+      }
 
       toast.success(`Space ${spaceDialog.mode === 'create' ? 'created' : 'updated'}!`);
       setSpaceDialog({ open: false, mode: 'create', data: null });
       loadSpaces();
     } catch (error) {
+      console.error('Space save error:', error);
       toast.error(error.message);
     } finally {
       setProcessing(false);
