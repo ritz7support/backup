@@ -1659,25 +1659,135 @@ export default function AdminPanel() {
             ) : (
               <div className="space-y-3">
                 {membersDialog.members.map((membership) => (
-                  <MemberCard 
-                    key={membership.id}
-                    membership={membership}
-                    spaceId={membersDialog.spaceId}
-                    spaceName={membersDialog.spaceName}
-                    onReload={() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName)}
-                    handlers={{
-                      handlePromoteToAdmin,
-                      handleDemoteFromAdmin,
-                      handlePromoteToManager,
-                      handleDemoteFromManager,
-                      handleBlockMember,
-                      handleUnblockMember,
-                      handleRemoveMember,
-                      openSpaceSelector: (userId, userName) => {
-                        setSpaceSelectDialog({ open: true, userId, userName, selectedSpaces: [] });
-                      }
-                    }}
-                  />
+                  <div key={membership.id} className="border rounded-lg p-4" style={{ borderColor: '#E5E7EB' }}>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-lg">
+                          {membership.user?.name?.charAt(0) || '?'}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-lg" style={{ color: '#011328' }}>{membership.user?.name || 'Unknown'}</span>
+                            {membership.user?.role === 'admin' && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Global Admin
+                              </span>
+                            )}
+                            {membership.role === 'manager' && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                Space Manager
+                              </span>
+                            )}
+                            {membership.status === 'blocked' && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                Blocked
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm" style={{ color: '#8E8E8E' }}>{membership.user?.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Action Buttons */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {membership.status === 'blocked' ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            handleUnblockMember(membersDialog.spaceId, membership.user_id, membership.user?.name);
+                            setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
+                          }}
+                          className="col-span-3"
+                        >
+                          Unblock Member
+                        </Button>
+                      ) : (
+                        <>
+                          {/* Admin Management */}
+                          {membership.user?.role === 'admin' ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                handleDemoteFromAdmin(membership.user_id, membership.user?.name);
+                                setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
+                              }}
+                              className="border-orange-400 text-orange-600"
+                            >
+                              Demote from Admin
+                            </Button>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                handlePromoteToAdmin(membership.user_id, membership.user?.name);
+                                setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
+                              }}
+                              className="border-green-400 text-green-600"
+                            >
+                              Make Global Admin
+                            </Button>
+                          )}
+
+                          {/* Space Manager Management */}
+                          {membership.role === 'manager' ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                handleDemoteFromManager(membersDialog.spaceId, membership.user_id, membership.user?.name);
+                                setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
+                              }}
+                              className="border-purple-400 text-purple-600"
+                            >
+                              Remove Manager
+                            </Button>
+                          ) : membership.user?.role !== 'admin' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                handlePromoteToManager(membersDialog.spaceId, membership.user_id, membership.user?.name);
+                                setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
+                              }}
+                              className="border-purple-400 text-purple-600"
+                            >
+                              Make Manager
+                            </Button>
+                          )}
+
+                          {/* Block/Remove Actions */}
+                          {membership.user?.role !== 'admin' && (
+                            <>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  handleBlockMember(membersDialog.spaceId, membership.user_id, membership.user?.name);
+                                  setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
+                                }}
+                              >
+                                Block
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  handleRemoveMember(membersDialog.spaceId, membership.user_id, membership.user?.name);
+                                }}
+                                className="border-red-400 text-red-600"
+                              >
+                                Remove
+                              </Button>
+                            </>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
