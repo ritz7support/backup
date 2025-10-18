@@ -1945,6 +1945,82 @@ async def demote_from_manager(space_id: str, user_id: str, user: User = Depends(
     
     return {"message": "Manager demoted to member successfully"}
 
+
+
+# ==================== USER ROLE MANAGEMENT (ADMIN ONLY) ====================
+
+@api_router.put("/users/{user_id}/promote-to-admin")
+async def promote_user_to_admin(user_id: str, user: User = Depends(require_auth)):
+    """Promote a user to global admin (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can promote users to admin")
+    
+    # Can't promote yourself (you're already admin)
+    if user_id == user.id:
+        raise HTTPException(status_code=400, detail="You are already an admin")
+    
+    # Check if user exists
+    target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if target_user.get('role') == 'admin':
+        raise HTTPException(status_code=400, detail="User is already an admin")
+    
+    # Update user role
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"role": "admin"}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": f"User promoted to admin successfully"}
+
+@api_router.put("/users/{user_id}/demote-from-admin")
+async def demote_user_from_admin(user_id: str, user: User = Depends(require_auth)):
+    """Demote an admin to regular learner (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can demote admins")
+    
+    # Can't demote yourself
+    if user_id == user.id:
+        raise HTTPException(status_code=400, detail="Cannot demote yourself")
+    
+    # Check how many admins exist
+    admin_count = await db.users.count_documents({"role": "admin"})
+    if admin_count <= 1:
+        raise HTTPException(status_code=400, detail="Cannot demote the last admin")
+    
+    # Check if user exists and is admin
+    target_user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    if target_user.get('role') != 'admin':
+        raise HTTPException(status_code=400, detail="User is not an admin")
+    
+    # Update user role
+    result = await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"role": "learner"}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": f"Admin demoted to learner successfully"}
+
+@api_router.get("/users/all")
+async def get_all_users(user: User = Depends(require_auth)):
+    """Get all users (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    users = await db.users.find({}, {"_id": 0, "password_hash": 0}).to_list(1000)
+    return users
+
 # Subscription Tiers Management
 @api_router.get("/subscription-tiers")
 async def get_subscription_tiers():
