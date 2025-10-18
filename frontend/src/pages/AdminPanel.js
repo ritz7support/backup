@@ -1679,9 +1679,9 @@ export default function AdminPanel() {
                     </div>
                     
                     {/* Action Buttons */}
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {membership.status === 'blocked' ? (
-                        <div className="col-span-3 space-y-2">
+                        <div className="w-full space-y-2">
                           {membership.block_type && (
                             <p className="text-xs text-gray-600">
                               Block Type: <strong>{membership.block_type === 'soft' ? '🔒 Soft (Can read)' : '🚫 Hard (Cannot read)'}</strong>
