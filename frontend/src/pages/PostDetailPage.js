@@ -36,7 +36,11 @@ export default function PostDetailPage() {
   useEffect(() => {
     fetchSpaces();
     fetchPost();
-  }, [postId, spaceId]);
+    // Get space name from route state if available
+    if (location.state?.spaceName) {
+      setSpaceName(location.state.spaceName);
+    }
+  }, [postId, spaceId, location.state]);
 
   const fetchSpaces = async () => {
     try {
