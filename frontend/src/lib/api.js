@@ -28,6 +28,13 @@ export const spacesAPI = {
   leaveSpace: (spaceId) => api.post(`/spaces/${spaceId}/leave`),
   getSpaceMembers: (spaceId) => api.get(`/spaces/${spaceId}/members`),
   configureSpace: (spaceId, data) => api.put(`/admin/spaces/${spaceId}/configure`, data),
+  // Join requests
+  createJoinRequest: (spaceId, message) => api.post(`/spaces/${spaceId}/join-request`, { message }),
+  getJoinRequests: (spaceId) => api.get(`/spaces/${spaceId}/join-requests`),
+  getMyJoinRequests: () => api.get('/my-join-requests'),
+  approveJoinRequest: (requestId) => api.put(`/join-requests/${requestId}/approve`),
+  rejectJoinRequest: (requestId) => api.put(`/join-requests/${requestId}/reject`),
+  cancelJoinRequest: (requestId) => api.delete(`/join-requests/${requestId}`),
 };
 
 // Events API
