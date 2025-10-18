@@ -44,6 +44,7 @@ function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/join/:inviteCode" element={<JoinViaInvite />} />
             
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/space/:spaceId" element={<PrivateRoute><SpaceView /></PrivateRoute>} />
