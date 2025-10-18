@@ -432,6 +432,87 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
         </div>
       </div>
 
+
+      {/* Join Requests Panel - Only for Admins/Managers of Private/Secret spaces */}
+      {isAdminOrManager && (spaceVisibility === 'private' || spaceVisibility === 'secret') && joinRequests.length > 0 && (
+        <div className="mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-4 border-2 border-yellow-200">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="bg-yellow-500 rounded-full p-2">
+                <svg className="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-semibold text-lg" style={{ color: '#92400E' }}>
+                  {joinRequests.length} Pending Join Request{joinRequests.length > 1 ? 's' : ''}
+                </h3>
+                <p className="text-sm" style={{ color: '#B45309' }}>
+                  {joinRequests.length === 1 ? 'Someone wants' : 'People want'} to join this space
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              {joinRequests.length > 1 && (
+                <Button
+                  onClick={handleApproveAll}
+                  size="sm"
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
+                  Approve All
+                </Button>
+              )}
+              <Button
+                onClick={() => setShowRequestsPanel(!showRequestsPanel)}
+                variant="outline"
+                size="sm"
+                className="border-yellow-400"
+              >
+                {showRequestsPanel ? 'Hide' : 'View'}
+              </Button>
+            </div>
+          </div>
+          
+          {showRequestsPanel && (
+            <div className="mt-4 space-y-3">
+              {joinRequests.map((request) => (
+                <div key={request.id} className="bg-white rounded-lg p-4 border border-yellow-200 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold">
+                      {request.user?.name?.charAt(0) || '?'}
+                    </div>
+                    <div>
+                      <p className="font-medium" style={{ color: '#011328' }}>{request.user?.name || 'Unknown'}</p>
+                      <p className="text-sm" style={{ color: '#8E8E8E' }}>{request.user?.email}</p>
+                      {request.message && (
+                        <p className="text-sm mt-1 italic" style={{ color: '#6B7280' }}>"{request.message}"</p>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => handleApproveRequest(request.id, request.user?.name)}
+                      size="sm"
+                      className="bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      ✓ Approve
+                    </Button>
+                    <Button
+                      onClick={() => handleRejectRequest(request.id, request.user?.name)}
+                      size="sm"
+                      variant="outline"
+                      className="border-red-400 text-red-600 hover:bg-red-50"
+                    >
+                      ✗ Reject
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Welcome Banner */}
       <div className="mb-6 p-6 rounded-2xl text-white" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
         <div className="flex items-center gap-3 mb-3">
