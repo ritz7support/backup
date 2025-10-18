@@ -510,6 +510,9 @@ export default function AdminPanel() {
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
                                 <h3 className="font-semibold" style={{ color: '#011328' }}>{space.name}</h3>
+                                <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                                  Position: {space.order}
+                                </span>
                                 {getVisibilityBadge(space.visibility)}
                                 {space.auto_join && (
                                   <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
