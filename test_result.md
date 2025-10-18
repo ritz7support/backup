@@ -360,6 +360,68 @@ frontend:
         comment: "✅ COMPREHENSIVE UI TESTING COMPLETE - Enhanced member and space manager management system fully functional in Admin Panel. Members Dialog (👥): 16 buttons found, opens successfully, shows 15 members with role badges (Admin/Manager/Blocked), all action buttons present (Make Global Admin, Make Manager, Remove Manager, Block, Remove). Space Managers Dialog (🛡️): 16 buttons found, opens successfully, shows Current Managers section (0 managers) and Add New Manager section (15 available members with Add as Manager buttons). All dialogs open/close properly, buttons are clickable and styled correctly. Minor issue: 8 users showing as 'Unknown' - user name display needs attention but functionality works. Visibility badges working (Public: 11, Private: 4, Secret: 1). System is fully functional with minor display issue."
 
 
+  - task: "API Client - Team Member and Soft Block Methods"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/lib/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added usersAPI.getAllUsersWithMemberships(), usersAPI.setTeamMember(), and enhanced spacesAPI.blockMember() to support block_type and expires_at parameters. Added adminAPI.processExpiredBlocks()."
+
+  - task: "AdminPanel - Centralized User Management Tab"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced Users tab to show all users with team member badge (🎩), role badges (Global Admin, Manager of X spaces), space memberships with block status. Added team member badge grant/remove functionality. Shows block type (soft/hard) in membership badges."
+
+  - task: "AdminPanel - Team Member Badge Management"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added handleSetTeamMember() function with confirmation dialog. Team member badge displayed with hat emoji (🎩) across the platform. Only admins can grant/remove badge."
+
+  - task: "AdminPanel - Soft Block Dialog"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added soft block dialog with block type selector (hard/soft) and expiry datetime picker. Integrated with Members Dialog. Shows block type and expiry info for blocked members."
+
+  - task: "AdminPanel - Enhanced Members Dialog with Soft Block"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated Members Dialog to show block type (🔒 soft or 🚫 hard) and expiry date for blocked members. Updated Block button to open soft block dialog. Enhanced UI to display block information."
+
+
+
   - task: "Team Member Badge - User Model Update"
     implemented: true
     working: "NA"
