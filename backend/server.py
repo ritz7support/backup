@@ -1047,10 +1047,13 @@ async def create_post(request: Request, user: User = Depends(require_auth)):
     if membership and membership.get('status') == 'blocked':
         raise HTTPException(status_code=403, detail="You are blocked from posting in this space")
     
-    # Check if user is a member (for non-public spaces)
-    if space.get('visibility') != 'public':
-        is_member = await is_space_member(user, data['space_id'])
-        if not is_member:
+    # Check if user is a member - required for ALL spaces (public, private, secret)
+    # Public spaces allow viewing without membership, but posting requires membership
+    is_member = await is_space_member(user, data['space_id'])
+    if not is_member:
+        if space.get('visibility') == 'public':
+            raise HTTPException(status_code=403, detail="Please join this space to create posts")
+        else:
             raise HTTPException(status_code=403, detail="You must be a member to post in this space")
     
     # If space doesn't allow member posts, only admins/managers can post
