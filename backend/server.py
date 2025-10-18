@@ -1898,7 +1898,9 @@ async def unblock_space_member(space_id: str, user_id: str, user: User = Depends
             "$set": {
                 "status": "member",
                 "blocked_at": None,
-                "blocked_by": None
+                "blocked_by": None,
+                "block_type": "hard",  # Reset to default
+                "block_expires_at": None
             }
         }
     )
