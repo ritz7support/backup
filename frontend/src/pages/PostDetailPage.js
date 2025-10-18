@@ -166,6 +166,9 @@ export default function PostDetailPage() {
   };
 
   const getSpaceName = () => {
+    // Use the dynamically set space name, or fall back to hardcoded mapping
+    if (spaceName) return spaceName;
+    
     const spaceNames = {
       'introductions': 'Introduction',
       'ask-doubts': 'Ask-Doubts',
