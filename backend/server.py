@@ -2474,33 +2474,6 @@ async def seed_default_levels(user: User = Depends(require_auth)):
     
     return {"message": "Default 10 levels created successfully", "count": len(default_levels)}
 
-        except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Invalid expires_at format: {str(e)}")
-    
-    result = await db.space_memberships.update_one(
-        {
-            "space_id": space_id,
-            "user_id": user_id
-        },
-        {
-            "$set": {
-                "status": "blocked",
-                "blocked_at": datetime.now(timezone.utc).isoformat(),
-                "blocked_by": user.id,
-                "block_type": block_type,
-                "block_expires_at": block_expires_at.isoformat() if block_expires_at else None
-            }
-        }
-    )
-    
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Member not found")
-    
-    block_msg = f"Member {block_type}-blocked successfully"
-    if block_expires_at:
-        block_msg += f" until {block_expires_at.strftime('%Y-%m-%d %H:%M:%S %Z')}"
-    return {"message": block_msg}
-
 @api_router.put("/spaces/{space_id}/members/{user_id}/unblock")
 async def unblock_space_member(space_id: str, user_id: str, user: User = Depends(require_auth)):
     """Unblock a member from a space (admin/manager only)"""
