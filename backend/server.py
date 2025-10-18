@@ -161,6 +161,8 @@ class SpaceMembership(BaseModel):
     joined_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     blocked_at: Optional[datetime] = None
     blocked_by: Optional[str] = None
+    block_type: str = "hard"  # hard (cannot read/engage), soft (can read but cannot engage)
+    block_expires_at: Optional[datetime] = None  # Auto-unblock at this time (for soft blocks)
 
 class JoinRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
