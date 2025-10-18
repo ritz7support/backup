@@ -149,7 +149,6 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
       setIsMember(false);
       setSpaceVisibility('public');
     }
-    }
     
     // Check if user is admin or manager of this space
     checkAdminOrManager();
