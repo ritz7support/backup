@@ -196,7 +196,7 @@ export default function PostDetailPage() {
             </button>
             <div className="flex items-center gap-2" style={{ color: '#6B7280' }}>
               <MessageCircle className="h-5 w-5" />
-              <span className="font-medium">{post.comments?.length || 0}</span>
+              <span className="font-medium">{comments.length}</span>
             </div>
           </div>
         </div>
