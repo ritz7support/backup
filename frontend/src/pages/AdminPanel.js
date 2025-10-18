@@ -138,15 +138,22 @@ export default function AdminPanel() {
   };
 
   const handleDemoteFromAdmin = async (userId, userName) => {
-    if (!window.confirm(`Demote ${userName} from Admin to Learner? They will lose admin access.`)) return;
-    
-    try {
-      await usersAPI.demoteFromAdmin(userId);
-      toast.success(`${userName} demoted to Learner`);
-      loadAllUsers();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to demote user');
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Demote from Admin',
+      message: `Demote ${userName} from Admin to Learner? They will lose admin access.`,
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          await usersAPI.demoteFromAdmin(userId);
+          toast.success(`${userName} demoted to Learner`);
+          loadAllUsers();
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Failed to demote user');
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
 
