@@ -907,6 +907,37 @@ export default function AdminPanel() {
             </div>
 
             <div className="border-t pt-4" style={{ borderColor: '#E5E7EB' }}>
+              <h4 className="font-semibold mb-3" style={{ color: '#011328' }}>Welcome Message</h4>
+              
+              <div className="space-y-3">
+                <div>
+                  <Label>Welcome Title (optional)</Label>
+                  <Input
+                    value={spaceForm.welcome_title}
+                    onChange={(e) => setSpaceForm({ ...spaceForm, welcome_title: e.target.value })}
+                    placeholder={`Welcome to ${spaceForm.name || 'this space'}!`}
+                  />
+                  <p className="text-xs mt-1" style={{ color: '#8E8E8E' }}>
+                    Leave blank to use default title
+                  </p>
+                </div>
+
+                <div>
+                  <Label>Welcome Message (optional)</Label>
+                  <Textarea
+                    value={spaceForm.welcome_message}
+                    onChange={(e) => setSpaceForm({ ...spaceForm, welcome_message: e.target.value })}
+                    placeholder="Connect, share, and engage with the community!"
+                    rows={3}
+                  />
+                  <p className="text-xs mt-1" style={{ color: '#8E8E8E' }}>
+                    Custom message shown at the top of the space
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t pt-4" style={{ borderColor: '#E5E7EB' }}>
               <div className="flex items-center gap-2 mb-3">
                 <input
                   type="checkbox"
