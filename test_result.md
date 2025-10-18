@@ -905,15 +905,18 @@ backend:
 
   - task: "Stripe Payment Checkout Session Creation"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added Stripe checkout session creation in /api/payments/create-order endpoint using emergentintegrations library. Updated Stripe API key with user's test credentials (sk_test_51HQDY5FJbX6FDilD...). Creates checkout session with dynamic success/cancel URLs from origin_url. Stores transaction with session_id in payment_transactions collection. Returns url and session_id for frontend redirect."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Stripe checkout session creation working correctly. POST /api/payments/create-order?plan=monthly_usd with origin_url successfully creates Stripe checkout sessions. Returns proper response structure with checkout URL (https://checkout.stripe.com) and session_id. Payment transaction records are created in database with session_id and status='pending'. Authentication is properly enforced. Dynamic URL construction from origin_url working correctly."
 
   - task: "Stripe Payment Status Polling"
     implemented: true
