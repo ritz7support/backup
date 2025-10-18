@@ -93,7 +93,7 @@ export default function Sidebar({ spaceGroups, spaces }) {
                 data-testid={`toggle-${group.id}`}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-lg">{group.icon || '📁'}</span>
+                  {group.icon && <span className="text-lg">{group.icon}</span>}
                   <span className="text-sm font-medium">{group.name}</span>
                 </div>
                 {expandedSections[group.id] ? (
