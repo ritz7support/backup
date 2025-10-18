@@ -365,33 +365,49 @@ export default function AdminPanel() {
   };
 
   const handleAddManager = async (spaceId, userId, userName) => {
-    if (!window.confirm(`Promote ${userName} to Space Manager? They can moderate content, approve join requests, and manage members.`)) return;
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/promote`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to promote member');
-      toast.success(`${userName} promoted to Space Manager`);
-      handleViewManagers(spaceId, managersDialog.spaceName); // Reload
-    } catch (error) {
-      toast.error(error.message);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Add Space Manager',
+      message: `Promote ${userName} to Space Manager? They can moderate content, approve join requests, and manage members.`,
+      variant: 'success',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/promote`, {
+            method: 'PUT',
+            credentials: 'include'
+          });
+          if (!response.ok) throw new Error('Failed to promote member');
+          toast.success(`${userName} promoted to Space Manager`);
+          handleViewManagers(spaceId, managersDialog.spaceName); // Reload
+        } catch (error) {
+          toast.error(error.message);
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
   const handleRemoveManager = async (spaceId, userId, userName) => {
-    if (!window.confirm(`Remove ${userName} from Space Manager role?`)) return;
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/demote`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to demote manager');
-      toast.success(`${userName} removed from Space Manager role`);
-      handleViewManagers(spaceId, managersDialog.spaceName); // Reload
-    } catch (error) {
-      toast.error(error.message);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Remove Space Manager',
+      message: `Remove ${userName} from Space Manager role?`,
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/demote`, {
+            method: 'PUT',
+            credentials: 'include'
+          });
+          if (!response.ok) throw new Error('Failed to demote manager');
+          toast.success(`${userName} removed from Space Manager role`);
+          handleViewManagers(spaceId, managersDialog.spaceName); // Reload
+        } catch (error) {
+          toast.error(error.message);
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
 
