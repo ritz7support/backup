@@ -316,18 +316,26 @@ export default function AdminPanel() {
   };
 
   const handleRejectRequest = async (requestId, userName) => {
-    if (!window.confirm(`Reject join request from ${userName}?`)) return;
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/join-requests/${requestId}/reject`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to reject request');
-      toast.success('Request rejected');
-      handleViewJoinRequests(joinRequestsDialog.spaceId, joinRequestsDialog.spaceName); // Reload
-    } catch (error) {
-      toast.error(error.message);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Reject Join Request',
+      message: `Reject join request from ${userName}?`,
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/join-requests/${requestId}/reject`, {
+            method: 'PUT',
+            credentials: 'include'
+          });
+          if (!response.ok) throw new Error('Failed to reject request');
+          toast.success('Request rejected');
+          handleViewJoinRequests(joinRequestsDialog.spaceId, joinRequestsDialog.spaceName); // Reload
+        } catch (error) {
+          toast.error(error.message);
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
 
