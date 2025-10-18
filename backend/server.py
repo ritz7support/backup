@@ -1423,6 +1423,53 @@ async def create_space(request: Request, user: User = Depends(require_auth)):
     
     return space
 
+@api_router.put("/admin/spaces/{space_id}")
+async def update_space(space_id: str, request: Request, user: User = Depends(require_auth)):
+    """Update space (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    update_fields = {}
+    
+    allowed_fields = ['name', 'description', 'space_group_id', 'icon', 'order', 'is_pinned', 
+                      'visibility', 'requires_payment', 'subscription_tier_id', 'auto_join']
+    
+    for field in allowed_fields:
+        if field in data:
+            update_fields[field] = data[field]
+    
+    if 'visibility' in update_fields and update_fields['visibility'] not in ['public', 'private', 'secret']:
+        raise HTTPException(status_code=400, detail="Invalid visibility value")
+    
+    if update_fields:
+        result = await db.spaces.update_one({"id": space_id}, {"$set": update_fields})
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Space not found")
+    
+    return {"message": "Space updated successfully"}
+
+@api_router.delete("/admin/spaces/{space_id}")
+async def delete_space(space_id: str, user: User = Depends(require_auth)):
+    """Delete space (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check if space has posts
+    posts_count = await db.posts.count_documents({"space_id": space_id})
+    if posts_count > 0:
+        raise HTTPException(status_code=400, detail=f"Cannot delete space with {posts_count} posts. Archive or delete posts first.")
+    
+    # Delete space memberships
+    await db.space_memberships.delete_many({"space_id": space_id})
+    
+    # Delete space
+    result = await db.spaces.delete_one({"id": space_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Space not found")
+    
+    return {"message": "Space deleted successfully"}
+
 @api_router.get("/admin/analytics")
 async def get_analytics(user: User = Depends(require_auth)):
     """Get platform analytics (admin only)"""
