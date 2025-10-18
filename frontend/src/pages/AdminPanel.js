@@ -733,7 +733,7 @@ export default function AdminPanel() {
                 Back
               </Button>
               <div>
-                <h1 className="text-2xl font-bold" style={{ color: '#011328' }}>Admin Panel</h1>
+                <h1 className="text-2xl font-bold" style={{ color: '#011328' }}>Admin Settings</h1>
                 <p className="text-sm" style={{ color: '#8E8E8E' }}>Manage spaces, groups, and subscriptions</p>
               </div>
             </div>
