@@ -187,15 +187,18 @@ backend:
 
   - task: "Post/Comment/React - Check for blocked users and membership"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Updated create_post, add_comment, and react_to_post endpoints to check if user is blocked and if they are members for non-public spaces"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Access control working correctly. Blocked users are properly prevented from posting, commenting, and reacting (403 Forbidden). Non-members cannot engage in private spaces (401/403 responses). All engagement restrictions are enforced at the API level."
 
 frontend:
   - task: "SpaceFeed - Public Space Join Button"
