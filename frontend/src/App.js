@@ -17,6 +17,7 @@ import AdminPanel from './pages/AdminPanel';
 import DMsPage from './pages/DMsPage';
 import PricingPage from './pages/PricingPage';
 import PaymentSuccess from './pages/PaymentSuccess';
+import JoinViaInvite from './pages/JoinViaInvite';
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
