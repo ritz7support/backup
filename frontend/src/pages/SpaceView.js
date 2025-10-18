@@ -52,10 +52,10 @@ export default function SpaceView() {
   const getSpaceTitle = () => {
     const titles = {
       'introductions': 'Introduction',
-      'qa-lounge': 'Ask-Doubts',
+      'ask-doubts': 'Ask-Doubts',
       'gratitude': 'Gratitude',
       'showcase': 'Showcase',
-      'general-chat': 'Community & Discussions',
+      'discussions': 'Discussions',
       'resources': 'Resources'
     };
     return titles[spaceId] || 'Space';
