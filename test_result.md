@@ -110,6 +110,19 @@ user_problem_statement: |
   4. Make All Spaces Generic - ensure Resources, Showcase, and Discussions work the same as Introduction/Ask-Doubts/Gratitude
 
 backend:
+  - task: "Comment API - Add Comment"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Comment creation API already exists. Need to verify it supports image content in HTML format."
+
+frontend:
   - task: "Create Event API"
     implemented: true
     working: true
