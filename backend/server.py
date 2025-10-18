@@ -905,6 +905,20 @@ async def get_spaces(space_group_id: Optional[str] = None, user: User = Depends(
         
         space['is_member'] = is_member
         space['membership_status'] = membership.get('status') if membership else None
+        space['membership_role'] = membership.get('role') if membership else None
+        
+        # Check for pending join requests
+        if not is_member:
+            pending_request = await db.join_requests.find_one({
+                "user_id": user.id,
+                "space_id": space['id'],
+                "status": "pending"
+            }, {"_id": 0})
+            space['has_pending_request'] = bool(pending_request)
+            space['pending_request_id'] = pending_request.get('id') if pending_request else None
+        else:
+            space['has_pending_request'] = False
+            space['pending_request_id'] = None
         
         # For auto-join spaces, show total community member count
         if space.get('auto_join'):
