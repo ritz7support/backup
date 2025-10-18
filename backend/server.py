@@ -1859,6 +1859,144 @@ async def cancel_join_request(request_id: str, user: User = Depends(require_auth
 
 # ==================== MEMBER MANAGEMENT ENDPOINTS ====================
 
+
+# ==================== SPACE INVITES (FOR SECRET SPACES) ====================
+
+@api_router.post("/spaces/{space_id}/invites")
+async def create_space_invite(space_id: str, request: Request, user: User = Depends(require_auth)):
+    """Create an invite link for a space (admin/manager only)"""
+    # Check if user is admin or manager for this space
+    is_authorized = await is_space_manager_or_admin(user, space_id)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
+    
+    data = await request.json()
+    max_uses = data.get('max_uses')  # None = unlimited
+    expires_at = data.get('expires_at')  # ISO datetime string
+    
+    # Parse expiry if provided
+    expiry_datetime = None
+    if expires_at:
+        try:
+            expiry_datetime = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid expires_at format: {str(e)}")
+    
+    # Create invite
+    invite = SpaceInvite(
+        space_id=space_id,
+        created_by=user.id,
+        max_uses=max_uses,
+        expires_at=expiry_datetime
+    )
+    
+    invite_dict = invite.model_dump()
+    if invite_dict.get('expires_at'):
+        invite_dict['expires_at'] = invite_dict['expires_at'].isoformat()
+    invite_dict['created_at'] = invite_dict['created_at'].isoformat()
+    
+    await db.space_invites.insert_one(invite_dict)
+    
+    return {
+        "invite_code": invite.invite_code,
+        "invite_link": f"/join/{invite.invite_code}",
+        "max_uses": invite.max_uses,
+        "expires_at": invite.expires_at
+    }
+
+@api_router.get("/spaces/{space_id}/invites")
+async def get_space_invites(space_id: str, user: User = Depends(require_auth)):
+    """Get all invites for a space (admin/manager only)"""
+    # Check if user is admin or manager for this space
+    is_authorized = await is_space_manager_or_admin(user, space_id)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
+    
+    invites = await db.space_invites.find({
+        "space_id": space_id,
+        "is_active": True
+    }, {"_id": 0}).to_list(100)
+    
+    return invites
+
+@api_router.delete("/invites/{invite_code}")
+async def deactivate_invite(invite_code: str, user: User = Depends(require_auth)):
+    """Deactivate an invite (admin/manager only)"""
+    invite = await db.space_invites.find_one({"invite_code": invite_code}, {"_id": 0})
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invite not found")
+    
+    # Check if user is admin or manager for this space
+    is_authorized = await is_space_manager_or_admin(user, invite['space_id'])
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
+    
+    await db.space_invites.update_one(
+        {"invite_code": invite_code},
+        {"$set": {"is_active": False}}
+    )
+    
+    return {"message": "Invite deactivated"}
+
+@api_router.post("/join/{invite_code}")
+async def join_via_invite(invite_code: str, user: User = Depends(require_auth)):
+    """Join a space using an invite code"""
+    invite = await db.space_invites.find_one({"invite_code": invite_code}, {"_id": 0})
+    if not invite:
+        raise HTTPException(status_code=404, detail="Invalid invite code")
+    
+    if not invite.get('is_active'):
+        raise HTTPException(status_code=400, detail="This invite has been deactivated")
+    
+    # Check if expired
+    if invite.get('expires_at'):
+        expiry = datetime.fromisoformat(invite['expires_at'].replace('Z', '+00:00'))
+        if datetime.now(timezone.utc) > expiry:
+            raise HTTPException(status_code=400, detail="This invite has expired")
+    
+    # Check max uses
+    if invite.get('max_uses') is not None:
+        if invite.get('uses_count', 0) >= invite['max_uses']:
+            raise HTTPException(status_code=400, detail="This invite has reached its usage limit")
+    
+    space_id = invite['space_id']
+    
+    # Check if already a member
+    existing = await db.space_memberships.find_one({
+        "user_id": user.id,
+        "space_id": space_id
+    })
+    if existing:
+        raise HTTPException(status_code=400, detail="You are already a member of this space")
+    
+    # Add user to space
+    membership = SpaceMembership(
+        user_id=user.id,
+        space_id=space_id,
+        role="member",
+        status="member"
+    )
+    
+    membership_dict = membership.model_dump()
+    membership_dict['joined_at'] = membership_dict['joined_at'].isoformat()
+    await db.space_memberships.insert_one(membership_dict)
+    
+    # Increment member count and invite uses
+    await db.spaces.update_one({"id": space_id}, {"$inc": {"member_count": 1}})
+    await db.space_invites.update_one(
+        {"invite_code": invite_code},
+        {"$inc": {"uses_count": 1}}
+    )
+    
+    # Get space info
+    space = await db.spaces.find_one({"id": space_id}, {"_id": 0})
+    
+    return {
+        "message": "Successfully joined space via invite",
+        "space": space
+    }
+
+
 @api_router.get("/spaces/{space_id}/members-detailed")
 async def get_space_members_detailed(space_id: str, user: User = Depends(require_auth)):
     """Get detailed member list for a space (admin/manager only)"""
