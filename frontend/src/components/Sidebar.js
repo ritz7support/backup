@@ -57,53 +57,19 @@ export default function Sidebar({ spaceGroups, spaces }) {
         </Link>
 
         {/* Resources */}
-        <div className="space-y-1">
-          <button
-            onClick={() => toggleSection('resources')}
-            className="flex items-center justify-between w-full text-left px-3 py-2.5 rounded-lg group transition-colors text-gray-300 hover:text-white"
-            style={{ backgroundColor: 'transparent' }}
-            data-testid="toggle-resources"
-          >
-            <div className="flex items-center gap-3">
-              <BookOpen className="h-5 w-5" style={{ color: '#8CB7E7' }} />
-              <span className="text-sm font-medium">Resources</span>
-            </div>
-            {expandedSections.resources ? (
-              <ChevronDown className="h-4 w-4" style={{ color: '#8CB7E7' }} />
-            ) : (
-              <ChevronRight className="h-4 w-4" style={{ color: '#8CB7E7' }} />
-            )}
-          </button>
-
-          {expandedSections.resources && (
-            <div className="ml-6 space-y-1" data-testid="resources-list">
-              {learningSpaces.map((space) => {
-                const isActive = isSpaceActive(space.id);
-                const isLocked = space.requires_membership && user?.membership_tier === 'free';
-
-                return (
-                  <Link
-                    key={space.id}
-                    to={isLocked ? '/pricing' : `/space/${space.id}`}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors ${
-                      isActive
-                        ? 'text-white font-medium'
-                        : 'text-gray-300 hover:text-white'
-                    }`}
-                    style={isActive ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
-                    data-testid={`sidebar-space-${space.id}`}
-                  >
-                    <span className="text-lg">{space.icon}</span>
-                    <span className="flex-1">{space.name}</span>
-                    {isLocked && (
-                      <Crown className="h-3.5 w-3.5" style={{ color: '#FFB91A' }} data-testid={`locked-icon-${space.id}`} />
-                    )}
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
+        <Link
+          to="/space/resources"
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+            location.pathname === '/space/resources'
+              ? 'text-white font-medium'
+              : 'text-gray-300 hover:text-white'
+          }`}
+          style={location.pathname === '/space/resources' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
+          data-testid="sidebar-resources"
+        >
+          <BookOpen className="h-5 w-5" />
+          <span>Resources</span>
+        </Link>
 
         {/* Events */}
         <Link
