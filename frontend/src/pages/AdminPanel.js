@@ -2466,6 +2466,66 @@ export default function AdminPanel() {
 
 
 
+      {/* Level Dialog (Create/Edit) */}
+      <Dialog open={levelDialog.open} onOpenChange={(open) => setLevelDialog({ ...levelDialog, open })}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{levelDialog.mode === 'create' ? 'Create Level' : 'Edit Level'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <Label htmlFor="level_number">Level Number *</Label>
+              <Input
+                id="level_number"
+                type="number"
+                min="1"
+                value={levelForm.level_number}
+                onChange={(e) => setLevelForm({ ...levelForm, level_number: e.target.value })}
+                placeholder="e.g., 11"
+                disabled={levelDialog.mode === 'edit'}
+              />
+              {levelDialog.mode === 'edit' && (
+                <p className="text-xs text-gray-500 mt-1">Level number cannot be changed</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="level_name">Level Name</Label>
+              <Input
+                id="level_name"
+                value={levelForm.level_name}
+                onChange={(e) => setLevelForm({ ...levelForm, level_name: e.target.value })}
+                placeholder="e.g., Elite"
+              />
+            </div>
+            <div>
+              <Label htmlFor="points_required">Points Required *</Label>
+              <Input
+                id="points_required"
+                type="number"
+                min="0"
+                value={levelForm.points_required}
+                onChange={(e) => setLevelForm({ ...levelForm, points_required: e.target.value })}
+                placeholder="e.g., 5000"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setLevelDialog({ ...levelDialog, open: false })}>
+              Cancel
+            </Button>
+            <Button
+              onClick={levelDialog.mode === 'create' ? handleSubmitLevel : handleUpdateLevel}
+              style={{ background: 'linear-gradient(135deg, #0462CB 0%, #0284C7 100%)' }}
+              className="text-white"
+            >
+              {levelDialog.mode === 'create' ? 'Create Level' : 'Update Level'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+
     </div>
   );
 }
