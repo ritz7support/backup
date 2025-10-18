@@ -301,6 +301,33 @@ export default function LeaderboardPage() {
                   </div>
                   <div className="text-2xl font-bold" style={{ color: '#0462CB' }}>+3</div>
                 </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                  <div className="text-2xl">👍</div>
+                  <div className="flex-1">
+                    <p className="font-semibold" style={{ color: '#011328' }}>React to a Comment</p>
+                    <p className="text-sm" style={{ color: '#8E8E8E' }}>You get <strong>+1 point</strong> for reacting, and the comment author gets <strong>+1 point</strong></p>
+                  </div>
+                  <div className="text-2xl font-bold" style={{ color: '#0462CB' }}>+1</div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                  <div className="text-2xl">🚪</div>
+                  <div className="flex-1">
+                    <p className="font-semibold" style={{ color: '#011328' }}>Join a Space</p>
+                    <p className="text-sm" style={{ color: '#8E8E8E' }}>You get <strong>+1 point</strong> for joining any space</p>
+                  </div>
+                  <div className="text-2xl font-bold" style={{ color: '#0462CB' }}>+1</div>
+                </div>
+
+                <div className="flex items-start gap-3 p-3 rounded-lg" style={{ backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                  <div className="text-2xl">✅</div>
+                  <div className="flex-1">
+                    <p className="font-semibold" style={{ color: '#011328' }}>Complete Your Profile</p>
+                    <p className="text-sm" style={{ color: '#8E8E8E' }}>You get <strong>+5 points</strong> (one-time) for adding bio and location</p>
+                  </div>
+                  <div className="text-2xl font-bold" style={{ color: '#0462CB' }}>+5</div>
+                </div>
               </div>
 
               <div className="mt-4 p-3 rounded-lg" style={{ backgroundColor: '#EFF6FF', border: '1px solid #DBEAFE' }}>
