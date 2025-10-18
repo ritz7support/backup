@@ -434,7 +434,7 @@ export default function SpaceFeed({ spaceId }) {
               </div>
 
               {/* Add Comment Form - Highlighted */}
-              <form onSubmit={handleAddComment} className="mb-6">
+              <div className="mb-6">
                 <div className="flex gap-3">
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={user?.picture} />
@@ -442,27 +442,20 @@ export default function SpaceFeed({ spaceId }) {
                       {user?.name?.[0]}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 flex gap-2">
-                    <input
-                      ref={setCommentInputRef}
-                      type="text"
-                      placeholder="Write a comment..."
+                  <div className="flex-1">
+                    <CommentEditor
                       value={commentContent}
-                      onChange={(e) => setCommentContent(e.target.value)}
-                      autoFocus
-                      className="flex-1 px-3 py-2 border-2 rounded-lg focus:outline-none focus:border-blue-500"
-                      style={{ borderColor: '#3B82F6' }}
+                      onChange={(text, image) => {
+                        setCommentContent(text);
+                        setCommentImage(image);
+                      }}
+                      onSubmit={handleAddComment}
+                      placeholder="Write a comment..."
+                      disabled={false}
                     />
-                    <Button
-                      type="submit"
-                      disabled={!commentContent.trim()}
-                      style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
-              </form>
+              </div>
 
               {/* Comments List */}
               <div>
