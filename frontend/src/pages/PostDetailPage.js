@@ -16,12 +16,17 @@ import {
 export default function PostDetailPage() {
   const { spaceId, postId } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   useEffect(() => {
     fetchPost();
