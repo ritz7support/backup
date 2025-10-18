@@ -1602,6 +1602,15 @@ class Phase2EnhancedUserManagementTester:
             ('Auto-Expiry System', self.test_auto_expiry_system),
             ('Process Expired Blocks', self.test_process_expired_blocks),
             ('Process Expired Blocks Non-Admin (Should Fail)', self.test_process_expired_blocks_non_admin),
+            
+            # Phase 3 Payment Gateway Tests (new)
+            ('Razorpay Order Creation', self.test_razorpay_order_creation),
+            ('Razorpay Payment Verification', self.test_razorpay_payment_verification),
+            ('Stripe Checkout Session Creation', self.test_stripe_checkout_session_creation),
+            ('Stripe Payment Status Polling', self.test_stripe_payment_status_polling),
+            ('Payment Transaction Records', self.test_payment_transaction_records),
+            ('Invalid Payment Plan (Should Fail)', self.test_invalid_payment_plan),
+            ('Payment Authentication Required', self.test_payment_authentication_required),
         ]
         
         for test_name, test_method in test_methods:
