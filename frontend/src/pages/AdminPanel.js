@@ -120,6 +120,17 @@ export default function AdminPanel() {
     }
   };
 
+
+  const loadLevels = async () => {
+    try {
+      const { data } = await leaderboardAPI.getLevels();
+      setLevels(data || []);
+    } catch (error) {
+      console.error('Error loading levels:', error);
+    }
+  };
+
+
   // User role management
   const handlePromoteToAdmin = async (userId, userName) => {
     setConfirmDialog({
