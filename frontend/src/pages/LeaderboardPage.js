@@ -3,8 +3,9 @@ import { useAuth } from '../hooks/useAuth';
 import { leaderboardAPI } from '../lib/api';
 import { Button } from '../components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { Trophy, TrendingUp, Award, Loader2 } from 'lucide-react';
+import { Trophy, TrendingUp, Award, Loader2, HelpCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 
 export default function LeaderboardPage() {
   const { user } = useAuth();
@@ -13,6 +14,8 @@ export default function LeaderboardPage() {
   const [currentUserRank, setCurrentUserRank] = useState(null);
   const [timeFilter, setTimeFilter] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [showHowItWorks, setShowHowItWorks] = useState(false);
+  const [levels, setLevels] = useState([]);
 
   useEffect(() => {
     loadLeaderboard();
