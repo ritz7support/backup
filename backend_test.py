@@ -85,13 +85,28 @@ class Phase2EnhancedUserManagementTester:
                 self.test_learner_id = user_data.get('user', {}).get('id')
             elif response.status_code == 400 and "already registered" in response.text:
                 self.log("ℹ️ Learner user already exists")
-                # Login to get user ID
-                login_response = self.learner_session.post(f"{BACKEND_URL}/auth/login", json={
-                    "email": LEARNER_EMAIL, "password": LEARNER_PASSWORD
-                })
-                if login_response.status_code == 200:
-                    user_data = login_response.json()
-                    self.test_learner_id = user_data.get('user', {}).get('id')
+            else:
+                self.log(f"❌ Failed to register learner user: {response.status_code} - {response.text}", "ERROR")
+                return False
+        except Exception as e:
+            self.log(f"❌ Exception during learner registration: {e}", "ERROR")
+            return False
+        
+        # Login learner to get user ID
+        try:
+            login_response = self.learner_session.post(f"{BACKEND_URL}/auth/login", json={
+                "email": LEARNER_EMAIL, "password": LEARNER_PASSWORD
+            })
+            if login_response.status_code == 200:
+                user_data = login_response.json()
+                self.test_learner_id = user_data.get('user', {}).get('id')
+                self.log("✅ Learner login successful")
+            else:
+                self.log(f"❌ Learner login failed: {login_response.status_code} - {login_response.text}", "ERROR")
+                return False
+        except Exception as e:
+            self.log(f"❌ Exception during learner login: {e}", "ERROR")
+            return False
             else:
                 self.log(f"❌ Failed to register learner user: {response.status_code} - {response.text}", "ERROR")
                 return False
