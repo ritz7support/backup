@@ -1755,11 +1755,10 @@ export default function AdminPanel() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => {
-                                  handleBlockMember(membersDialog.spaceId, membership.user_id, membership.user?.name);
-                                  setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
+                                  handleSoftBlockMember(membersDialog.spaceId, membership.user_id, membership.user?.name, membersDialog.spaceName);
                                 }}
                               >
-                                Block
+                                🔒 Block
                               </Button>
                               <Button
                                 variant="outline"
