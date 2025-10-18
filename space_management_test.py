@@ -488,7 +488,11 @@ class SpaceManagementTester:
                 verify_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
                 if verify_response.status_code == 200:
                     members = verify_response.json()
-                    demoted_member = next((m for m in members if m.get('user_id') == self.regular_user_id), None)
+                    demoted_member = None
+                    for m in members:
+                        if isinstance(m, dict) and m.get('user_id') == self.regular_user_id:
+                            demoted_member = m
+                            break
                     
                     if demoted_member and demoted_member.get('role') == 'member':
                         self.log("✅ Member demotion verified")
