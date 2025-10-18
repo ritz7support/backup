@@ -438,9 +438,13 @@ export default function AdminPanel() {
                     <div className="flex items-start gap-3">
                       <div className="text-2xl">{group.icon || '📁'}</div>
                       <div>
-                        <h3 className="font-semibold" style={{ color: '#011328' }}>{group.name}</h3>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold" style={{ color: '#011328' }}>{group.name}</h3>
+                          <span className="px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            Position: {group.order}
+                          </span>
+                        </div>
                         <p className="text-sm" style={{ color: '#8E8E8E' }}>{group.description || 'No description'}</p>
-                        <p className="text-xs mt-1" style={{ color: '#8E8E8E' }}>Order: {group.order}</p>
                       </div>
                     </div>
                     <div className="flex gap-2">
