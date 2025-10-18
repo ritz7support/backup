@@ -95,8 +95,8 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     title: spaceSettings.name || 'Space',
     description: spaceSettings.description || 'Community space',
     placeholder: spaceSettings.space_type === 'qa' ? 'Ask your question...' : 'Share something with the community...',
-    welcomeTitle: `Welcome to ${spaceSettings.name || 'this space'}!`,
-    welcomeMessage: 'Connect, share, and engage with the community!',
+    welcomeTitle: spaceSettings.welcome_title || `Welcome to ${spaceSettings.name || 'this space'}!`,
+    welcomeMessage: spaceSettings.welcome_message || 'Connect, share, and engage with the community!',
     postButtonText: spaceSettings.space_type === 'qa' ? 'Post Question' : 'Post',
     emptyState: spaceSettings.space_type === 'qa' ? 'No questions yet' : 'No posts yet',
     emptyMessage: spaceSettings.space_type === 'qa' ? 'Be the first to ask a question!' : 'Be the first to post!'
