@@ -156,6 +156,28 @@ export default function AdminPanel() {
     });
   };
 
+  // Team Member Badge Management
+  const handleSetTeamMember = async (userId, userName, currentStatus) => {
+    const action = currentStatus ? 'remove' : 'grant';
+    setConfirmDialog({
+      open: true,
+      title: currentStatus ? 'Remove Team Member Badge' : 'Grant Team Member Badge',
+      message: `${action === 'grant' ? 'Grant' : 'Remove'} Team Member badge ${action === 'grant' ? 'to' : 'from'} ${userName}?`,
+      variant: currentStatus ? 'warning' : 'success',
+      onConfirm: async () => {
+        try {
+          await usersAPI.setTeamMember(userId, !currentStatus);
+          toast.success(`Team Member badge ${action === 'grant' ? 'granted to' : 'removed from'} ${userName}`);
+          loadAllUsers();
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Failed to update team member status');
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
+  };
+
+
 
 
   // Members management
