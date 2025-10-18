@@ -1013,6 +1013,54 @@ async def create_payment_order(request: Request, plan: str, user: User = Depends
             logger.error(f"Stripe error: {e}")
             raise HTTPException(status_code=500, detail="Payment gateway error")
 
+
+@api_router.post("/payments/razorpay/verify")
+async def verify_razorpay_payment(request: Request, user: User = Depends(require_auth)):
+    """Verify Razorpay payment signature"""
+    try:
+        data = await request.json()
+        
+        # Verify signature
+        params_dict = {
+            'razorpay_order_id': data['razorpay_order_id'],
+            'razorpay_payment_id': data['razorpay_payment_id'],
+            'razorpay_signature': data['razorpay_signature']
+        }
+        
+        razorpay_client.utility.verify_payment_signature(params_dict)
+        
+        # Update transaction status
+        result = await db.payment_transactions.update_one(
+            {"gateway_order_id": data['razorpay_order_id'], "user_id": user.id},
+            {"$set": {
+                "status": "completed",
+                "gateway_payment_id": data['razorpay_payment_id']
+            }}
+        )
+        
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        
+        # Update user membership tier
+        transaction = await db.payment_transactions.find_one({
+            "gateway_order_id": data['razorpay_order_id']
+        })
+        
+        if transaction:
+            await db.users.update_one(
+                {"id": user.id},
+                {"$set": {"membership_tier": "paid"}}
+            )
+        
+        return {"status": "success", "message": "Payment verified successfully"}
+        
+    except razorpay.errors.SignatureVerificationError:
+        raise HTTPException(status_code=400, detail="Invalid payment signature")
+    except Exception as e:
+        logger.error(f"Razorpay verification error: {e}")
+        raise HTTPException(status_code=500, detail="Payment verification failed")
+
+
 @api_router.get("/payments/status/{session_id}")
 async def check_payment_status(session_id: str, user: User = Depends(require_auth)):
     """Check Stripe payment status"""
