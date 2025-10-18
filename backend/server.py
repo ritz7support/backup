@@ -2019,6 +2019,31 @@ async def get_all_users(user: User = Depends(require_auth)):
         raise HTTPException(status_code=403, detail="Admin access required")
     
     users = await db.users.find({}, {"_id": 0, "password_hash": 0}).to_list(1000)
+
+
+@api_router.get("/users/{user_id}/managed-spaces")
+async def get_user_managed_spaces(user_id: str, user: User = Depends(require_auth)):
+    """Get all spaces where user is a manager (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Find all spaces where this user is a manager
+    memberships = await db.space_memberships.find({
+        "user_id": user_id,
+        "role": "manager"
+    }, {"_id": 0}).to_list(100)
+    
+    # Enrich with space names
+    space_ids = [m['space_id'] for m in memberships]
+    managed_spaces = []
+    
+    for space_id in space_ids:
+        space = await db.spaces.find_one({"id": space_id}, {"_id": 0, "id": 1, "name": 1})
+        if space:
+            managed_spaces.append(space)
+    
+    return managed_spaces
+
     return users
 
 # Subscription Tiers Management
