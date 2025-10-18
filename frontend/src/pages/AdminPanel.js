@@ -386,6 +386,22 @@ export default function AdminPanel() {
 
       {/* Tabs */}
       <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Ordering Guide */}
+        <div className="mb-6 p-4 rounded-lg border-l-4" style={{ backgroundColor: '#EFF6FF', borderColor: '#3B82F6' }}>
+          <h3 className="font-semibold mb-2 flex items-center gap-2" style={{ color: '#1E40AF' }}>
+            <span>💡</span> Sidebar Ordering Guide
+          </h3>
+          <p className="text-sm" style={{ color: '#1E40AF' }}>
+            • Both <strong>spaces</strong> and <strong>groups</strong> use the same "Order" field to control their position in the sidebar
+            <br />
+            • Lower numbers appear higher (0 = top, 1 = second, 2 = third, etc.)
+            <br />
+            • You can mix them: Space (0) → Group (1) → Space (2) → Group (3)
+            <br />
+            • "Position" badges show current order. Edit any item to change its position.
+          </p>
+        </div>
+
         <div className="flex gap-2 mb-6">
           <Button
             variant={activeTab === 'groups' ? 'default' : 'outline'}
