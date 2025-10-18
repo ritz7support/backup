@@ -514,15 +514,18 @@ frontend:
 
   - task: "Process Expired Blocks - Admin Endpoint"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added POST /api/admin/process-expired-blocks endpoint for manual processing of all expired blocks. Returns count of unblocked users. Admin-only access."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Process expired blocks endpoint working correctly. POST /api/admin/process-expired-blocks successfully processes expired blocks and returns unblocked_count. Tested with past expiry dates - correctly identifies and unblocks expired soft blocks. Admin-only access properly enforced (403 for non-admins). Manual processing complements automatic expiry system for batch operations."
 
 
 metadata:
