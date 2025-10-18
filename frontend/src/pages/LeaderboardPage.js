@@ -385,8 +385,6 @@ export default function LeaderboardPage() {
           </div>
         </DialogContent>
       </Dialog>
-        </div>
-      </div>
     </Dashboard>
   );
 }
