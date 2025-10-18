@@ -480,14 +480,63 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
         </div>
       )}
 
-      {/* Posts Feed */}
-      <div className={isQAMode ? "space-y-2" : "space-y-4"}>
-        {posts.length === 0 ? (
-          <div className="text-center py-12 bg-white rounded-2xl border" style={{ borderColor: '#D1D5DB' }}>
-            <p className="text-lg mb-2" style={{ color: '#8E8E8E' }}>{config.emptyState}</p>
-            <p className="text-sm" style={{ color: '#8E8E8E' }}>{config.emptyMessage}</p>
+      {/* Posts Feed - Show only for members in private/secret spaces */}
+      {(spaceVisibility === 'private' || spaceVisibility === 'secret') && !isMember && user?.role !== 'admin' ? (
+        <div className="bg-white rounded-2xl p-8 shadow-sm border text-center" style={{ borderColor: '#D1D5DB' }}>
+          <div className="mb-4">
+            <svg className="h-16 w-16 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
           </div>
-        ) : isQAMode ? (
+          <h3 className="text-xl font-semibold mb-2" style={{ color: '#011328' }}>
+            {spaceVisibility === 'private' ? 'Private Space' : 'Secret Space'}
+          </h3>
+          <p className="mb-4" style={{ color: '#8E8E8E' }}>
+            This is a {spaceVisibility} space. You need to join to see posts and participate.
+          </p>
+          {hasPendingRequest ? (
+            <div className="flex flex-col items-center gap-3">
+              <Button
+                disabled
+                className="px-6 py-2 rounded-lg font-semibold bg-gray-300 cursor-not-allowed"
+              >
+                Request Pending ⏳
+              </Button>
+              <Button
+                onClick={handleCancelRequest}
+                disabled={joiningSpace}
+                variant="outline"
+                className="px-4 py-2 rounded-lg"
+              >
+                Cancel Request
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={handleJoinSpace}
+              disabled={joiningSpace}
+              className="px-6 py-2 rounded-lg font-semibold"
+              style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
+            >
+              {joiningSpace ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Sending Request...
+                </span>
+              ) : (
+                <span>🔒 Request to Join</span>
+              )}
+            </Button>
+          )}
+        </div>
+      ) : (
+        <div className={isQAMode ? "space-y-2" : "space-y-4"}>
+          {posts.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-2xl border" style={{ borderColor: '#D1D5DB' }}>
+              <p className="text-lg mb-2" style={{ color: '#8E8E8E' }}>{config.emptyState}</p>
+              <p className="text-sm" style={{ color: '#8E8E8E' }}>{config.emptyMessage}</p>
+            </div>
+          ) : isQAMode ? (
           // Q&A Mode - List View (matching screenshot style)
           posts.map((post) => {
             // Extract question text (first line or full content up to 150 chars)
