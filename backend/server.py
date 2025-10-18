@@ -864,13 +864,16 @@ async def get_spaces(space_group_id: Optional[str] = None, user: User = Depends(
             "user_id": user.id
         }, {"_id": 0})
         
+        # Admins are always considered members
+        is_member = is_admin or bool(membership)
+        
         # Determine visibility
         if space.get('visibility') == 'secret':
             # Secret spaces only visible if member or admin
-            if not (membership or is_admin):
+            if not is_member:
                 continue
         
-        space['is_member'] = bool(membership)
+        space['is_member'] = is_member
         space['membership_status'] = membership.get('status') if membership else None
         
         # For auto-join spaces, show total community member count
