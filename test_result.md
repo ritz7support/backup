@@ -122,7 +122,6 @@ backend:
         agent: "main"
         comment: "Comment creation API already exists. Need to verify it supports image content in HTML format."
 
-frontend:
   - task: "Create Event API"
     implemented: true
     working: true
