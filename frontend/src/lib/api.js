@@ -29,7 +29,7 @@ export const spacesAPI = {
   getSpaceMembers: (spaceId) => api.get(`/spaces/${spaceId}/members`),
   getSpaceMembersDetailed: (spaceId) => api.get(`/spaces/${spaceId}/members-detailed`),
   removeMember: (spaceId, userId) => api.delete(`/spaces/${spaceId}/members/${userId}`),
-  blockMember: (spaceId, userId) => api.put(`/spaces/${spaceId}/members/${userId}/block`),
+  blockMember: (spaceId, userId, blockType = 'hard', expiresAt = null) => api.put(`/spaces/${spaceId}/members/${userId}/block`, { block_type: blockType, expires_at: expiresAt }),
   unblockMember: (spaceId, userId) => api.put(`/spaces/${spaceId}/members/${userId}/unblock`),
   promoteToManager: (spaceId, userId) => api.put(`/spaces/${spaceId}/members/${userId}/promote`),
   demoteFromManager: (spaceId, userId) => api.put(`/spaces/${spaceId}/members/${userId}/demote`),
