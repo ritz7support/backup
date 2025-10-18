@@ -19,7 +19,7 @@ import {
 
 export default function ProfilePage() {
   const { userId } = useParams();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser, checkAuth } = useAuth();
   const navigate = useNavigate();
   const [member, setMember] = useState(null);
   const [loading, setLoading] = useState(true);
