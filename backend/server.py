@@ -175,6 +175,20 @@ class JoinRequest(BaseModel):
     reviewed_at: Optional[datetime] = None
     reviewed_by: Optional[str] = None  # Admin/manager who reviewed
 
+
+class SpaceInvite(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    space_id: str
+    invite_code: str = Field(default_factory=lambda: str(uuid.uuid4())[:8])  # Short invite code
+    created_by: str  # User ID who created the invite
+    max_uses: Optional[int] = None  # None = unlimited uses
+    uses_count: int = 0
+    expires_at: Optional[datetime] = None  # Optional expiry
+    is_active: bool = True
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class Post(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
