@@ -875,15 +875,18 @@ user_problem_statement: |
 backend:
   - task: "Razorpay Payment Order Creation"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added Razorpay order creation in /api/payments/create-order endpoint. Razorpay client initialized with test credentials (rzp_test_RV4wn86cLe1vtg). Creates order, stores transaction in payment_transactions collection with status='pending'. Returns order_id, amount, currency, and key_id for frontend."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Razorpay order creation working correctly. POST /api/payments/create-order?plan=monthly_inr successfully creates orders with proper response structure (order_id, amount=99.0, currency=INR, key_id). Payment transaction records are created in database with status='pending'. Authentication is properly enforced (401/403 for unauthenticated requests). Invalid plans correctly rejected with 400 Bad Request."
 
   - task: "Razorpay Payment Verification"
     implemented: true
