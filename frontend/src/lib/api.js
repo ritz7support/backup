@@ -27,6 +27,12 @@ export const spacesAPI = {
   joinSpace: (spaceId) => api.post(`/spaces/${spaceId}/join`),
   leaveSpace: (spaceId) => api.post(`/spaces/${spaceId}/leave`),
   getSpaceMembers: (spaceId) => api.get(`/spaces/${spaceId}/members`),
+  getSpaceMembersDetailed: (spaceId) => api.get(`/spaces/${spaceId}/members-detailed`),
+  removeMember: (spaceId, userId) => api.delete(`/spaces/${spaceId}/members/${userId}`),
+  blockMember: (spaceId, userId) => api.put(`/spaces/${spaceId}/members/${userId}/block`),
+  unblockMember: (spaceId, userId) => api.put(`/spaces/${spaceId}/members/${userId}/unblock`),
+  promoteToManager: (spaceId, userId) => api.put(`/spaces/${spaceId}/members/${userId}/promote`),
+  demoteFromManager: (spaceId, userId) => api.put(`/spaces/${spaceId}/members/${userId}/demote`),
   configureSpace: (spaceId, data) => api.put(`/admin/spaces/${spaceId}/configure`, data),
   // Join requests
   createJoinRequest: (spaceId, message) => api.post(`/spaces/${spaceId}/join-request`, { message }),
