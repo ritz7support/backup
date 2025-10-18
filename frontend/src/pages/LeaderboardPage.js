@@ -19,7 +19,17 @@ export default function LeaderboardPage() {
 
   useEffect(() => {
     loadLeaderboard();
+    loadLevels();
   }, [timeFilter]);
+
+  const loadLevels = async () => {
+    try {
+      const { data } = await leaderboardAPI.getLevels();
+      setLevels(data || []);
+    } catch (error) {
+      console.error('Failed to load levels:', error);
+    }
+  };
 
   const loadLeaderboard = async () => {
     try {
