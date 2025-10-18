@@ -84,6 +84,52 @@ export default function ProfilePage() {
     }
   };
 
+
+
+  const handlePictureUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          await authAPI.updateProfilePicture(reader.result);
+          toast.success('Profile picture updated successfully!');
+          loadMember(); // Reload member data to show new picture
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Failed to update profile picture');
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast.error('Failed to process image');
+    }
+  };
+
+  const handleRemovePicture = async () => {
+    try {
+      await authAPI.removeProfilePicture();
+      toast.success('Profile picture removed');
+      loadMember(); // Reload member data
+    } catch (error) {
+      toast.error('Failed to remove profile picture');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F4F6' }}>
