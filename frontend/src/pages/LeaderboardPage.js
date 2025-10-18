@@ -1,0 +1,237 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { leaderboardAPI } from '../lib/api';
+import { Button } from '../components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import { Trophy, TrendingUp, Award, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+
+export default function LeaderboardPage() {
+  const { user } = useAuth();
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [currentUserStats, setCurrentUserStats] = useState(null);
+  const [currentUserRank, setCurrentUserRank] = useState(null);
+  const [timeFilter, setTimeFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadLeaderboard();
+  }, [timeFilter]);
+
+  const loadLeaderboard = async () => {
+    try {
+      setLoading(true);
+      const { data } = await leaderboardAPI.getLeaderboard(timeFilter);
+      setLeaderboard(data.leaderboard || []);
+      setCurrentUserStats(data.current_user);
+      setCurrentUserRank(data.current_user_rank);
+    } catch (error) {
+      console.error('Failed to load leaderboard:', error);
+      toast.error('Failed to load leaderboard');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getLevelColor = (level) => {
+    if (level >= 10) return '#9333EA'; // Champion - Purple
+    if (level >= 9) return '#DC2626'; // Legend - Red
+    if (level >= 8) return '#EA580C'; // Master - Orange
+    if (level >= 7) return '#D97706'; // Expert - Amber
+    if (level >= 6) return '#0891B2'; // Regular - Cyan
+    if (level >= 5) return '#059669'; // Contributor - Green
+    if (level >= 4) return '#0284C7'; // Explorer - Blue
+    if (level >= 3) return '#4F46E5'; // Learner - Indigo
+    if (level >= 2) return '#7C3AED'; // Beginner - Violet
+    return '#6B7280'; // Newbie - Gray
+  };
+
+  const getRankEmoji = (rank) => {
+    if (rank === 1) return '🥇';
+    if (rank === 2) return '🥈';
+    if (rank === 3) return '🥉';
+    return `#${rank}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F4F6' }}>
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen" style={{ backgroundColor: '#F3F4F6' }}>
+      <div className="max-w-6xl mx-auto p-8">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <Trophy className="h-8 w-8" style={{ color: '#0462CB' }} />
+            <h1 className="text-3xl font-bold" style={{ color: '#011328' }}>Leaderboard</h1>
+          </div>
+          <p className="text-lg" style={{ color: '#8E8E8E' }}>Compete with the community and climb the ranks!</p>
+        </div>
+
+        {/* Time Filter Buttons */}
+        <div className="flex gap-3 mb-6">
+          <Button
+            onClick={() => setTimeFilter('week')}
+            variant={timeFilter === 'week' ? 'default' : 'outline'}
+            style={timeFilter === 'week' ? { background: 'linear-gradient(135deg, #0462CB 0%, #0284C7 100%)', color: 'white' } : {}}
+          >
+            Last 7 Days
+          </Button>
+          <Button
+            onClick={() => setTimeFilter('month')}
+            variant={timeFilter === 'month' ? 'default' : 'outline'}
+            style={timeFilter === 'month' ? { background: 'linear-gradient(135deg, #0462CB 0%, #0284C7 100%)', color: 'white' } : {}}
+          >
+            Last 30 Days
+          </Button>
+          <Button
+            onClick={() => setTimeFilter('all')}
+            variant={timeFilter === 'all' ? 'default' : 'outline'}
+            style={timeFilter === 'all' ? { background: 'linear-gradient(135deg, #0462CB 0%, #0284C7 100%)', color: 'white' } : {}}
+          >
+            All Time
+          </Button>
+        </div>
+
+        {/* Current User Stats Card */}
+        {currentUserStats && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm border mb-6" style={{ borderColor: '#D1D5DB', background: 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)' }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16 border-4 border-white shadow-lg">
+                  {user.picture ? (
+                    <AvatarImage src={user.picture} />
+                  ) : (
+                    <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white', fontSize: '1.5rem' }}>
+                      {user.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                <div>
+                  <p className="text-sm font-medium mb-1" style={{ color: '#8E8E8E' }}>Your Rank</p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl font-bold" style={{ color: '#011328' }}>
+                      {currentUserRank ? getRankEmoji(currentUserRank) : '-'}
+                    </span>
+                    <div className="px-3 py-1 rounded-full text-sm font-bold" style={{ backgroundColor: getLevelColor(currentUserStats.current_level), color: 'white' }}>
+                      Level {currentUserStats.current_level} - {currentUserStats.current_level_name}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium mb-1" style={{ color: '#8E8E8E' }}>Total Points</p>
+                <p className="text-3xl font-bold" style={{ color: '#0462CB' }}>{currentUserStats.total_points}</p>
+                {currentUserStats.points_to_next_level && (
+                  <p className="text-sm mt-1" style={{ color: '#8E8E8E' }}>
+                    {currentUserStats.points_to_next_level} points to Level {currentUserStats.next_level}
+                  </p>
+                )}
+              </div>
+            </div>
+            {/* Progress Bar */}
+            {currentUserStats.next_level_points && (
+              <div className="mt-4">
+                <div className="w-full bg-white rounded-full h-3 overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${(currentUserStats.total_points / currentUserStats.next_level_points) * 100}%`,
+                      background: 'linear-gradient(90deg, #0462CB 0%, #0284C7 100%)'
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Leaderboard List */}
+        <div className="bg-white rounded-2xl shadow-sm border" style={{ borderColor: '#D1D5DB' }}>
+          <div className="p-6 border-b" style={{ borderColor: '#E5E7EB' }}>
+            <h2 className="text-xl font-bold" style={{ color: '#011328' }}>
+              Top {leaderboard.length} Users
+              {timeFilter === 'week' && ' - Last 7 Days'}
+              {timeFilter === 'month' && ' - Last 30 Days'}
+              {timeFilter === 'all' && ' - All Time'}
+            </h2>
+          </div>
+
+          {leaderboard.length === 0 ? (
+            <div className="p-12 text-center">
+              <Award className="h-16 w-16 mx-auto mb-4" style={{ color: '#D1D5DB' }} />
+              <p className="text-lg font-medium mb-2" style={{ color: '#8E8E8E' }}>No data yet</p>
+              <p style={{ color: '#8E8E8E' }}>Start engaging to appear on the leaderboard!</p>
+            </div>
+          ) : (
+            <div className="divide-y" style={{ borderColor: '#E5E7EB' }}>
+              {leaderboard.map((entry) => (
+                <div
+                  key={entry.user_id}
+                  className={`p-4 hover:bg-gray-50 transition-colors ${entry.user_id === user?.id ? 'bg-blue-50' : ''}`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 flex-1">
+                      {/* Rank */}
+                      <div className="text-center w-16">
+                        <span className="text-2xl font-bold" style={{ color: entry.rank <= 3 ? '#0462CB' : '#8E8E8E' }}>
+                          {getRankEmoji(entry.rank)}
+                        </span>
+                      </div>
+
+                      {/* Avatar & Name */}
+                      <Avatar className="h-12 w-12 border-2" style={{ borderColor: entry.user_id === user?.id ? '#0462CB' : '#E5E7EB' }}>
+                        {entry.picture ? (
+                          <AvatarImage src={entry.picture} />
+                        ) : (
+                          <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white' }}>
+                            {entry.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                          </AvatarFallback>
+                        )}
+                      </Avatar>
+
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold" style={{ color: '#011328' }}>{entry.name}</p>
+                          {entry.user_id === user?.id && (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              You
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div
+                            className="px-2 py-0.5 rounded-full text-xs font-bold"
+                            style={{ backgroundColor: getLevelColor(entry.level), color: 'white' }}
+                          >
+                            Level {entry.level}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Points */}
+                    <div className="text-right">
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="h-5 w-5" style={{ color: '#0462CB' }} />
+                        <span className="text-2xl font-bold" style={{ color: '#0462CB' }}>
+                          {entry.points}
+                        </span>
+                      </div>
+                      <p className="text-sm" style={{ color: '#8E8E8E' }}>points</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
