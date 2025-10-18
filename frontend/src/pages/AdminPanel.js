@@ -1069,63 +1069,119 @@ export default function AdminPanel() {
         {activeTab === 'users' && (
           <div>
             <div className="bg-white rounded-2xl p-6 shadow-sm border" style={{ borderColor: '#D1D5DB' }}>
-              <h2 className="text-xl font-bold mb-6" style={{ color: '#011328' }}>User Management</h2>
+              <h2 className="text-xl font-bold mb-6" style={{ color: '#011328' }}>Centralized User Management</h2>
               
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {allUsers.map((u) => (
-                  <div key={u.id} className="flex items-center justify-between p-4 border rounded-lg" style={{ borderColor: '#E5E7EB' }}>
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="h-12 w-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-lg">
-                        {u.name?.charAt(0) || '?'}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-lg" style={{ color: '#011328' }}>{u.name || 'Unknown'}</span>
-                          {u.role === 'admin' && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Admin
-                            </span>
-                          )}
-                          {u.is_founding_member && (
-                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                              Founding Member
-                            </span>
-                          )}
+                  <div key={u.id} className="border rounded-lg p-4" style={{ borderColor: '#E5E7EB' }}>
+                    {/* User Header */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="h-12 w-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-lg">
+                          {u.name?.charAt(0) || '?'}
                         </div>
-                        <p className="text-sm" style={{ color: '#8E8E8E' }}>{u.email}</p>
-                        {u.badges && u.badges.length > 0 && (
-                          <div className="flex gap-1 mt-1">
-                            {u.badges.map((badge, i) => (
-                              <span key={i} className="text-sm">{badge}</span>
-                            ))}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-medium text-lg" style={{ color: '#011328' }}>{u.name || 'Unknown'}</span>
+                            
+                            {/* Role Badges */}
+                            {u.role === 'admin' && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                Global Admin
+                              </span>
+                            )}
+                            {u.is_team_member && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex items-center gap-1">
+                                🎩 Team Member
+                              </span>
+                            )}
+                            {u.is_founding_member && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                Founding Member
+                              </span>
+                            )}
+                            {u.managed_spaces_count > 0 && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                Manager of {u.managed_spaces_count} space{u.managed_spaces_count > 1 ? 's' : ''}
+                              </span>
+                            )}
+                            {u.id === user?.id && (
+                              <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                (You)
+                              </span>
+                            )}
                           </div>
+                          <p className="text-sm mt-1" style={{ color: '#8E8E8E' }}>{u.email}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 flex-wrap">
+                        {/* Admin Management */}
+                        {u.role === 'admin' && u.id !== user?.id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDemoteFromAdmin(u.id, u.name)}
+                            className="border-red-400 text-red-600 hover:bg-red-50"
+                          >
+                            Demote Admin
+                          </Button>
+                        )}
+                        {u.role === 'learner' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handlePromoteToAdmin(u.id, u.name)}
+                            className="border-green-400 text-green-600 hover:bg-green-50"
+                          >
+                            Make Admin
+                          </Button>
+                        )}
+                        
+                        {/* Team Member Badge */}
+                        {u.id !== user?.id && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleSetTeamMember(u.id, u.name, u.is_team_member)}
+                            className={u.is_team_member ? "border-orange-400 text-orange-600 hover:bg-orange-50" : "border-blue-400 text-blue-600 hover:bg-blue-50"}
+                          >
+                            {u.is_team_member ? '🎩 Remove Badge' : '🎩 Grant Badge'}
+                          </Button>
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      {u.role === 'admin' && u.id !== user?.id ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDemoteFromAdmin(u.id, u.name)}
-                          className="border-red-400 text-red-600 hover:bg-red-50"
-                        >
-                          Demote from Admin
-                        </Button>
-                      ) : u.role === 'learner' ? (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePromoteToAdmin(u.id, u.name)}
-                          className="border-green-400 text-green-600 hover:bg-green-50"
-                        >
-                          Promote to Admin
-                        </Button>
-                      ) : null}
-                      {u.id === user?.id && (
-                        <span className="text-sm" style={{ color: '#8E8E8E' }}>(You)</span>
-                      )}
-                    </div>
+                    
+                    {/* Space Memberships */}
+                    {u.memberships && u.memberships.length > 0 && (
+                      <div className="mt-3 pt-3 border-t" style={{ borderColor: '#E5E7EB' }}>
+                        <p className="text-xs font-medium mb-2" style={{ color: '#8E8E8E' }}>
+                          Space Memberships ({u.memberships.length})
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {u.memberships.map((membership, idx) => (
+                            <div 
+                              key={idx} 
+                              className="px-2 py-1 rounded text-xs border" 
+                              style={{ 
+                                borderColor: membership.status === 'blocked' ? '#EF4444' : membership.role === 'manager' ? '#F59E0B' : '#D1D5DB',
+                                backgroundColor: membership.status === 'blocked' ? '#FEE2E2' : membership.role === 'manager' ? '#FEF3C7' : '#F9FAFB',
+                                color: membership.status === 'blocked' ? '#B91C1C' : membership.role === 'manager' ? '#B45309' : '#4B5563'
+                              }}
+                            >
+                              <span className="font-medium">{membership.space_name}</span>
+                              {membership.role === 'manager' && ' (Manager)'}
+                              {membership.status === 'blocked' && (
+                                <span className="ml-1">
+                                  {membership.block_type === 'soft' ? '🔒 Soft' : '🚫 Hard'}
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
