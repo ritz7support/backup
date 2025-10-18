@@ -11,6 +11,7 @@ export default function PostDetailPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [comment, setComment] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
@@ -32,6 +33,15 @@ export default function PostDetailPage() {
       
       if (!foundPost) {
         toast.error('Post not found');
+      } else {
+        // Fetch comments for this post
+        try {
+          const commentsResponse = await postsAPI.getComments(postId);
+          setComments(commentsResponse.data || []);
+        } catch (error) {
+          console.error('Error fetching comments:', error);
+          setComments([]);
+        }
       }
     } catch (error) {
       console.error('Error fetching post:', error);
