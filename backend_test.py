@@ -17,427 +17,564 @@ ADMIN_PASSWORD = "admin123"
 LEARNER_EMAIL = "learner@test.com"
 LEARNER_PASSWORD = "learner123"
 
-class EventAPITester:
+class UserRoleManagementTester:
     def __init__(self):
-        self.session = requests.Session()
         self.admin_session = requests.Session()
-        self.test_event_id = None
+        self.learner_session = requests.Session()
+        self.test_learner_id = None
+        self.test_admin_id = None
         
     def log(self, message, level="INFO"):
         """Log test messages"""
         print(f"[{level}] {message}")
         
-    def register_admin_user(self):
-        """Register admin user if not exists"""
+    def setup_test_users(self):
+        """Setup admin and learner users for testing"""
+        self.log("🔧 Setting up test users...")
+        
+        # Setup admin user
+        admin_data = {
+            "email": ADMIN_EMAIL,
+            "password": ADMIN_PASSWORD,
+            "name": "Test Admin User",
+            "role": "admin"
+        }
+        
         try:
-            register_data = {
-                "email": ADMIN_EMAIL,
-                "password": ADMIN_PASSWORD,
-                "name": "Admin User",
-                "role": "admin"
-            }
-            
-            response = self.admin_session.post(f"{BACKEND_URL}/auth/register", json=register_data)
+            response = self.admin_session.post(f"{BACKEND_URL}/auth/register", json=admin_data)
             if response.status_code == 200:
                 self.log("✅ Admin user registered successfully")
-                return True
             elif response.status_code == 400 and "already registered" in response.text:
-                self.log("ℹ️ Admin user already exists, proceeding with login")
-                return True
+                self.log("ℹ️ Admin user already exists")
             else:
                 self.log(f"❌ Failed to register admin user: {response.status_code} - {response.text}", "ERROR")
                 return False
         except Exception as e:
             self.log(f"❌ Exception during admin registration: {e}", "ERROR")
             return False
-    
-    def login_admin(self):
-        """Login as admin user"""
+        
+        # Login admin
         try:
-            login_data = {
-                "email": ADMIN_EMAIL,
-                "password": ADMIN_PASSWORD
-            }
-            
+            login_data = {"email": ADMIN_EMAIL, "password": ADMIN_PASSWORD}
             response = self.admin_session.post(f"{BACKEND_URL}/auth/login", json=login_data)
             if response.status_code == 200:
-                data = response.json()
                 self.log("✅ Admin login successful")
-                return True
             else:
                 self.log(f"❌ Admin login failed: {response.status_code} - {response.text}", "ERROR")
                 return False
         except Exception as e:
             self.log(f"❌ Exception during admin login: {e}", "ERROR")
             return False
-    
-    def test_get_events(self):
-        """Test GET /api/events endpoint"""
-        self.log("\n🧪 Testing GET /api/events")
+        
+        # Setup learner user
+        learner_data = {
+            "email": LEARNER_EMAIL,
+            "password": LEARNER_PASSWORD,
+            "name": "Test Learner User",
+            "role": "learner"
+        }
+        
         try:
-            response = self.session.get(f"{BACKEND_URL}/events")
+            response = self.learner_session.post(f"{BACKEND_URL}/auth/register", json=learner_data)
+            if response.status_code == 200:
+                self.log("✅ Learner user registered successfully")
+                user_data = response.json()
+                self.test_learner_id = user_data.get('user', {}).get('id')
+            elif response.status_code == 400 and "already registered" in response.text:
+                self.log("ℹ️ Learner user already exists")
+                # Login to get user ID
+                login_response = self.learner_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": LEARNER_EMAIL, "password": LEARNER_PASSWORD
+                })
+                if login_response.status_code == 200:
+                    user_data = login_response.json()
+                    self.test_learner_id = user_data.get('user', {}).get('id')
+            else:
+                self.log(f"❌ Failed to register learner user: {response.status_code} - {response.text}", "ERROR")
+                return False
+        except Exception as e:
+            self.log(f"❌ Exception during learner registration: {e}", "ERROR")
+            return False
+        
+        if not self.test_learner_id:
+            self.log("❌ Failed to get learner user ID", "ERROR")
+            return False
+        
+        self.log(f"✅ Test users setup complete. Learner ID: {self.test_learner_id}")
+        return True
+    
+    def test_get_all_users_admin(self):
+        """Test GET /api/users/all with admin user"""
+        self.log("\n🧪 Testing GET /api/users/all (Admin Access)")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/users/all")
             
             if response.status_code == 200:
-                events = response.json()
-                self.log(f"✅ GET /api/events successful - Retrieved {len(events)} events")
+                users = response.json()
+                self.log(f"✅ GET /api/users/all successful - Retrieved {len(users)} users")
                 
                 # Verify response structure
-                if events:
-                    event = events[0]
-                    required_fields = ['id', 'title', 'description', 'event_type', 'start_time', 'end_time', 'requires_membership', 'rsvp_list']
-                    missing_fields = [field for field in required_fields if field not in event]
+                if users:
+                    user = users[0]
+                    required_fields = ['id', 'email', 'name', 'role']
+                    missing_fields = [field for field in required_fields if field not in user]
                     
                     if missing_fields:
-                        self.log(f"⚠️ Missing fields in event response: {missing_fields}", "WARNING")
+                        self.log(f"⚠️ Missing fields in user response: {missing_fields}", "WARNING")
                     else:
-                        self.log("✅ Event response structure is correct")
-                
-                return True
-            else:
-                self.log(f"❌ GET /api/events failed: {response.status_code} - {response.text}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Exception in GET /api/events: {e}", "ERROR")
-            return False
-    
-    def test_create_event(self):
-        """Test POST /api/events endpoint (admin only)"""
-        self.log("\n🧪 Testing POST /api/events (Create Event)")
-        
-        # Test event data
-        start_time = datetime.now(timezone.utc) + timedelta(days=1)
-        end_time = start_time + timedelta(hours=2)
-        
-        event_data = {
-            "title": "Test Event - Backend Testing",
-            "description": "This is a test event created during backend testing",
-            "event_type": "workshop",
-            "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat(),
-            "requires_membership": False
-        }
-        
-        try:
-            # Test with admin user
-            response = self.admin_session.post(f"{BACKEND_URL}/events", json=event_data)
-            
-            if response.status_code == 200:
-                event = response.json()
-                self.test_event_id = event['id']
-                self.log(f"✅ Event created successfully with ID: {self.test_event_id}")
-                
-                # Verify event data
-                if event['title'] == event_data['title'] and event['event_type'] == event_data['event_type']:
-                    self.log("✅ Event data matches input")
-                else:
-                    self.log("⚠️ Event data doesn't match input", "WARNING")
-                
-                return True
-            else:
-                self.log(f"❌ Event creation failed: {response.status_code} - {response.text}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Exception in POST /api/events: {e}", "ERROR")
-            return False
-    
-    def test_create_event_validation(self):
-        """Test POST /api/events validation (end_time > start_time)"""
-        self.log("\n🧪 Testing POST /api/events validation")
-        
-        # Test with invalid dates (end_time before start_time)
-        start_time = datetime.now(timezone.utc) + timedelta(days=1)
-        end_time = start_time - timedelta(hours=1)  # Invalid: end before start
-        
-        invalid_event_data = {
-            "title": "Invalid Test Event",
-            "description": "This event should fail validation",
-            "event_type": "workshop",
-            "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat(),
-            "requires_membership": False
-        }
-        
-        try:
-            response = self.admin_session.post(f"{BACKEND_URL}/events", json=invalid_event_data)
-            
-            # This should fail validation, but let's see what happens
-            if response.status_code != 200:
-                self.log("✅ Event validation working - rejected invalid dates")
-                return True
-            else:
-                self.log("⚠️ Event validation not implemented - invalid dates accepted", "WARNING")
-                # Clean up the invalid event if it was created
-                if 'id' in response.json():
-                    invalid_event_id = response.json()['id']
-                    self.admin_session.delete(f"{BACKEND_URL}/events/{invalid_event_id}")
-                return True
-                
-        except Exception as e:
-            self.log(f"❌ Exception in validation test: {e}", "ERROR")
-            return False
-    
-    def test_update_event(self):
-        """Test PUT /api/events/{event_id} endpoint (admin only)"""
-        self.log("\n🧪 Testing PUT /api/events/{event_id} (Update Event)")
-        
-        if not self.test_event_id:
-            self.log("❌ No test event ID available for update test", "ERROR")
-            return False
-        
-        update_data = {
-            "title": "Updated Test Event - Backend Testing",
-            "description": "This event has been updated during testing",
-            "event_type": "live_session"
-        }
-        
-        try:
-            # Test with admin user
-            response = self.admin_session.put(f"{BACKEND_URL}/events/{self.test_event_id}", json=update_data)
-            
-            if response.status_code == 200:
-                self.log("✅ Event updated successfully")
-                
-                # Verify the update by fetching the event
-                get_response = self.session.get(f"{BACKEND_URL}/events")
-                if get_response.status_code == 200:
-                    events = get_response.json()
-                    updated_event = next((e for e in events if e['id'] == self.test_event_id), None)
+                        self.log("✅ User response structure is correct")
                     
-                    if updated_event and updated_event['title'] == update_data['title']:
-                        self.log("✅ Event update verified - changes saved correctly")
+                    # Check that password_hash is not included
+                    if 'password_hash' in user:
+                        self.log("⚠️ Security issue: password_hash included in response", "WARNING")
                     else:
-                        self.log("⚠️ Event update not reflected in database", "WARNING")
+                        self.log("✅ Security check passed: password_hash not in response")
                 
                 return True
             else:
-                self.log(f"❌ Event update failed: {response.status_code} - {response.text}", "ERROR")
+                self.log(f"❌ GET /api/users/all failed: {response.status_code} - {response.text}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Exception in PUT /api/events: {e}", "ERROR")
+            self.log(f"❌ Exception in GET /api/users/all: {e}", "ERROR")
             return False
     
-    def test_update_event_non_admin(self):
-        """Test PUT /api/events/{event_id} with non-admin user (should fail)"""
-        self.log("\n🧪 Testing PUT /api/events/{event_id} with non-admin user")
+    def test_get_all_users_non_admin(self):
+        """Test GET /api/users/all with non-admin user (should fail)"""
+        self.log("\n🧪 Testing GET /api/users/all (Non-Admin Access - Should Fail)")
         
-        if not self.test_event_id:
-            self.log("❌ No test event ID available for non-admin update test", "ERROR")
-            return False
-        
-        # Register a regular user
         try:
-            regular_user_data = {
-                "email": "regular@test.com",
-                "password": "regular123",
-                "name": "Regular User",
-                "role": "learner"
-            }
-            
-            regular_session = requests.Session()
-            
-            # Register and login regular user
-            register_response = regular_session.post(f"{BACKEND_URL}/auth/register", json=regular_user_data)
-            if register_response.status_code not in [200, 400]:  # 400 if already exists
-                login_response = regular_session.post(f"{BACKEND_URL}/auth/login", json={
-                    "email": regular_user_data["email"],
-                    "password": regular_user_data["password"]
-                })
-                if login_response.status_code != 200:
-                    self.log("❌ Failed to setup regular user for test", "ERROR")
-                    return False
-            
-            # Try to update event with regular user
-            update_data = {"title": "Unauthorized Update Attempt"}
-            response = regular_session.put(f"{BACKEND_URL}/events/{self.test_event_id}", json=update_data)
+            response = self.learner_session.get(f"{BACKEND_URL}/users/all")
             
             if response.status_code == 403:
-                self.log("✅ Non-admin update correctly rejected (403 Forbidden)")
+                self.log("✅ Non-admin access correctly rejected (403 Forbidden)")
                 return True
             elif response.status_code == 401:
-                self.log("✅ Non-admin update correctly rejected (401 Unauthorized)")
+                self.log("✅ Non-admin access correctly rejected (401 Unauthorized)")
                 return True
             else:
-                self.log(f"❌ Non-admin update should be rejected but got: {response.status_code}", "ERROR")
+                self.log(f"❌ Non-admin access should be rejected but got: {response.status_code}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Exception in non-admin update test: {e}", "ERROR")
+            self.log(f"❌ Exception in non-admin GET /api/users/all: {e}", "ERROR")
             return False
     
-    def test_rsvp_event(self):
-        """Test POST /api/events/{event_id}/rsvp endpoint"""
-        self.log("\n🧪 Testing POST /api/events/{event_id}/rsvp (RSVP to Event)")
+    def test_promote_user_to_admin(self):
+        """Test PUT /api/users/{user_id}/promote-to-admin"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/promote-to-admin")
         
-        if not self.test_event_id:
-            self.log("❌ No test event ID available for RSVP test", "ERROR")
+        if not self.test_learner_id:
+            self.log("❌ No test learner ID available", "ERROR")
             return False
         
         try:
-            # Test RSVP with admin user
-            response = self.admin_session.post(f"{BACKEND_URL}/events/{self.test_event_id}/rsvp")
+            response = self.admin_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/promote-to-admin")
             
             if response.status_code == 200:
-                rsvp_data = response.json()
-                self.log("✅ RSVP successful")
+                self.log("✅ User promoted to admin successfully")
                 
-                if 'rsvp_list' in rsvp_data:
-                    self.log(f"✅ RSVP list returned with {len(rsvp_data['rsvp_list'])} attendees")
+                # Verify the promotion by checking user role
+                users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
+                if users_response.status_code == 200:
+                    users = users_response.json()
+                    promoted_user = next((u for u in users if u['id'] == self.test_learner_id), None)
                     
-                    # Test RSVP toggle (RSVP again should remove)
-                    toggle_response = self.admin_session.post(f"{BACKEND_URL}/events/{self.test_event_id}/rsvp")
-                    if toggle_response.status_code == 200:
-                        toggle_data = toggle_response.json()
-                        if len(toggle_data['rsvp_list']) != len(rsvp_data['rsvp_list']):
-                            self.log("✅ RSVP toggle behavior working correctly")
-                        else:
-                            self.log("⚠️ RSVP toggle behavior not working as expected", "WARNING")
-                    
-                    return True
-                else:
-                    self.log("⚠️ RSVP response missing rsvp_list field", "WARNING")
-                    return True
-            else:
-                self.log(f"❌ RSVP failed: {response.status_code} - {response.text}", "ERROR")
-                return False
-                
-        except Exception as e:
-            self.log(f"❌ Exception in POST /api/events/rsvp: {e}", "ERROR")
-            return False
-    
-    def test_delete_event(self):
-        """Test DELETE /api/events/{event_id} endpoint (admin only)"""
-        self.log("\n🧪 Testing DELETE /api/events/{event_id} (Delete Event)")
-        
-        if not self.test_event_id:
-            self.log("❌ No test event ID available for delete test", "ERROR")
-            return False
-        
-        try:
-            # Test with admin user
-            response = self.admin_session.delete(f"{BACKEND_URL}/events/{self.test_event_id}")
-            
-            if response.status_code == 200:
-                self.log("✅ Event deleted successfully")
-                
-                # Verify deletion by trying to fetch the event
-                get_response = self.session.get(f"{BACKEND_URL}/events")
-                if get_response.status_code == 200:
-                    events = get_response.json()
-                    deleted_event = next((e for e in events if e['id'] == self.test_event_id), None)
-                    
-                    if not deleted_event:
-                        self.log("✅ Event deletion verified - event no longer exists")
+                    if promoted_user and promoted_user.get('role') == 'admin':
+                        self.log("✅ User promotion verified - role updated to admin")
+                        self.test_admin_id = self.test_learner_id  # Store for demotion test
+                        return True
                     else:
-                        self.log("⚠️ Event still exists after deletion", "WARNING")
-                
-                return True
+                        self.log("⚠️ User promotion not reflected in database", "WARNING")
+                        return False
+                else:
+                    self.log("⚠️ Could not verify promotion", "WARNING")
+                    return True
             else:
-                self.log(f"❌ Event deletion failed: {response.status_code} - {response.text}", "ERROR")
+                self.log(f"❌ User promotion failed: {response.status_code} - {response.text}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Exception in DELETE /api/events: {e}", "ERROR")
+            self.log(f"❌ Exception in promote user: {e}", "ERROR")
             return False
     
-    def test_delete_event_non_admin(self):
-        """Test DELETE /api/events/{event_id} with non-admin user (should fail)"""
-        self.log("\n🧪 Testing DELETE /api/events/{event_id} with non-admin user")
+    def test_promote_self_admin(self):
+        """Test promoting self (should fail)"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/promote-to-admin (Self Promotion - Should Fail)")
         
-        # First create a new event for this test
-        start_time = datetime.now(timezone.utc) + timedelta(days=2)
-        end_time = start_time + timedelta(hours=1)
+        # Get admin user ID
+        try:
+            me_response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+            if me_response.status_code != 200:
+                self.log("❌ Could not get current admin user info", "ERROR")
+                return False
+            
+            admin_user = me_response.json()
+            admin_id = admin_user.get('id')
+            
+            response = self.admin_session.put(f"{BACKEND_URL}/users/{admin_id}/promote-to-admin")
+            
+            if response.status_code == 400:
+                self.log("✅ Self promotion correctly rejected (400 Bad Request)")
+                return True
+            else:
+                self.log(f"❌ Self promotion should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in self promotion test: {e}", "ERROR")
+            return False
+    
+    def test_promote_existing_admin(self):
+        """Test promoting an existing admin (should fail)"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/promote-to-admin (Existing Admin - Should Fail)")
         
-        event_data = {
-            "title": "Test Event for Non-Admin Delete",
-            "description": "This event will be used to test non-admin delete",
-            "event_type": "workshop",
-            "start_time": start_time.isoformat(),
-            "end_time": end_time.isoformat(),
-            "requires_membership": False
+        if not self.test_admin_id:
+            self.log("❌ No test admin ID available (need to run promotion test first)", "ERROR")
+            return False
+        
+        try:
+            response = self.admin_session.put(f"{BACKEND_URL}/users/{self.test_admin_id}/promote-to-admin")
+            
+            if response.status_code == 400:
+                self.log("✅ Existing admin promotion correctly rejected (400 Bad Request)")
+                return True
+            else:
+                self.log(f"❌ Existing admin promotion should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in existing admin promotion test: {e}", "ERROR")
+            return False
+    
+    def test_promote_non_admin_user(self):
+        """Test promotion by non-admin user (should fail)"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/promote-to-admin (Non-Admin User - Should Fail)")
+        
+        # Create another learner for this test
+        test_user_data = {
+            "email": "test_promote@test.com",
+            "password": "test123",
+            "name": "Test Promote User",
+            "role": "learner"
         }
         
         try:
-            # Create event with admin
-            create_response = self.admin_session.post(f"{BACKEND_URL}/events", json=event_data)
-            if create_response.status_code != 200:
-                self.log("❌ Failed to create test event for non-admin delete test", "ERROR")
-                return False
+            test_session = requests.Session()
+            register_response = test_session.post(f"{BACKEND_URL}/auth/register", json=test_user_data)
             
-            test_event_id = create_response.json()['id']
-            
-            # Try to delete with regular user
-            regular_user_data = {
-                "email": "regular2@test.com",
-                "password": "regular123",
-                "name": "Regular User 2",
-                "role": "learner"
-            }
-            
-            regular_session = requests.Session()
-            
-            # Register and login regular user
-            register_response = regular_session.post(f"{BACKEND_URL}/auth/register", json=regular_user_data)
             if register_response.status_code not in [200, 400]:
-                login_response = regular_session.post(f"{BACKEND_URL}/auth/login", json={
-                    "email": regular_user_data["email"],
-                    "password": regular_user_data["password"]
+                login_response = test_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": test_user_data["email"],
+                    "password": test_user_data["password"]
                 })
                 if login_response.status_code != 200:
-                    self.log("❌ Failed to setup regular user for delete test", "ERROR")
+                    self.log("❌ Failed to setup test user for non-admin promotion test", "ERROR")
                     return False
             
-            # Try to delete event with regular user
-            response = regular_session.delete(f"{BACKEND_URL}/events/{test_event_id}")
-            
-            if response.status_code == 403:
-                self.log("✅ Non-admin delete correctly rejected (403 Forbidden)")
-                # Clean up - delete the test event with admin
-                self.admin_session.delete(f"{BACKEND_URL}/events/{test_event_id}")
-                return True
-            elif response.status_code == 401:
-                self.log("✅ Non-admin delete correctly rejected (401 Unauthorized)")
-                # Clean up - delete the test event with admin
-                self.admin_session.delete(f"{BACKEND_URL}/events/{test_event_id}")
-                return True
+            # Try to promote someone as non-admin
+            if self.test_admin_id:
+                response = test_session.put(f"{BACKEND_URL}/users/{self.test_admin_id}/promote-to-admin")
+                
+                if response.status_code == 403:
+                    self.log("✅ Non-admin promotion correctly rejected (403 Forbidden)")
+                    return True
+                elif response.status_code == 401:
+                    self.log("✅ Non-admin promotion correctly rejected (401 Unauthorized)")
+                    return True
+                else:
+                    self.log(f"❌ Non-admin promotion should be rejected but got: {response.status_code}", "ERROR")
+                    return False
             else:
-                self.log(f"❌ Non-admin delete should be rejected but got: {response.status_code}", "ERROR")
-                # Clean up - delete the test event with admin
-                self.admin_session.delete(f"{BACKEND_URL}/events/{test_event_id}")
+                self.log("❌ No admin ID available for non-admin promotion test", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Exception in non-admin delete test: {e}", "ERROR")
+            self.log(f"❌ Exception in non-admin promotion test: {e}", "ERROR")
+            return False
+    
+    def test_demote_admin_to_learner(self):
+        """Test PUT /api/users/{user_id}/demote-from-admin"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/demote-from-admin")
+        
+        if not self.test_admin_id:
+            self.log("❌ No test admin ID available (need to run promotion test first)", "ERROR")
+            return False
+        
+        try:
+            response = self.admin_session.put(f"{BACKEND_URL}/users/{self.test_admin_id}/demote-from-admin")
+            
+            if response.status_code == 200:
+                self.log("✅ Admin demoted to learner successfully")
+                
+                # Verify the demotion by checking user role
+                users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
+                if users_response.status_code == 200:
+                    users = users_response.json()
+                    demoted_user = next((u for u in users if u['id'] == self.test_admin_id), None)
+                    
+                    if demoted_user and demoted_user.get('role') == 'learner':
+                        self.log("✅ Admin demotion verified - role updated to learner")
+                        return True
+                    else:
+                        self.log("⚠️ Admin demotion not reflected in database", "WARNING")
+                        return False
+                else:
+                    self.log("⚠️ Could not verify demotion", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ Admin demotion failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in demote admin: {e}", "ERROR")
+            return False
+    
+    def test_demote_self_admin(self):
+        """Test demoting self (should fail)"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/demote-from-admin (Self Demotion - Should Fail)")
+        
+        # Get admin user ID
+        try:
+            me_response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+            if me_response.status_code != 200:
+                self.log("❌ Could not get current admin user info", "ERROR")
+                return False
+            
+            admin_user = me_response.json()
+            admin_id = admin_user.get('id')
+            
+            response = self.admin_session.put(f"{BACKEND_URL}/users/{admin_id}/demote-from-admin")
+            
+            if response.status_code == 400:
+                self.log("✅ Self demotion correctly rejected (400 Bad Request)")
+                return True
+            else:
+                self.log(f"❌ Self demotion should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in self demotion test: {e}", "ERROR")
+            return False
+    
+    def test_demote_non_admin(self):
+        """Test demoting a non-admin user (should fail)"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/demote-from-admin (Non-Admin User - Should Fail)")
+        
+        # Create a learner user for this test
+        test_user_data = {
+            "email": "test_demote@test.com",
+            "password": "test123",
+            "name": "Test Demote User",
+            "role": "learner"
+        }
+        
+        try:
+            test_session = requests.Session()
+            register_response = test_session.post(f"{BACKEND_URL}/auth/register", json=test_user_data)
+            
+            test_user_id = None
+            if register_response.status_code == 200:
+                user_data = register_response.json()
+                test_user_id = user_data.get('user', {}).get('id')
+            elif register_response.status_code == 400:
+                # User exists, login to get ID
+                login_response = test_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": test_user_data["email"],
+                    "password": test_user_data["password"]
+                })
+                if login_response.status_code == 200:
+                    user_data = login_response.json()
+                    test_user_id = user_data.get('user', {}).get('id')
+            
+            if not test_user_id:
+                self.log("❌ Failed to get test user ID for demotion test", "ERROR")
+                return False
+            
+            response = self.admin_session.put(f"{BACKEND_URL}/users/{test_user_id}/demote-from-admin")
+            
+            if response.status_code == 400:
+                self.log("✅ Non-admin demotion correctly rejected (400 Bad Request)")
+                return True
+            else:
+                self.log(f"❌ Non-admin demotion should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in non-admin demotion test: {e}", "ERROR")
+            return False
+    
+    def test_demote_by_non_admin(self):
+        """Test demotion by non-admin user (should fail)"""
+        self.log("\n🧪 Testing PUT /api/users/{user_id}/demote-from-admin (By Non-Admin - Should Fail)")
+        
+        if not self.test_admin_id:
+            # Create a temporary admin for this test
+            temp_learner_data = {
+                "email": "temp_admin@test.com",
+                "password": "temp123",
+                "name": "Temp Admin User",
+                "role": "learner"
+            }
+            
+            try:
+                temp_session = requests.Session()
+                register_response = temp_session.post(f"{BACKEND_URL}/auth/register", json=temp_learner_data)
+                
+                temp_user_id = None
+                if register_response.status_code == 200:
+                    user_data = register_response.json()
+                    temp_user_id = user_data.get('user', {}).get('id')
+                elif register_response.status_code == 400:
+                    login_response = temp_session.post(f"{BACKEND_URL}/auth/login", json={
+                        "email": temp_learner_data["email"],
+                        "password": temp_learner_data["password"]
+                    })
+                    if login_response.status_code == 200:
+                        user_data = login_response.json()
+                        temp_user_id = user_data.get('user', {}).get('id')
+                
+                if temp_user_id:
+                    # Promote to admin first
+                    promote_response = self.admin_session.put(f"{BACKEND_URL}/users/{temp_user_id}/promote-to-admin")
+                    if promote_response.status_code == 200:
+                        self.test_admin_id = temp_user_id
+                    else:
+                        self.log("❌ Failed to create temporary admin for test", "ERROR")
+                        return False
+                else:
+                    self.log("❌ Failed to setup temporary admin", "ERROR")
+                    return False
+            except Exception as e:
+                self.log(f"❌ Exception setting up temporary admin: {e}", "ERROR")
+                return False
+        
+        try:
+            # Try to demote admin using learner session
+            response = self.learner_session.put(f"{BACKEND_URL}/users/{self.test_admin_id}/demote-from-admin")
+            
+            if response.status_code == 403:
+                self.log("✅ Non-admin demotion correctly rejected (403 Forbidden)")
+                return True
+            elif response.status_code == 401:
+                self.log("✅ Non-admin demotion correctly rejected (401 Unauthorized)")
+                return True
+            else:
+                self.log(f"❌ Non-admin demotion should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in non-admin demotion test: {e}", "ERROR")
+            return False
+    
+    def test_role_persistence(self):
+        """Test that role changes are persisted in database"""
+        self.log("\n🧪 Testing Role Change Persistence")
+        
+        # Create a new user for this test
+        test_user_data = {
+            "email": "persistence_test@test.com",
+            "password": "persist123",
+            "name": "Persistence Test User",
+            "role": "learner"
+        }
+        
+        try:
+            test_session = requests.Session()
+            register_response = test_session.post(f"{BACKEND_URL}/auth/register", json=test_user_data)
+            
+            test_user_id = None
+            if register_response.status_code == 200:
+                user_data = register_response.json()
+                test_user_id = user_data.get('user', {}).get('id')
+            elif register_response.status_code == 400:
+                login_response = test_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": test_user_data["email"],
+                    "password": test_user_data["password"]
+                })
+                if login_response.status_code == 200:
+                    user_data = login_response.json()
+                    test_user_id = user_data.get('user', {}).get('id')
+            
+            if not test_user_id:
+                self.log("❌ Failed to setup user for persistence test", "ERROR")
+                return False
+            
+            # 1. Verify initial role is learner
+            users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
+            if users_response.status_code == 200:
+                users = users_response.json()
+                test_user = next((u for u in users if u['id'] == test_user_id), None)
+                if not test_user or test_user.get('role') != 'learner':
+                    self.log("❌ Initial role not set correctly", "ERROR")
+                    return False
+                self.log("✅ Initial role verified as learner")
+            
+            # 2. Promote to admin
+            promote_response = self.admin_session.put(f"{BACKEND_URL}/users/{test_user_id}/promote-to-admin")
+            if promote_response.status_code != 200:
+                self.log("❌ Failed to promote user for persistence test", "ERROR")
+                return False
+            
+            # 3. Verify promotion persisted
+            users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
+            if users_response.status_code == 200:
+                users = users_response.json()
+                test_user = next((u for u in users if u['id'] == test_user_id), None)
+                if not test_user or test_user.get('role') != 'admin':
+                    self.log("❌ Promotion not persisted in database", "ERROR")
+                    return False
+                self.log("✅ Promotion persistence verified")
+            
+            # 4. Demote back to learner
+            demote_response = self.admin_session.put(f"{BACKEND_URL}/users/{test_user_id}/demote-from-admin")
+            if demote_response.status_code != 200:
+                self.log("❌ Failed to demote user for persistence test", "ERROR")
+                return False
+            
+            # 5. Verify demotion persisted
+            users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
+            if users_response.status_code == 200:
+                users = users_response.json()
+                test_user = next((u for u in users if u['id'] == test_user_id), None)
+                if not test_user or test_user.get('role') != 'learner':
+                    self.log("❌ Demotion not persisted in database", "ERROR")
+                    return False
+                self.log("✅ Demotion persistence verified")
+            
+            self.log("✅ All role changes properly persisted in database")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Exception in persistence test: {e}", "ERROR")
             return False
     
     def run_all_tests(self):
-        """Run all event API tests"""
-        self.log("🚀 Starting Event API Backend Tests")
+        """Run all user role management tests"""
+        self.log("🚀 Starting User Role Management API Tests")
         self.log(f"Backend URL: {BACKEND_URL}")
         
         results = {}
         
-        # Setup admin user
-        if not self.register_admin_user():
-            self.log("❌ Failed to setup admin user - aborting tests", "ERROR")
+        # Setup test users
+        if not self.setup_test_users():
+            self.log("❌ Failed to setup test users - aborting tests", "ERROR")
             return False
         
-        if not self.login_admin():
-            self.log("❌ Failed to login admin user - aborting tests", "ERROR")
-            return False
-        
-        # Run tests
+        # Run tests in order
         test_methods = [
-            ('GET Events', self.test_get_events),
-            ('Create Event', self.test_create_event),
-            ('Create Event Validation', self.test_create_event_validation),
-            ('Update Event (Admin)', self.test_update_event),
-            ('Update Event (Non-Admin)', self.test_update_event_non_admin),
-            ('RSVP Event', self.test_rsvp_event),
-            ('Delete Event (Non-Admin)', self.test_delete_event_non_admin),
-            ('Delete Event (Admin)', self.test_delete_event),
+            ('GET All Users (Admin)', self.test_get_all_users_admin),
+            ('GET All Users (Non-Admin)', self.test_get_all_users_non_admin),
+            ('Promote User to Admin', self.test_promote_user_to_admin),
+            ('Promote Self (Should Fail)', self.test_promote_self_admin),
+            ('Promote Existing Admin (Should Fail)', self.test_promote_existing_admin),
+            ('Promote by Non-Admin (Should Fail)', self.test_promote_non_admin_user),
+            ('Demote Admin to Learner', self.test_demote_admin_to_learner),
+            ('Demote Self (Should Fail)', self.test_demote_self_admin),
+            ('Demote Non-Admin (Should Fail)', self.test_demote_non_admin),
+            ('Demote by Non-Admin (Should Fail)', self.test_demote_by_non_admin),
+            ('Role Change Persistence', self.test_role_persistence),
         ]
         
         for test_name, test_method in test_methods:
@@ -448,9 +585,9 @@ class EventAPITester:
                 results[test_name] = False
         
         # Summary
-        self.log("\n" + "="*60)
-        self.log("📊 TEST RESULTS SUMMARY")
-        self.log("="*60)
+        self.log("\n" + "="*70)
+        self.log("📊 USER ROLE MANAGEMENT TEST RESULTS SUMMARY")
+        self.log("="*70)
         
         passed = 0
         total = len(results)
@@ -464,7 +601,7 @@ class EventAPITester:
         self.log(f"\nOverall: {passed}/{total} tests passed")
         
         if passed == total:
-            self.log("🎉 All tests passed!")
+            self.log("🎉 All user role management tests passed!")
             return True
         else:
             self.log(f"⚠️ {total - passed} tests failed")
