@@ -110,7 +110,7 @@ export default function AdminPanel() {
 
   const loadAllUsers = async () => {
     try {
-      const { data } = await usersAPI.getAllUsers();
+      const { data } = await usersAPI.getAllUsersWithMemberships();
       setAllUsers(data || []);
     } catch (error) {
       console.error('Error loading users:', error);
