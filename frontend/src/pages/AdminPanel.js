@@ -640,7 +640,6 @@ export default function AdminPanel() {
         )}
 
         {/* Old separate tabs removed - now using unified overview tab */}
-          <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold" style={{ color: '#011328' }}>Space Groups</h2>
               <Button
