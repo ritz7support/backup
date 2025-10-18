@@ -609,14 +609,14 @@ class UserRoleManagementTester:
 
 def main():
     """Main test runner"""
-    tester = EventAPITester()
+    tester = UserRoleManagementTester()
     success = tester.run_all_tests()
     
     if success:
-        print("\n✅ Backend testing completed successfully")
+        print("\n✅ User role management testing completed successfully")
         sys.exit(0)
     else:
-        print("\n❌ Backend testing completed with failures")
+        print("\n❌ User role management testing completed with failures")
         sys.exit(1)
 
 if __name__ == "__main__":
