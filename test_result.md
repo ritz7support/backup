@@ -344,16 +344,11 @@ metadata:
 
 test_plan:
   current_focus:
-    - "SpaceMembership Model - Add role and blocked fields"
-    - "Member Management Endpoints"
-    - "Join Request Approval - Support Managers"
-    - "Post/Comment/React - Check for blocked users and membership"
-    - "SpaceFeed - Public Space Join Button"
-    - "SpaceFeed - Private Space Request Button"
-    - "AdminPanel - Members Dialog"
-    - "AdminPanel - Join Requests Dialog"
+    - "User Role Management - GET All Users"
+    - "User Role Management - Promote to Admin"
+    - "User Role Management - Demote from Admin"
   stuck_tasks: []
-  test_all: true
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
