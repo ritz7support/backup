@@ -202,6 +202,20 @@ class Phase2EnhancedUserManagementTester:
             return False
         
         try:
+            # First check if user is already admin
+            users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
+            if users_response.status_code == 200:
+                users = users_response.json()
+                test_user = next((u for u in users if u['id'] == self.test_learner_id), None)
+                
+                if test_user and test_user.get('role') == 'admin':
+                    self.log("ℹ️ Test user is already admin - demoting first")
+                    # Demote to learner first
+                    demote_response = self.admin_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/demote-from-admin")
+                    if demote_response.status_code != 200:
+                        self.log("❌ Failed to demote user before promotion test", "ERROR")
+                        return False
+            
             response = self.admin_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/promote-to-admin")
             
             if response.status_code == 200:
