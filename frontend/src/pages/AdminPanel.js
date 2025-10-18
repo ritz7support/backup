@@ -100,6 +100,140 @@ export default function AdminPanel() {
     }
   };
 
+
+  // Members management
+  const handleViewMembers = async (spaceId, spaceName) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members-detailed`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch members');
+      const data = await response.json();
+      setMembersDialog({ open: true, spaceId, spaceName, members: data.members || [] });
+    } catch (error) {
+      toast.error('Failed to load members');
+    }
+  };
+
+  const handleRemoveMember = async (spaceId, userId, userName) => {
+    if (!window.confirm(`Remove ${userName} from this space?`)) return;
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to remove member');
+      toast.success('Member removed');
+      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleBlockMember = async (spaceId, userId, userName) => {
+    if (!window.confirm(`Block ${userName}? They won't be able to post or comment.`)) return;
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/block`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to block member');
+      toast.success('Member blocked');
+      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleUnblockMember = async (spaceId, userId, userName) => {
+    if (!window.confirm(`Unblock ${userName}?`)) return;
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/unblock`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to unblock member');
+      toast.success('Member unblocked');
+      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handlePromoteToManager = async (spaceId, userId, userName) => {
+    if (!window.confirm(`Promote ${userName} to manager? They can moderate content and manage members.`)) return;
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/promote`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to promote member');
+      toast.success('Member promoted to manager');
+      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleDemoteFromManager = async (spaceId, userId, userName) => {
+    if (!window.confirm(`Demote ${userName} from manager to regular member?`)) return;
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/demote`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to demote manager');
+      toast.success('Manager demoted to member');
+      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  // Join requests management
+  const handleViewJoinRequests = async (spaceId, spaceName) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/join-requests`, {
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to fetch join requests');
+      const data = await response.json();
+      setJoinRequestsDialog({ open: true, spaceId, spaceName, requests: data || [] });
+    } catch (error) {
+      toast.error('Failed to load join requests');
+    }
+  };
+
+  const handleApproveRequest = async (requestId, userName) => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/join-requests/${requestId}/approve`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to approve request');
+      toast.success(`${userName} approved!`);
+      handleViewJoinRequests(joinRequestsDialog.spaceId, joinRequestsDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleRejectRequest = async (requestId, userName) => {
+    if (!window.confirm(`Reject join request from ${userName}?`)) return;
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/join-requests/${requestId}/reject`, {
+        method: 'PUT',
+        credentials: 'include'
+      });
+      if (!response.ok) throw new Error('Failed to reject request');
+      toast.success('Request rejected');
+      handleViewJoinRequests(joinRequestsDialog.spaceId, joinRequestsDialog.spaceName); // Reload
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+
   // Space Group handlers
   const handleCreateGroup = () => {
     setGroupForm({ name: '', description: '', icon: '', order: 0 });
