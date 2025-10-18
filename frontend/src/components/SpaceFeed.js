@@ -194,6 +194,8 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
         toast.success('Joined space successfully! 🎉');
         setIsMember(true);
         await loadSpaceInfo();
+        // Reload page to refresh sidebar
+        setTimeout(() => window.location.reload(), 500);
       } else if (spaceVisibility === 'private' || spaceVisibility === 'secret') {
         // Send join request for private/secret spaces
         await spacesAPI.createJoinRequest(spaceId, '');
