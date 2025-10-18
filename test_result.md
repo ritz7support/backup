@@ -499,15 +499,18 @@ frontend:
 
   - task: "Centralized User Management - Enhanced API Endpoint"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added GET /api/users/all-with-memberships endpoint. Returns all users with enriched space memberships, manager counts, and block status information. Admin-only access."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Centralized user management endpoint working correctly. GET /api/users/all-with-memberships returns all users with enriched memberships array. Each membership includes space_id, space_name, role, status, block_type, and block_expires_at fields. managed_spaces_count field correctly calculated. Admin-only access properly enforced (403 for non-admins). Security check passed: password_hash not included in response. Minor: is_team_member field missing from response but core functionality works."
 
   - task: "Process Expired Blocks - Admin Endpoint"
     implemented: true
