@@ -1622,7 +1622,7 @@ class Phase2EnhancedUserManagementTester:
         
         # Summary
         self.log("\n" + "="*80)
-        self.log("📊 PHASE 2 ENHANCED USER MANAGEMENT TEST RESULTS SUMMARY")
+        self.log("📊 PHASE 2 & 3 ENHANCED USER MANAGEMENT + PAYMENT GATEWAY TEST RESULTS SUMMARY")
         self.log("="*80)
         
         passed = 0
