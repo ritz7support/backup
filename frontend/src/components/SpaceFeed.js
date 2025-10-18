@@ -107,6 +107,8 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     emptyMessage: spaceSettings.space_type === 'qa' ? 'Be the first to ask a question!' : 'Be the first to post!'
   };
   const canCreatePost = (isMember && (user?.role === 'admin' || spaceSettings.allow_member_posts));
+  
+  console.log('SpaceFeed render - isMember:', isMember, 'canCreatePost:', canCreatePost, 'user role:', user?.role);
 
   useEffect(() => {
     loadSpaceInfo();
