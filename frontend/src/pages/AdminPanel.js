@@ -36,6 +36,7 @@ export default function AdminPanel() {
   const [managersDialog, setManagersDialog] = useState({ open: false, spaceId: null, spaceName: '', managers: [], allMembers: [] });
   const [spaceSelectDialog, setSpaceSelectDialog] = useState({ open: false, userId: null, userName: '', selectedSpaces: [] });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', message: '', onConfirm: null, variant: 'default' });
+  const [softBlockDialog, setSoftBlockDialog] = useState({ open: false, spaceId: null, spaceName: '', userId: null, userName: '' });
   
   
   // Form states
