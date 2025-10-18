@@ -164,8 +164,8 @@ export default function AdminPanel() {
   // Space handlers
   const handleCreateSpace = () => {
     setSpaceForm({
-      name: '', description: '', icon: '', space_group_id: '', order: 0,
-      visibility: 'public', requires_payment: false, subscription_tier_id: '', auto_join: false
+      name: '', description: '', icon: '', space_group_id: 'none', order: 0,
+      visibility: 'public', requires_payment: false, subscription_tier_id: 'none', auto_join: false
     });
     setSpaceDialog({ open: true, mode: 'create', data: null });
   };
@@ -175,11 +175,11 @@ export default function AdminPanel() {
       name: space.name,
       description: space.description || '',
       icon: space.icon || '',
-      space_group_id: space.space_group_id || '',
+      space_group_id: space.space_group_id || 'none',
       order: space.order || 0,
       visibility: space.visibility || 'public',
       requires_payment: space.requires_payment || false,
-      subscription_tier_id: space.subscription_tier_id || '',
+      subscription_tier_id: space.subscription_tier_id || 'none',
       auto_join: space.auto_join || false
     });
     setSpaceDialog({ open: true, mode: 'edit', data: space });
