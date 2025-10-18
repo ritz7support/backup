@@ -116,7 +116,9 @@ export default function SpaceFeed({ spaceId }) {
         setMemberCount(space.member_count || 0);
         setSpaceSettings({
           allow_member_posts: space.allow_member_posts !== false,
-          space_type: space.space_type || 'post'
+          space_type: space.space_type || 'post',
+          name: space.name,
+          description: space.description
         });
       }
     } catch (error) {
