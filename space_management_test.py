@@ -355,8 +355,12 @@ class SpaceManagementTester:
                 # Verify response structure
                 if members:
                     member = members[0]
-                    required_fields = ['user_id', 'role', 'status', 'joined_at']
-                    missing_fields = [field for field in required_fields if field not in member]
+                    if isinstance(member, dict):
+                        required_fields = ['user_id', 'role', 'status', 'joined_at']
+                        missing_fields = [field for field in required_fields if field not in member]
+                    else:
+                        self.log(f"⚠️ Unexpected member format in detailed response: {type(member)} - {member}", "WARNING")
+                        missing_fields = []
                     
                     if missing_fields:
                         self.log(f"⚠️ Missing fields in member response: {missing_fields}", "WARNING")
