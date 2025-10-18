@@ -4,8 +4,9 @@ import { useAuth } from '../hooks/useAuth';
 import { postsAPI, spacesAPI } from '../lib/api';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
+import { Dialog, DialogContent } from '../components/ui/dialog';
 import RichTextEditor from '../components/RichTextEditor';
-import { Heart, MessageCircle, Send, Loader2, Sparkles, Crown, Users } from 'lucide-react';
+import { Heart, MessageCircle, Send, Loader2, Sparkles, Crown, Users, X, Maximize2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 
