@@ -35,7 +35,7 @@ export default function AdminPanel() {
   const [spaceForm, setSpaceForm] = useState({
     name: '', description: '', icon: '', space_group_id: '', order: 0,
     visibility: 'public', requires_payment: false, subscription_tier_id: '', auto_join: false,
-    space_type: 'post', allow_member_posts: true
+    space_type: 'post', allow_member_posts: true, welcome_title: '', welcome_message: ''
   });
   const [tierForm, setTierForm] = useState({
     name: '', description: '', price: 0, currency: 'USD', features: [], is_active: true
