@@ -203,10 +203,10 @@ export default function AdminPanel() {
       }
       
       // Convert empty strings to null for optional fields
-      if (!payload.space_group_id || payload.space_group_id === '') {
+      if (!payload.space_group_id || payload.space_group_id === '' || payload.space_group_id === 'none') {
         payload.space_group_id = null;
       }
-      if (!payload.subscription_tier_id || payload.subscription_tier_id === '') {
+      if (!payload.subscription_tier_id || payload.subscription_tier_id === '' || payload.subscription_tier_id === 'none') {
         payload.subscription_tier_id = null;
       }
       if (!payload.description || payload.description === '') {
