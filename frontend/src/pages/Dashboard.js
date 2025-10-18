@@ -130,7 +130,7 @@ export default function Dashboard() {
                 {user?.role === 'admin' && (
                   <DropdownMenuItem onClick={() => navigate('/admin/spaces')} data-testid="menu-admin-spaces">
                     <Settings className="h-4 w-4 mr-2" />
-                    Manage Spaces
+                    Admin Settings
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
