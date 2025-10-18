@@ -170,6 +170,46 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     }
   };
 
+  const handleJoinSpace = async () => {
+    setJoiningSpace(true);
+    try {
+      if (spaceVisibility === 'public') {
+        // Directly join public space
+        await spacesAPI.joinSpace(spaceId);
+        toast.success('Joined space successfully! 🎉');
+        setIsMember(true);
+        await loadSpaceInfo();
+      } else if (spaceVisibility === 'private' || spaceVisibility === 'secret') {
+        // Send join request for private/secret spaces
+        await spacesAPI.createJoinRequest(spaceId, '');
+        toast.success('Join request sent! 📤');
+        setHasPendingRequest(true);
+        await loadSpaceInfo();
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to join space');
+    } finally {
+      setJoiningSpace(false);
+    }
+  };
+
+  const handleCancelRequest = async () => {
+    if (!pendingRequestId) return;
+    setJoiningSpace(true);
+    try {
+      await spacesAPI.cancelJoinRequest(pendingRequestId);
+      toast.success('Join request cancelled');
+      setHasPendingRequest(false);
+      setPendingRequestId(null);
+      await loadSpaceInfo();
+    } catch (error) {
+      toast.error('Failed to cancel request');
+    } finally {
+      setJoiningSpace(false);
+    }
+  };
+
+
   const handleReact = async (postId) => {
     try {
       await postsAPI.reactToPost(postId, '❤️');
