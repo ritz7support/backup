@@ -641,6 +641,45 @@ async def get_me(user: User = Depends(require_auth)):
     """Get current user"""
     return user
 
+
+@api_router.put("/users/profile-picture")
+async def update_profile_picture(request: Request, user: User = Depends(require_auth)):
+    """Update user's profile picture"""
+    data = await request.json()
+    picture_data = data.get('picture')
+    
+    if not picture_data:
+        raise HTTPException(status_code=400, detail="Picture data is required")
+    
+    # Validate that it's a base64 image
+    if not picture_data.startswith('data:image'):
+        raise HTTPException(status_code=400, detail="Invalid image format")
+    
+    # Update user's picture
+    result = await db.users.update_one(
+        {"id": user.id},
+        {"$set": {"picture": picture_data}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "Profile picture updated successfully", "picture": picture_data}
+
+@api_router.delete("/users/profile-picture")
+async def remove_profile_picture(user: User = Depends(require_auth)):
+    """Remove user's profile picture"""
+    result = await db.users.update_one(
+        {"id": user.id},
+        {"$set": {"picture": None}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "Profile picture removed successfully"}
+
+
 @api_router.post("/auth/logout")
 async def logout(request: Request, response: Response):
     """Logout user"""
