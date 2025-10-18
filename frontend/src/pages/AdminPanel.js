@@ -1284,6 +1284,110 @@ export default function AdminPanel() {
           </div>
         )}
 
+
+
+        {/* Levels Management Tab */}
+        {activeTab === 'levels' && (
+          <div>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border" style={{ borderColor: '#D1D5DB' }}>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold" style={{ color: '#011328' }}>Levels Management</h2>
+                <Button
+                  onClick={async () => {
+                    try {
+                      await leaderboardAPI.seedDefaultLevels();
+                      toast.success('Default levels created successfully!');
+                      loadLevels();
+                    } catch (error) {
+                      toast.error(error.response?.data?.detail || 'Failed to seed levels');
+                    }
+                  }}
+                  style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}
+                  className="text-white"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Seed Default Levels
+                </Button>
+              </div>
+
+              {levels.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-lg font-medium mb-2" style={{ color: '#8E8E8E' }}>No levels configured</p>
+                  <p className="text-sm mb-4" style={{ color: '#8E8E8E' }}>Click "Seed Default Levels" to create 10 default levels</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {levels.sort((a, b) => a.level_number - b.level_number).map((level) => (
+                    <div key={level.id} className="border rounded-lg p-4 flex items-center justify-between" style={{ borderColor: '#E5E7EB' }}>
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-full flex items-center justify-center font-bold text-white text-xl"
+                          style={{
+                            background: level.level_number >= 10 ? '#9333EA' :
+                                       level.level_number >= 9 ? '#DC2626' :
+                                       level.level_number >= 8 ? '#EA580C' :
+                                       level.level_number >= 7 ? '#D97706' :
+                                       level.level_number >= 6 ? '#0891B2' :
+                                       level.level_number >= 5 ? '#059669' :
+                                       level.level_number >= 4 ? '#0284C7' :
+                                       level.level_number >= 3 ? '#4F46E5' :
+                                       level.level_number >= 2 ? '#7C3AED' : '#6B7280'
+                          }}
+                        >
+                          {level.level_number}
+                        </div>
+                        <div>
+                          <p className="font-bold text-lg" style={{ color: '#011328' }}>{level.level_name || `Level ${level.level_number}`}</p>
+                          <p className="text-sm" style={{ color: '#8E8E8E' }}>{level.points_required} points required</p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newName = prompt('Enter level name:', level.level_name);
+                            const newPoints = prompt('Enter points required:', level.points_required);
+                            if (newName !== null || newPoints !== null) {
+                              leaderboardAPI.updateLevel(level.id, {
+                                level_name: newName || level.level_name,
+                                points_required: newPoints ? parseInt(newPoints) : level.points_required
+                              }).then(() => {
+                                toast.success('Level updated!');
+                                loadLevels();
+                              }).catch(err => {
+                                toast.error(err.response?.data?.detail || 'Failed to update level');
+                              });
+                            }
+                          }}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            if (window.confirm(`Delete ${level.level_name}?`)) {
+                              leaderboardAPI.deleteLevel(level.id).then(() => {
+                                toast.success('Level deleted');
+                                loadLevels();
+                              }).catch(err => {
+                                toast.error('Failed to delete level');
+                              });
+                            }
+                          }}
+                          className="text-red-600 border-red-300"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {activeTab === 'subscriptions' && (
           <div>
             <div className="flex justify-between items-center mb-4">
