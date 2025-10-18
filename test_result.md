@@ -920,15 +920,18 @@ backend:
 
   - task: "Stripe Payment Status Polling"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added GET /api/payments/status/{session_id} endpoint to check Stripe payment status using stripe_checkout.get_checkout_status(). Updates transaction status only once when payment_status='paid'. Creates subscription record and updates user membership_tier to 'paid'. Prevents duplicate processing of same payment."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Stripe payment status polling working correctly. GET /api/payments/status/{session_id} successfully retrieves payment status from Stripe using emergentintegrations library. Returns proper payment_status values ('unpaid', 'paid', etc.). Authentication is properly enforced. Status polling mechanism ready for frontend integration. Transaction updates and subscription creation logic verified for paid status."
 
   - task: "Stripe Webhook Handler"
     implemented: true
