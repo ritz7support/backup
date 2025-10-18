@@ -469,15 +469,18 @@ frontend:
 
   - task: "Soft Block - Auto-Expiry Helper Functions"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Added check_and_unblock_expired_memberships() and get_effective_block_status() helper functions. These check block expiry and auto-unblock users when blocks expire. Integrated into all engagement endpoints (post/comment/react)."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Auto-expiry helper functions working correctly. check_and_unblock_expired_memberships() successfully detects expired blocks and automatically unblocks users. get_effective_block_status() returns current block status after checking expiry. Auto-expiry system tested with 10-second expiry blocks - users are automatically unblocked when attempting engagement after expiry time. Integration with engagement endpoints (post/comment/react) verified."
 
   - task: "Soft Block - Engagement Endpoint Updates"
     implemented: true
