@@ -156,6 +156,17 @@ class SpaceMembership(BaseModel):
     status: str = "member"  # pending, member
     joined_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class JoinRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    space_id: str
+    status: str = "pending"  # pending, approved, rejected
+    message: Optional[str] = None  # Optional message from user
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    reviewed_at: Optional[datetime] = None
+    reviewed_by: Optional[str] = None  # Admin/manager who reviewed
+
 class Post(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
