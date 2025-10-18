@@ -2286,6 +2286,32 @@ async def block_space_member(space_id: str, user_id: str, request: Request, user
     if expires_at:
         try:
             block_expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=f"Invalid expires_at format: {str(e)}")
+    
+    result = await db.space_memberships.update_one(
+        {
+            "space_id": space_id,
+            "user_id": user_id
+        },
+        {
+            "$set": {
+                "status": "blocked",
+                "blocked_at": datetime.now(timezone.utc).isoformat(),
+                "blocked_by": user.id,
+                "block_type": block_type,
+                "block_expires_at": block_expires_at.isoformat() if block_expires_at else None
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    block_msg = f"Member {block_type}-blocked successfully"
+    if block_expires_at:
+        block_msg += f" until {block_expires_at.strftime('%Y-%m-%d %H:%M:%S %Z')}"
+    return {"message": block_msg}
 
 
 # ==================== LEADERBOARD & LEVELS MANAGEMENT ====================
