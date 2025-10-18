@@ -404,22 +404,13 @@ export default function AdminPanel() {
 
         <div className="flex gap-2 mb-6">
           <Button
-            variant={activeTab === 'groups' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('groups')}
+            variant={activeTab === 'overview' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('overview')}
             className="flex items-center gap-2"
-            style={activeTab === 'groups' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
-          >
-            <Folder className="h-4 w-4" />
-            Space Groups ({spaceGroups.length})
-          </Button>
-          <Button
-            variant={activeTab === 'spaces' ? 'default' : 'outline'}
-            onClick={() => setActiveTab('spaces')}
-            className="flex items-center gap-2"
-            style={activeTab === 'spaces' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
+            style={activeTab === 'overview' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
           >
             <Grid className="h-4 w-4" />
-            Spaces ({spaces.length})
+            Spaces & Groups ({spaceGroups.length + spaces.length})
           </Button>
           <Button
             variant={activeTab === 'subscriptions' ? 'default' : 'outline'}
