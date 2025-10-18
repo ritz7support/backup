@@ -1355,12 +1355,41 @@ async def react_to_post(post_id: str, emoji: str, user: User = Depends(require_a
     if emoji not in reactions:
         reactions[emoji] = []
     
+    # Check if this is adding or removing a reaction
+    is_adding = user.id not in reactions[emoji]
+    
     if user.id in reactions[emoji]:
         reactions[emoji].remove(user.id)
     else:
         reactions[emoji].append(user.id)
     
     await db.posts.update_one({"id": post_id}, {"$set": {"reactions": reactions}})
+    
+    # Award points only when adding a like (not removing)
+    if is_adding:
+        # Award 1 point to the person liking
+        await award_points(
+            user_id=user.id,
+            points=1,
+            action_type="like",
+            related_entity_type="post",
+            related_entity_id=post_id,
+            related_user_id=post['author_id'],
+            description="Liked a post"
+        )
+        
+        # Award 1 point to the post author (if not self-like)
+        if user.id != post['author_id']:
+            await award_points(
+                user_id=post['author_id'],
+                points=1,
+                action_type="receive_like",
+                related_entity_type="post",
+                related_entity_id=post_id,
+                related_user_id=user.id,
+                description="Received a like on post"
+            )
+    
     return {"reactions": reactions}
 
 @api_router.post("/posts/{post_id}/comments")
