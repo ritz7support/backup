@@ -76,29 +76,18 @@ export default function SpaceView() {
     
     if (!currentSpace) {
       return (
-        <ComingSoonPage 
-          title={getSpaceTitle()}
-          description="This space is being prepared with exciting content. Check back soon!" 
-        />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <h2 className="text-xl font-bold mb-2" style={{ color: '#011328' }}>Space Not Found</h2>
+            <p style={{ color: '#8E8E8E' }}>This space doesn't exist or you don't have access.</p>
+          </div>
+        </div>
       );
     }
     
-    // Check space type and render accordingly
-    const spaceType = currentSpace.space_type || 'post';
-    
-    if (spaceType === 'post' || spaceType === 'qa') {
-      // Both post and Q&A use SpaceFeed for now
-      // SpaceFeed will handle different layouts based on space type
-      return <SpaceFeed spaceId={spaceId} />;
-    }
-    
-    // For other types, show coming soon for now
-    return (
-      <ComingSoonPage 
-        title={getSpaceTitle()}
-        description={`${spaceType.charAt(0).toUpperCase() + spaceType.slice(1)} type spaces are coming soon!`}
-      />
-    );
+    // All spaces use SpaceFeed - no more "coming soon"
+    // SpaceFeed will handle different space types (post, qa, announcement, etc.)
+    return <SpaceFeed spaceId={spaceId} />;
   };
 
   return (
