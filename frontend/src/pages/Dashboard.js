@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 
-export default function Dashboard() {
+export default function Dashboard({ children }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [spaceGroups, setSpaceGroups] = useState([]);
