@@ -1227,7 +1227,7 @@ class Phase2EnhancedUserManagementTester:
         self.log(f"\nOverall: {passed}/{total} tests passed")
         
         if passed == total:
-            self.log("🎉 All user role management tests passed!")
+            self.log("🎉 All Phase 2 enhanced user management tests passed!")
             return True
         else:
             self.log(f"⚠️ {total - passed} tests failed")
@@ -1235,14 +1235,14 @@ class Phase2EnhancedUserManagementTester:
 
 def main():
     """Main test runner"""
-    tester = UserRoleManagementTester()
+    tester = Phase2EnhancedUserManagementTester()
     success = tester.run_all_tests()
     
     if success:
-        print("\n✅ User role management testing completed successfully")
+        print("\n✅ Phase 2 enhanced user management testing completed successfully")
         sys.exit(0)
     else:
-        print("\n❌ User role management testing completed with failures")
+        print("\n❌ Phase 2 enhanced user management testing completed with failures")
         sys.exit(1)
 
 if __name__ == "__main__":
