@@ -230,6 +230,64 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     }
   };
 
+  // Load join requests for admin/manager
+  const loadJoinRequests = async () => {
+    if (!user || user.role !== 'admin') {
+      setIsAdminOrManager(false);
+      return;
+    }
+    
+    setIsAdminOrManager(true);
+    
+    try {
+      setLoadingRequests(true);
+      const { data } = await spacesAPI.getJoinRequests(spaceId);
+      const pending = data.filter(r => r.status === 'pending');
+      setJoinRequests(pending);
+    } catch (error) {
+      console.error('Failed to load join requests:', error);
+    } finally {
+      setLoadingRequests(false);
+    }
+  };
+
+  const handleApproveRequest = async (requestId, userName) => {
+    try {
+      await spacesAPI.approveJoinRequest(requestId);
+      toast.success(`${userName} approved! 🎉`);
+      loadJoinRequests(); // Reload the list
+      loadSpaceInfo(); // Update member count
+    } catch (error) {
+      toast.error('Failed to approve request');
+    }
+  };
+
+  const handleRejectRequest = async (requestId, userName) => {
+    try {
+      await spacesAPI.rejectJoinRequest(requestId);
+      toast.success(`Request from ${userName} rejected`);
+      loadJoinRequests(); // Reload the list
+    } catch (error) {
+      toast.error('Failed to reject request');
+    }
+  };
+
+  const handleApproveAll = async () => {
+    if (!window.confirm(`Approve all ${joinRequests.length} pending requests?`)) return;
+    
+    try {
+      for (const request of joinRequests) {
+        await spacesAPI.approveJoinRequest(request.id);
+      }
+      toast.success(`All requests approved! 🎉`);
+      loadJoinRequests();
+      loadSpaceInfo();
+    } catch (error) {
+      toast.error('Failed to approve all requests');
+    }
+  };
+
+
 
   const handleReact = async (postId) => {
     if (!isMember) {
