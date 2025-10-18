@@ -118,9 +118,9 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     loadPosts();
   }, [spaceId]);
 
-  // Load join requests when space info is loaded and user is admin
+  // Load join requests when space info is loaded for admins/managers
   useEffect(() => {
-    if (user?.role === 'admin' && (spaceVisibility === 'private' || spaceVisibility === 'secret')) {
+    if (user && (spaceVisibility === 'private' || spaceVisibility === 'secret')) {
       loadJoinRequests();
     }
   }, [spaceId, spaceVisibility, user]);
