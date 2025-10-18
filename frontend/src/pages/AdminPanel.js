@@ -173,48 +173,72 @@ export default function AdminPanel() {
   };
 
   const handleRemoveMember = async (spaceId, userId, userName) => {
-    if (!window.confirm(`Remove ${userName} from this space?`)) return;
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to remove member');
-      toast.success('Member removed');
-      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
-    } catch (error) {
-      toast.error(error.message);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Remove Member',
+      message: `Remove ${userName} from this space?`,
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+          });
+          if (!response.ok) throw new Error('Failed to remove member');
+          toast.success('Member removed');
+          handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+        } catch (error) {
+          toast.error(error.message);
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
   const handleBlockMember = async (spaceId, userId, userName) => {
-    if (!window.confirm(`Block ${userName}? They won't be able to post or comment.`)) return;
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/block`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to block member');
-      toast.success('Member blocked');
-      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
-    } catch (error) {
-      toast.error(error.message);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Block Member',
+      message: `Block ${userName}? They won't be able to post or comment.`,
+      variant: 'warning',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/block`, {
+            method: 'PUT',
+            credentials: 'include'
+          });
+          if (!response.ok) throw new Error('Failed to block member');
+          toast.success('Member blocked');
+          handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+        } catch (error) {
+          toast.error(error.message);
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
   const handleUnblockMember = async (spaceId, userId, userName) => {
-    if (!window.confirm(`Unblock ${userName}?`)) return;
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/unblock`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to unblock member');
-      toast.success('Member unblocked');
-      handleViewMembers(spaceId, membersDialog.spaceName); // Reload
-    } catch (error) {
-      toast.error(error.message);
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Unblock Member',
+      message: `Unblock ${userName}?`,
+      variant: 'success',
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/members/${userId}/unblock`, {
+            method: 'PUT',
+            credentials: 'include'
+          });
+          if (!response.ok) throw new Error('Failed to unblock member');
+          toast.success('Member unblocked');
+          handleViewMembers(spaceId, membersDialog.spaceName); // Reload
+        } catch (error) {
+          toast.error(error.message);
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
   const handlePromoteToManager = async (spaceId, userId, userName) => {
