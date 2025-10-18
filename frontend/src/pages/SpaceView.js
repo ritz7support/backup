@@ -90,8 +90,23 @@ export default function SpaceView() {
     // Render based on space type
     switch(spaceType) {
       case 'event':
-        // Events type shows the events calendar
-        return <EventsPage />;
+        // Events type - Redirect to /events route which has full layout
+        // Or show message to go to Events page
+        return (
+          <div className="flex items-center justify-center py-20">
+            <div className="text-center">
+              <Calendar className="h-16 w-16 mx-auto mb-4" style={{ color: '#0462CB' }} />
+              <h2 className="text-xl font-bold mb-2" style={{ color: '#011328' }}>Event Calendar</h2>
+              <p className="mb-4" style={{ color: '#8E8E8E' }}>View and manage community events</p>
+              <Button
+                onClick={() => navigate('/events')}
+                style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}
+              >
+                Go to Events Calendar
+              </Button>
+            </div>
+          </div>
+        );
         
       case 'qa':
         // Q&A type - pass flag to SpaceFeed for different layout
