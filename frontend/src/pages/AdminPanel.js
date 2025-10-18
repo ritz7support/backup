@@ -176,8 +176,27 @@ export default function AdminPanel() {
       
       // Clean up form data
       const payload = { ...spaceForm };
-      if (!payload.space_group_id) payload.space_group_id = null;
-      if (!payload.subscription_tier_id) payload.subscription_tier_id = null;
+      
+      // Don't send id when creating (let backend generate it)
+      if (spaceDialog.mode === 'create') {
+        delete payload.id;
+      }
+      
+      // Convert empty strings to null for optional fields
+      if (!payload.space_group_id || payload.space_group_id === '') {
+        payload.space_group_id = null;
+      }
+      if (!payload.subscription_tier_id || payload.subscription_tier_id === '') {
+        payload.subscription_tier_id = null;
+      }
+      if (!payload.description || payload.description === '') {
+        payload.description = null;
+      }
+      if (!payload.icon || payload.icon === '') {
+        payload.icon = null;
+      }
+      
+      console.log('Sending payload:', payload);
       
       const response = await fetch(url, {
         method,
