@@ -2288,6 +2288,194 @@ async def block_space_member(space_id: str, user_id: str, request: Request, user
     if expires_at:
         try:
             block_expires_at = datetime.fromisoformat(expires_at.replace('Z', '+00:00'))
+
+
+# ==================== LEADERBOARD & LEVELS MANAGEMENT ====================
+
+@api_router.get("/levels")
+async def get_levels():
+    """Get all levels"""
+    levels = await db.levels.find({}, {"_id": 0}).sort("level_number", 1).to_list(100)
+    return levels
+
+@api_router.post("/admin/levels")
+async def create_level(request: Request, user: User = Depends(require_auth)):
+    """Create a new level (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    
+    # Check if level number already exists
+    existing = await db.levels.find_one({"level_number": data['level_number']})
+    if existing:
+        raise HTTPException(status_code=400, detail="Level number already exists")
+    
+    level = Level(
+        level_number=data['level_number'],
+        level_name=data.get('level_name', f"Level {data['level_number']}"),
+        points_required=data['points_required']
+    )
+    
+    level_dict = level.model_dump()
+    level_dict['created_at'] = level_dict['created_at'].isoformat()
+    await db.levels.insert_one(level_dict)
+    
+    return level
+
+@api_router.put("/admin/levels/{level_id}")
+async def update_level(level_id: str, request: Request, user: User = Depends(require_auth)):
+    """Update a level (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    
+    update_fields = {}
+    if 'level_name' in data:
+        update_fields['level_name'] = data['level_name']
+    if 'points_required' in data:
+        update_fields['points_required'] = data['points_required']
+    
+    if not update_fields:
+        raise HTTPException(status_code=400, detail="No fields to update")
+    
+    result = await db.levels.update_one({"id": level_id}, {"$set": update_fields})
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Level not found")
+    
+    # Recalculate all users' levels after updating level points
+    users = await db.users.find({}, {"_id": 0, "id": 1}).to_list(10000)
+    for u in users:
+        await update_user_level(u['id'])
+    
+    return {"message": "Level updated successfully"}
+
+@api_router.delete("/admin/levels/{level_id}")
+async def delete_level(level_id: str, user: User = Depends(require_auth)):
+    """Delete a level (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    result = await db.levels.delete_one({"id": level_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Level not found")
+    
+    return {"message": "Level deleted successfully"}
+
+@api_router.get("/leaderboard")
+async def get_leaderboard(time_filter: str = "all", user: User = Depends(require_auth)):
+    """
+    Get leaderboard with time filter
+    time_filter: 'week' (7 days), 'month' (30 days), or 'all'
+    """
+    # Calculate date threshold
+    now = datetime.now(timezone.utc)
+    date_threshold = None
+    
+    if time_filter == "week":
+        date_threshold = now - timedelta(days=7)
+    elif time_filter == "month":
+        date_threshold = now - timedelta(days=30)
+    
+    # Get all users
+    all_users = await db.users.find(
+        {"archived": False},
+        {"_id": 0, "id": 1, "name": 1, "picture": 1, "total_points": 1, "current_level": 1}
+    ).to_list(10000)
+    
+    # Calculate points for the time period
+    leaderboard_data = []
+    for u in all_users:
+        if time_filter == "all":
+            # Use total_points directly
+            points = u.get('total_points', 0)
+        else:
+            # Calculate points from transactions in the time period
+            query = {"user_id": u['id']}
+            if date_threshold:
+                query["created_at"] = {"$gte": date_threshold.isoformat()}
+            
+            transactions = await db.point_transactions.find(query, {"_id": 0, "points": 1}).to_list(10000)
+            points = sum(t['points'] for t in transactions)
+        
+        if points > 0:  # Only include users with points
+            leaderboard_data.append({
+                "user_id": u['id'],
+                "name": u['name'],
+                "picture": u.get('picture'),
+                "points": points,
+                "level": u.get('current_level', 1)
+            })
+    
+    # Sort by points descending
+    leaderboard_data.sort(key=lambda x: x['points'], reverse=True)
+    
+    # Add rank
+    for idx, entry in enumerate(leaderboard_data):
+        entry['rank'] = idx + 1
+    
+    # Get current user's stats
+    current_user_stats = await get_user_leaderboard_stats(user.id)
+    
+    # Find current user's position in this filtered leaderboard
+    current_user_entry = next((entry for entry in leaderboard_data if entry['user_id'] == user.id), None)
+    
+    return {
+        "leaderboard": leaderboard_data[:100],  # Top 100
+        "current_user": current_user_stats,
+        "current_user_rank": current_user_entry['rank'] if current_user_entry else None,
+        "time_filter": time_filter
+    }
+
+@api_router.get("/users/{user_id}/points-history")
+async def get_user_points_history(user_id: str, user: User = Depends(require_auth)):
+    """Get detailed points history for a user (admin only or own profile)"""
+    if user.role != 'admin' and user.id != user_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    transactions = await db.point_transactions.find(
+        {"user_id": user_id},
+        {"_id": 0}
+    ).sort("created_at", -1).to_list(500)
+    
+    return transactions
+
+@api_router.post("/admin/seed-levels")
+async def seed_default_levels(user: User = Depends(require_auth)):
+    """Seed default 10 levels (admin only, one-time setup)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check if levels already exist
+    existing_count = await db.levels.count_documents({})
+    if existing_count > 0:
+        raise HTTPException(status_code=400, detail="Levels already exist. Delete all levels first if you want to reseed.")
+    
+    # Default levels based on screenshot
+    default_levels = [
+        {"level_number": 1, "level_name": "Newbie", "points_required": 0},
+        {"level_number": 2, "level_name": "Beginner", "points_required": 10},
+        {"level_number": 3, "level_name": "Learner", "points_required": 20},
+        {"level_number": 4, "level_name": "Explorer", "points_required": 40},
+        {"level_number": 5, "level_name": "Contributor", "points_required": 80},
+        {"level_number": 6, "level_name": "Regular", "points_required": 160},
+        {"level_number": 7, "level_name": "Expert", "points_required": 320},
+        {"level_number": 8, "level_name": "Master", "points_required": 640},
+        {"level_number": 9, "level_name": "Legend", "points_required": 1280},
+        {"level_number": 10, "level_name": "Champion", "points_required": 2560},
+    ]
+    
+    for level_data in default_levels:
+        level = Level(**level_data)
+        level_dict = level.model_dump()
+        level_dict['created_at'] = level_dict['created_at'].isoformat()
+        await db.levels.insert_one(level_dict)
+    
+    return {"message": "Default 10 levels created successfully", "count": len(default_levels)}
+
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Invalid expires_at format: {str(e)}")
     
