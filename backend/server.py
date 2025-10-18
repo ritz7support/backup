@@ -52,6 +52,7 @@ class User(BaseModel):
     location: Optional[str] = None
     linkedin: Optional[str] = None
     is_founding_member: bool = False
+    is_team_member: bool = False  # New: Team Member badge feature
     badges: List[str] = []
     membership_tier: str = "free"  # free, paid
     archived: bool = False
