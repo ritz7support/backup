@@ -703,7 +703,7 @@ agent_communication:
     message: |
       **FINAL COMPREHENSIVE UI TESTING COMPLETE - Enhanced Member and Space Manager Management System ✅**
       
-      **Test URL:** https://community-space-8.preview.emergentagent.com/admin/spaces
+      **Test URL:** https://engage-space.preview.emergentagent.com/admin/spaces
       **Login:** admin@test.com / admin123 ✅ Successful
       
       **MEMBERS DIALOG TESTING (👥 Icons):**
