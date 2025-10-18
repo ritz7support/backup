@@ -523,7 +523,11 @@ class SpaceManagementTester:
             manager_requests = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.private_space_id}/join-requests")
             if manager_requests.status_code == 200:
                 requests = manager_requests.json()
-                manager_request = next((r for r in requests if r.get('user_id') == self.manager_user_id), None)
+                manager_request = None
+                for r in requests:
+                    if isinstance(r, dict) and r.get('user_id') == self.manager_user_id:
+                        manager_request = r
+                        break
                 
                 if manager_request:
                     approve_response = self.admin_session.put(f"{BACKEND_URL}/join-requests/{manager_request['id']}/approve")
