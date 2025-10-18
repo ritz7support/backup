@@ -103,11 +103,11 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Implement comment functionality and space improvements:
-  1. Dynamic Back Button - should navigate to correct space (Introduction, Ask-Doubts, etc.) based on where user came from
-  2. Comment Submission UX - no page refresh after adding comment, smooth state update
-  3. Comment Editor - support text + images (no rich text), ~3000 character limit (LinkedIn-style)
-  4. Make All Spaces Generic - ensure Resources, Showcase, and Discussions work the same as Introduction/Ask-Doubts/Gratitude
+  Implement comprehensive space access control and member management system:
+  1. Public Space Join Logic - Allow viewing posts without joining, but require joining to engage (post/comment/react)
+  2. Private Spaces with Join Requests - "Request to Join" button, admin/manager approval, show "Request Pending" with cancel option
+  3. Member Management per Space - Add/remove/block members, promote to manager role
+  4. Space Managers Role - Can moderate content, approve join requests, manage members (but cannot create spaces or edit settings)
 
 backend:
   - task: "Comment API - Add Comment"
