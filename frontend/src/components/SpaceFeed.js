@@ -74,7 +74,7 @@ const SPACE_CONFIG = {
   }
 };
 
-export default function SpaceFeed({ spaceId }) {
+export default function SpaceFeed({ spaceId, isQAMode = false }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
