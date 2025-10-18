@@ -209,7 +209,32 @@ export default function PostDetailPage() {
 
         {/* Post Content Area */}
         <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#E6EFFA' }}>
-          <div className="max-w-4xl mx-auto p-6">
+          {/* Back Button - Sticky at top left of content area */}
+          <div className="sticky top-0 z-10 bg-transparent pt-4 pl-6">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(`/space/${spaceId}`)}
+              className="flex items-center gap-2 hover:bg-white hover:shadow-sm bg-white shadow-sm"
+              style={{ borderRadius: '8px' }}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m15 18-6-6 6-6"/>
+              </svg>
+              <span className="font-medium">Back to {getSpaceName()}</span>
+            </Button>
+          </div>
+
+          <div className="max-w-4xl mx-auto px-6 pb-8">
             {/* Post Card */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           {/* Post Header */}
