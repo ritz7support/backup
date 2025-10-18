@@ -561,7 +561,11 @@ class SpaceManagementTester:
                     members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.private_space_id}/members-detailed")
                     if members_response.status_code == 200:
                         members = members_response.json()
-                        approved_member = next((m for m in members if m.get('user_id') == self.blocked_user_id), None)
+                        approved_member = None
+                        for m in members:
+                            if isinstance(m, dict) and m.get('user_id') == self.blocked_user_id:
+                                approved_member = m
+                                break
                         
                         if approved_member:
                             self.log("✅ Join request approval by manager verified")
