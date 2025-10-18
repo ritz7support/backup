@@ -592,9 +592,25 @@ class Phase2EnhancedUserManagementTester:
             if spaces_response.status_code == 200:
                 spaces = spaces_response.json()
                 if spaces:
-                    self.test_space_id = spaces[0]['id']
-                    self.log(f"✅ Using existing space: {self.test_space_id}")
-                    return True
+                    # Find a space that allows member posts or update one
+                    for space in spaces:
+                        if space.get('allow_member_posts', True):
+                            self.test_space_id = space['id']
+                            self.log(f"✅ Using existing space that allows member posts: {self.test_space_id}")
+                            return True
+                    
+                    # If no space allows member posts, update the first one
+                    if spaces:
+                        self.test_space_id = spaces[0]['id']
+                        update_data = {"allow_member_posts": True}
+                        update_response = self.admin_session.put(f"{BACKEND_URL}/admin/spaces/{self.test_space_id}", json=update_data)
+                        if update_response.status_code == 200:
+                            self.log(f"✅ Updated space to allow member posts: {self.test_space_id}")
+                            return True
+                        else:
+                            self.log(f"⚠️ Failed to update space settings: {update_response.status_code}", "WARNING")
+                            self.test_space_id = spaces[0]['id']
+                            return True
             
             # If no spaces, create one
             space_data = {
