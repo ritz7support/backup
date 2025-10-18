@@ -122,19 +122,39 @@ export default function AdminPanel() {
       
       const method = groupDialog.mode === 'create' ? 'POST' : 'PUT';
       
+      // Clean up form data
+      const payload = { ...groupForm };
+      
+      // Don't send id when creating
+      if (groupDialog.mode === 'create') {
+        delete payload.id;
+      }
+      
+      // Convert empty strings to null
+      if (!payload.description || payload.description === '') {
+        payload.description = null;
+      }
+      if (!payload.icon || payload.icon === '') {
+        payload.icon = null;
+      }
+      
       const response = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify(groupForm)
+        body: JSON.stringify(payload)
       });
 
-      if (!response.ok) throw new Error('Failed to save group');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to save group');
+      }
 
       toast.success(`Space group ${groupDialog.mode === 'create' ? 'created' : 'updated'}!`);
       setGroupDialog({ open: false, mode: 'create', data: null });
       loadSpaceGroups();
     } catch (error) {
+      console.error('Group save error:', error);
       toast.error(error.message);
     } finally {
       setProcessing(false);
