@@ -1488,6 +1488,66 @@ async def get_analytics(user: User = Depends(require_auth)):
         "total_events": total_events
     }
 
+# Subscription Tiers Management
+@api_router.get("/subscription-tiers")
+async def get_subscription_tiers():
+    """Get all subscription tiers"""
+    tiers = await db.subscription_tiers.find({"is_active": True}, {"_id": 0}).sort("price", 1).to_list(100)
+    return tiers
+
+@api_router.post("/admin/subscription-tiers")
+async def create_subscription_tier(request: Request, user: User = Depends(require_auth)):
+    """Create subscription tier (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    tier = SubscriptionTier(**data)
+    
+    tier_dict = tier.model_dump()
+    tier_dict['created_at'] = tier_dict['created_at'].isoformat()
+    await db.subscription_tiers.insert_one(tier_dict)
+    
+    return tier
+
+@api_router.put("/admin/subscription-tiers/{tier_id}")
+async def update_subscription_tier(tier_id: str, request: Request, user: User = Depends(require_auth)):
+    """Update subscription tier (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    update_fields = {}
+    
+    allowed_fields = ['name', 'description', 'price', 'currency', 'features', 'is_active']
+    for field in allowed_fields:
+        if field in data:
+            update_fields[field] = data[field]
+    
+    if update_fields:
+        result = await db.subscription_tiers.update_one({"id": tier_id}, {"$set": update_fields})
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="Subscription tier not found")
+    
+    return {"message": "Subscription tier updated successfully"}
+
+@api_router.delete("/admin/subscription-tiers/{tier_id}")
+async def delete_subscription_tier(tier_id: str, user: User = Depends(require_auth)):
+    """Delete subscription tier (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    # Check if any spaces use this tier
+    spaces_count = await db.spaces.count_documents({"subscription_tier_id": tier_id})
+    if spaces_count > 0:
+        raise HTTPException(status_code=400, detail=f"Cannot delete tier used by {spaces_count} spaces")
+    
+    result = await db.subscription_tiers.delete_one({"id": tier_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Subscription tier not found")
+    
+    return {"message": "Subscription tier deleted successfully"}
+
 # Include router
 app.include_router(api_router)
 
