@@ -166,7 +166,8 @@ export default function AdminPanel() {
   const handleCreateSpace = () => {
     setSpaceForm({
       name: '', description: '', icon: '', space_group_id: 'none', order: 0,
-      visibility: 'public', requires_payment: false, subscription_tier_id: 'none', auto_join: false
+      visibility: 'public', requires_payment: false, subscription_tier_id: 'none', auto_join: false,
+      space_type: 'post', allow_member_posts: true
     });
     setSpaceDialog({ open: true, mode: 'create', data: null });
   };
@@ -181,7 +182,9 @@ export default function AdminPanel() {
       visibility: space.visibility || 'public',
       requires_payment: space.requires_payment || false,
       subscription_tier_id: space.subscription_tier_id || 'none',
-      auto_join: space.auto_join || false
+      auto_join: space.auto_join || false,
+      space_type: space.space_type || 'post',
+      allow_member_posts: space.allow_member_posts !== false
     });
     setSpaceDialog({ open: true, mode: 'edit', data: space });
   };
