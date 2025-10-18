@@ -1511,6 +1511,155 @@ async def get_analytics(user: User = Depends(require_auth)):
         "total_events": total_events
     }
 
+# Join Request Management
+@api_router.post("/spaces/{space_id}/join-request")
+async def create_join_request(space_id: str, request: Request, user: User = Depends(require_auth)):
+    """Create a join request for a private space"""
+    # Check if space exists and is private
+    space = await db.spaces.find_one({"id": space_id}, {"_id": 0})
+    if not space:
+        raise HTTPException(status_code=404, detail="Space not found")
+    
+    if space.get('visibility') not in ['private', 'secret']:
+        raise HTTPException(status_code=400, detail="This space doesn't require join requests")
+    
+    # Check if already a member
+    existing_membership = await db.space_memberships.find_one({"user_id": user.id, "space_id": space_id})
+    if existing_membership:
+        raise HTTPException(status_code=400, detail="You are already a member of this space")
+    
+    # Check if request already exists
+    existing_request = await db.join_requests.find_one({
+        "user_id": user.id, 
+        "space_id": space_id,
+        "status": "pending"
+    })
+    if existing_request:
+        raise HTTPException(status_code=400, detail="You already have a pending request for this space")
+    
+    data = await request.json()
+    join_request = JoinRequest(
+        user_id=user.id,
+        space_id=space_id,
+        message=data.get('message')
+    )
+    
+    request_dict = join_request.model_dump()
+    request_dict['created_at'] = request_dict['created_at'].isoformat()
+    await db.join_requests.insert_one(request_dict)
+    
+    return join_request
+
+@api_router.get("/spaces/{space_id}/join-requests")
+async def get_join_requests(space_id: str, user: User = Depends(require_auth)):
+    """Get all join requests for a space (admin/manager only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    requests = await db.join_requests.find({"space_id": space_id}, {"_id": 0}).to_list(100)
+    
+    # Enrich with user data
+    for req in requests:
+        user_data = await db.users.find_one({"id": req['user_id']}, {"_id": 0, "password": 0})
+        req['user'] = user_data
+    
+    return requests
+
+@api_router.get("/my-join-requests")
+async def get_my_join_requests(user: User = Depends(require_auth)):
+    """Get current user's join requests"""
+    requests = await db.join_requests.find({"user_id": user.id}, {"_id": 0}).to_list(100)
+    
+    # Enrich with space data
+    for req in requests:
+        space_data = await db.spaces.find_one({"id": req['space_id']}, {"_id": 0})
+        req['space'] = space_data
+    
+    return requests
+
+@api_router.put("/join-requests/{request_id}/approve")
+async def approve_join_request(request_id: str, user: User = Depends(require_auth)):
+    """Approve a join request (admin/manager only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    join_request = await db.join_requests.find_one({"id": request_id}, {"_id": 0})
+    if not join_request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    if join_request['status'] != 'pending':
+        raise HTTPException(status_code=400, detail="Request already processed")
+    
+    # Update request status
+    await db.join_requests.update_one(
+        {"id": request_id},
+        {"$set": {
+            "status": "approved",
+            "reviewed_at": datetime.now(timezone.utc).isoformat(),
+            "reviewed_by": user.id
+        }}
+    )
+    
+    # Create space membership
+    membership = SpaceMembership(
+        user_id=join_request['user_id'],
+        space_id=join_request['space_id'],
+        role="member"
+    )
+    membership_dict = membership.model_dump()
+    membership_dict['joined_at'] = membership_dict['joined_at'].isoformat()
+    await db.space_memberships.insert_one(membership_dict)
+    
+    # Update space member count
+    await db.spaces.update_one(
+        {"id": join_request['space_id']},
+        {"$inc": {"member_count": 1}}
+    )
+    
+    return {"message": "Request approved"}
+
+@api_router.put("/join-requests/{request_id}/reject")
+async def reject_join_request(request_id: str, user: User = Depends(require_auth)):
+    """Reject a join request (admin/manager only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    join_request = await db.join_requests.find_one({"id": request_id}, {"_id": 0})
+    if not join_request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    if join_request['status'] != 'pending':
+        raise HTTPException(status_code=400, detail="Request already processed")
+    
+    # Update request status
+    await db.join_requests.update_one(
+        {"id": request_id},
+        {"$set": {
+            "status": "rejected",
+            "reviewed_at": datetime.now(timezone.utc).isoformat(),
+            "reviewed_by": user.id
+        }}
+    )
+    
+    return {"message": "Request rejected"}
+
+@api_router.delete("/join-requests/{request_id}")
+async def cancel_join_request(request_id: str, user: User = Depends(require_auth)):
+    """Cancel a join request (user's own request)"""
+    join_request = await db.join_requests.find_one({"id": request_id}, {"_id": 0})
+    if not join_request:
+        raise HTTPException(status_code=404, detail="Request not found")
+    
+    if join_request['user_id'] != user.id:
+        raise HTTPException(status_code=403, detail="You can only cancel your own requests")
+    
+    if join_request['status'] != 'pending':
+        raise HTTPException(status_code=400, detail="Can only cancel pending requests")
+    
+    await db.join_requests.delete_one({"id": request_id})
+    
+    return {"message": "Request cancelled"}
+
 # Subscription Tiers Management
 @api_router.get("/subscription-tiers")
 async def get_subscription_tiers():
