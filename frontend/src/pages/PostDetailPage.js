@@ -205,7 +205,7 @@ export default function PostDetailPage() {
       {/* Main Content Area with Sidebar */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <Sidebar />
+        <Sidebar spaces={spaces} spaceGroups={[]} />
 
         {/* Post Content Area */}
         <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#E6EFFA' }}>
