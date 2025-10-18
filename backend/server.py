@@ -2105,7 +2105,7 @@ async def demote_user_from_admin(user_id: str, user: User = Depends(require_auth
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="User not found")
     
-    return {"message": f"Admin demoted to learner successfully"}
+    return {"message": "Admin demoted to learner successfully"}
 
 @api_router.get("/users/all")
 async def get_all_users(user: User = Depends(require_auth)):
