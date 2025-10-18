@@ -1704,33 +1704,6 @@ export default function AdminPanel() {
                         </div>
                       ) : (
                         <>
-                          {/* Admin Management */}
-                          {membership.user?.role === 'admin' ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                handleDemoteFromAdmin(membership.user_id, membership.user?.name);
-                                setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
-                              }}
-                              className="border-orange-400 text-orange-600"
-                            >
-                              Demote from Admin
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                handlePromoteToAdmin(membership.user_id, membership.user?.name);
-                                setTimeout(() => handleViewMembers(membersDialog.spaceId, membersDialog.spaceName), 500);
-                              }}
-                              className="border-green-400 text-green-600"
-                            >
-                              Make Global Admin
-                            </Button>
-                          )}
-
                           {/* Space Manager Management */}
                           {membership.role === 'manager' ? (
                             <Button
