@@ -119,15 +119,22 @@ export default function AdminPanel() {
 
   // User role management
   const handlePromoteToAdmin = async (userId, userName) => {
-    if (!window.confirm(`Promote ${userName} to Admin? They will have full access to all admin features.`)) return;
-    
-    try {
-      await usersAPI.promoteToAdmin(userId);
-      toast.success(`${userName} promoted to Admin!`);
-      loadAllUsers();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to promote user');
-    }
+    setConfirmDialog({
+      open: true,
+      title: 'Promote to Global Admin',
+      message: `Promote ${userName} to Admin? They will have full access to all admin features.`,
+      variant: 'success',
+      onConfirm: async () => {
+        try {
+          await usersAPI.promoteToAdmin(userId);
+          toast.success(`${userName} promoted to Admin!`);
+          loadAllUsers();
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Failed to promote user');
+        }
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
   };
 
   const handleDemoteFromAdmin = async (userId, userName) => {
