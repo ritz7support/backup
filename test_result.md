@@ -103,11 +103,16 @@
 #====================================================================================================
 
 user_problem_statement: |
-  Implement comprehensive space access control and member management system:
+  Phase 1 (COMPLETED): Implement comprehensive space access control and member management system:
   1. Public Space Join Logic - Allow viewing posts without joining, but require joining to engage (post/comment/react)
   2. Private Spaces with Join Requests - "Request to Join" button, admin/manager approval, show "Request Pending" with cancel option
   3. Member Management per Space - Add/remove/block members, promote to manager role
   4. Space Managers Role - Can moderate content, approve join requests, manage members (but cannot create spaces or edit settings)
+  
+  Phase 2 (NEW): Implement Enhanced User Management Features:
+  1. Centralized User Management - Show all users with their space memberships, roles, and actions in one place
+  2. Team Member Badge - Add "Team Member" role with hat emoji badge, assignable by global admins only
+  3. Soft Block with Expiry - Implement temporary blocks (can read but not engage) with expiry date/time in user's local timezone, with automatic unblocking
 
 backend:
   - task: "SpaceMembership Model - Add role and blocked fields"
