@@ -441,70 +441,153 @@ export default function AdminPanel() {
               </Button>
             </div>
 
-            <div className="grid gap-4">
-              {spaces.map((space) => {
-                const group = spaceGroups.find(g => g.id === space.space_group_id);
-                const tier = subscriptionTiers.find(t => t.id === space.subscription_tier_id);
-                
-                return (
-                  <div key={space.id} className="bg-white rounded-lg p-4 border hover:shadow-md transition-shadow" style={{ borderColor: '#E5E7EB' }}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3 flex-1">
-                        <div className="text-2xl">{space.icon || '💬'}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold" style={{ color: '#011328' }}>{space.name}</h3>
-                            {getVisibilityBadge(space.visibility)}
-                            {space.auto_join && (
-                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                Auto-Join
-                              </span>
-                            )}
-                            {space.requires_payment && (
-                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                <DollarSign className="h-3 w-3 inline" /> Paid
-                              </span>
-                            )}
+            {/* Standalone Spaces (No Group) */}
+            {spaces.filter(s => !s.space_group_id).length > 0 && (
+              <div className="mb-6">
+                <h3 className="text-sm font-semibold mb-2" style={{ color: '#6B7280' }}>
+                  Standalone Spaces
+                </h3>
+                <div className="grid gap-3">
+                  {spaces.filter(s => !s.space_group_id).sort((a, b) => a.order - b.order).map((space) => {
+                    const tier = subscriptionTiers.find(t => t.id === space.subscription_tier_id);
+                    
+                    return (
+                      <div key={space.id} className="bg-white rounded-lg p-4 border hover:shadow-md transition-shadow" style={{ borderColor: '#E5E7EB' }}>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-start gap-3 flex-1">
+                            <div className="text-2xl">{space.icon || '💬'}</div>
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold" style={{ color: '#011328' }}>{space.name}</h3>
+                                {getVisibilityBadge(space.visibility)}
+                                {space.auto_join && (
+                                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                    Auto-Join
+                                  </span>
+                                )}
+                                {space.requires_payment && (
+                                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                    <DollarSign className="h-3 w-3 inline" /> Paid
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm" style={{ color: '#8E8E8E' }}>{space.description || 'No description'}</p>
+                              <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: '#8E8E8E' }}>
+                                <span>Order: {space.order}</span>
+                                <span>Members: {space.member_count || 0}</span>
+                                {space.requires_payment && tier && (
+                                  <span>Tier: {tier.name}</span>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                          <p className="text-sm" style={{ color: '#8E8E8E' }}>{space.description || 'No description'}</p>
-                          <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: '#8E8E8E' }}>
-                            <span>Group: {group?.name || 'Standalone'}</span>
-                            <span>Order: {space.order}</span>
-                            <span>Members: {space.member_count || 0}</span>
-                            {space.requires_payment && tier && (
-                              <span>Tier: {tier.name}</span>
-                            )}
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditSpace(space)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setDeleteDialog({ open: true, type: 'space', id: space.id, name: space.name })}
+                              style={{ color: '#EF4444' }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEditSpace(space)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setDeleteDialog({ open: true, type: 'space', id: space.id, name: space.name })}
-                          style={{ color: '#EF4444' }}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              {spaces.length === 0 && (
-                <div className="text-center py-12 bg-white rounded-lg border" style={{ borderColor: '#E5E7EB' }}>
-                  <Grid className="h-12 w-12 mx-auto mb-2" style={{ color: '#8E8E8E' }} />
-                  <p style={{ color: '#8E8E8E' }}>No spaces yet. Create one to get started!</p>
+                    );
+                  })}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+
+            {/* Grouped Spaces */}
+            {spaceGroups.sort((a, b) => a.order - b.order).map((group) => {
+              const groupSpaces = spaces.filter(s => s.space_group_id === group.id).sort((a, b) => a.order - b.order);
+              if (groupSpaces.length === 0) return null;
+
+              return (
+                <div key={group.id} className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl">{group.icon || '📁'}</span>
+                    <h3 className="text-sm font-semibold" style={{ color: '#011328' }}>
+                      {group.name}
+                    </h3>
+                    <span className="text-xs px-2 py-1 rounded-full bg-gray-100" style={{ color: '#6B7280' }}>
+                      {groupSpaces.length} {groupSpaces.length === 1 ? 'space' : 'spaces'}
+                    </span>
+                  </div>
+                  <div className="grid gap-3 pl-8">
+                    {groupSpaces.map((space) => {
+                      const tier = subscriptionTiers.find(t => t.id === space.subscription_tier_id);
+                      
+                      return (
+                        <div key={space.id} className="bg-white rounded-lg p-4 border hover:shadow-md transition-shadow" style={{ borderColor: '#E5E7EB' }}>
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-3 flex-1">
+                              <div className="text-2xl">{space.icon || '💬'}</div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <h3 className="font-semibold" style={{ color: '#011328' }}>{space.name}</h3>
+                                  {getVisibilityBadge(space.visibility)}
+                                  {space.auto_join && (
+                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                      Auto-Join
+                                    </span>
+                                  )}
+                                  {space.requires_payment && (
+                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                      <DollarSign className="h-3 w-3 inline" /> Paid
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-sm" style={{ color: '#8E8E8E' }}>{space.description || 'No description'}</p>
+                                <div className="flex items-center gap-4 mt-2 text-xs" style={{ color: '#8E8E8E' }}>
+                                  <span>Order: {space.order}</span>
+                                  <span>Members: {space.member_count || 0}</span>
+                                  {space.requires_payment && tier && (
+                                    <span>Tier: {tier.name}</span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditSpace(space)}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeleteDialog({ open: true, type: 'space', id: space.id, name: space.name })}
+                                style={{ color: '#EF4444' }}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+
+            {spaces.length === 0 && (
+              <div className="text-center py-12 bg-white rounded-lg border" style={{ borderColor: '#E5E7EB' }}>
+                <Grid className="h-12 w-12 mx-auto mb-2" style={{ color: '#8E8E8E' }} />
+                <p style={{ color: '#8E8E8E' }}>No spaces yet. Create one to get started!</p>
+              </div>
+            )}
           </div>
         )}
 
