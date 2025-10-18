@@ -211,15 +211,23 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
 
 
   const handleReact = async (postId) => {
+    if (!isMember) {
+      toast.error('Please join the space to react to posts');
+      return;
+    }
     try {
       await postsAPI.reactToPost(postId, '❤️');
       loadPosts();
     } catch (error) {
-      toast.error('Failed to react');
+      toast.error(error.response?.data?.detail || 'Failed to react');
     }
   };
 
   const openComments = async (post) => {
+    if (!isMember && spaceVisibility !== 'public') {
+      toast.error('Please join the space to view comments');
+      return;
+    }
     setSelectedPost(post);
     setLoadingComments(true);
     try {
