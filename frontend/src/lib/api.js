@@ -91,6 +91,19 @@ export const paymentsAPI = {
   checkStatus: (sessionId) => api.get(`/payments/status/${sessionId}`),
 };
 
+
+// Leaderboard & Levels API
+export const leaderboardAPI = {
+  getLeaderboard: (timeFilter = 'all') => api.get('/leaderboard', { params: { time_filter: timeFilter } }),
+  getLevels: () => api.get('/levels'),
+  createLevel: (data) => api.post('/admin/levels', data),
+  updateLevel: (levelId, data) => api.put(`/admin/levels/${levelId}`, data),
+  deleteLevel: (levelId) => api.delete(`/admin/levels/${levelId}`),
+  seedDefaultLevels: () => api.post('/admin/seed-levels'),
+  getUserPointsHistory: (userId) => api.get(`/users/${userId}/points-history`),
+};
+
+
 // Admin API
 export const adminAPI = {
   createSpaceGroup: (data) => api.post('/admin/space-groups', data),
