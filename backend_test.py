@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for User Role Management System
-Tests user role management endpoints with proper authentication and validation
+Backend API Testing for Phase 2 Enhanced User Management Features
+Tests team member badge management, centralized user management, soft blocks with expiry, and auto-expiry system
 """
 
 import requests
@@ -9,13 +9,14 @@ import json
 from datetime import datetime, timezone, timedelta
 import sys
 import os
+import time
 
 # Configuration
 BACKEND_URL = "https://community-space-8.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@test.com"
 ADMIN_PASSWORD = "admin123"
 LEARNER_EMAIL = "learner@test.com"
-LEARNER_PASSWORD = "learner123"
+LEARNER_PASSWORD = "password123"
 
 class UserRoleManagementTester:
     def __init__(self):
