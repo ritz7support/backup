@@ -838,6 +838,15 @@ export default function AdminPanel() {
             User Management ({allUsers.length})
           </Button>
           <Button
+            variant={activeTab === 'levels' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('levels')}
+            className="flex items-center gap-2"
+            style={activeTab === 'levels' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
+          >
+            <span className="text-base">🏆</span>
+            Levels ({levels.length})
+          </Button>
+          <Button
             variant={activeTab === 'subscriptions' ? 'default' : 'outline'}
             onClick={() => setActiveTab('subscriptions')}
             className="flex items-center gap-2"
