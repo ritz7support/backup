@@ -1039,9 +1039,25 @@ async def create_post(request: Request, user: User = Depends(require_auth)):
     if not space:
         raise HTTPException(status_code=404, detail="Space not found")
     
-    # If space doesn't allow member posts, only admins can post
-    if not space.get('allow_member_posts', True) and user.role != 'admin':
-        raise HTTPException(status_code=403, detail="Only admins can create posts in this space")
+    # Check if user is blocked from this space
+    membership = await db.space_memberships.find_one({
+        "user_id": user.id,
+        "space_id": data['space_id']
+    })
+    if membership and membership.get('status') == 'blocked':
+        raise HTTPException(status_code=403, detail="You are blocked from posting in this space")
+    
+    # Check if user is a member (for non-public spaces)
+    if space.get('visibility') != 'public':
+        is_member = await is_space_member(user, data['space_id'])
+        if not is_member:
+            raise HTTPException(status_code=403, detail="You must be a member to post in this space")
+    
+    # If space doesn't allow member posts, only admins/managers can post
+    if not space.get('allow_member_posts', True):
+        is_authorized = await is_space_manager_or_admin(user, data['space_id'])
+        if not is_authorized:
+            raise HTTPException(status_code=403, detail="Only admins and managers can create posts in this space")
     
     post = Post(
         space_id=data['space_id'],
