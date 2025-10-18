@@ -85,9 +85,25 @@ export default function SpaceView() {
       );
     }
     
-    // All spaces use SpaceFeed - no more "coming soon"
-    // SpaceFeed will handle different space types (post, qa, announcement, etc.)
-    return <SpaceFeed spaceId={spaceId} />;
+    const spaceType = currentSpace.space_type || 'post';
+    
+    // Render based on space type
+    switch(spaceType) {
+      case 'event':
+        // Events type shows the events calendar
+        return <EventsPage />;
+        
+      case 'qa':
+        // Q&A type - pass flag to SpaceFeed for different layout
+        return <SpaceFeed spaceId={spaceId} isQAMode={true} />;
+        
+      case 'post':
+      case 'announcement':
+      case 'resource':
+      default:
+        // Post, announcement, and resource types use standard feed
+        return <SpaceFeed spaceId={spaceId} isQAMode={false} />;
+    }
   };
 
   return (
