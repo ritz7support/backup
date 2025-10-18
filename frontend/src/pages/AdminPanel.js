@@ -241,6 +241,25 @@ export default function AdminPanel() {
     });
   };
 
+  const handleSoftBlockMember = async (spaceId, userId, userName, spaceName) => {
+    setSoftBlockDialog({ open: true, spaceId, userId, userName, spaceName });
+  };
+
+  const handleConfirmSoftBlock = async (blockType, expiresAt) => {
+    const { spaceId, userId, userName, spaceName } = softBlockDialog;
+    try {
+      await spacesAPI.blockMember(spaceId, userId, blockType, expiresAt);
+      toast.success(`${userName} ${blockType}-blocked ${expiresAt ? `until ${new Date(expiresAt).toLocaleString()}` : 'permanently'}`);
+      if (membersDialog.open) {
+        handleViewMembers(spaceId, spaceName); // Reload if in members dialog
+      }
+      setSoftBlockDialog({ open: false, spaceId: null, userId: null, userName: '', spaceName: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to block member');
+    }
+  };
+
+
   const handleUnblockMember = async (spaceId, userId, userName) => {
     setConfirmDialog({
       open: true,
