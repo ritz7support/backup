@@ -945,14 +945,26 @@ export default function AdminPanel() {
                             >
                               <Shield className="h-4 w-4" />
                             </Button>
-                            {(space.visibility === 'private' || space.visibility === 'secret') && (
+                            {space.visibility === 'private' && (
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleViewJoinRequests(space.id, space.name)}
                                 title="Join Requests"
+                                style={{ color: '#F59E0B' }}
                               >
-                                <Shield className="h-4 w-4" />
+                                📩
+                              </Button>
+                            )}
+                            {space.visibility === 'secret' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleViewInvites(space.id, space.name)}
+                                title="Manage Invites"
+                                style={{ color: '#10B981' }}
+                              >
+                                🔗
                               </Button>
                             )}
                             <Button
