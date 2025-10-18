@@ -11,7 +11,7 @@ import sys
 import os
 
 # Configuration
-BACKEND_URL = "https://community-gates.preview.emergentagent.com/api"
+BACKEND_URL = "https://community-space-8.preview.emergentagent.com/api"
 
 class SpaceManagementTester:
     def __init__(self):
