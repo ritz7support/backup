@@ -130,25 +130,29 @@ export default function PostDetailPage() {
   const hasReacted = hasUserReacted(post.reactions);
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F3F4F6' }}>
-      {/* Header */}
-      <div className="bg-white border-b" style={{ borderColor: '#E5E7EB' }}>
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate(`/space/${spaceId}`)}
-            className="mb-2"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to {getSpaceName()}
-          </Button>
-        </div>
-      </div>
-
+    <div className="min-h-screen flex" style={{ backgroundColor: '#F3F4F6' }}>
+      {/* Left Sidebar would go here if needed */}
+      
       {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        {/* Post Card */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      <div className="flex-1">
+        {/* Header - keeping your existing header */}
+        <div className="bg-white border-b sticky top-0 z-10" style={{ borderColor: '#E5E7EB' }}>
+          <div className="max-w-5xl mx-auto px-6 py-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate(`/space/${spaceId}`)}
+              className="flex items-center gap-2 hover:bg-gray-100"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to {getSpaceName()}
+            </Button>
+          </div>
+        </div>
+
+        {/* Post Content */}
+        <div className="max-w-5xl mx-auto px-6 py-8">
+          {/* Post Card */}
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           {/* Post Header */}
           <div className="flex items-center gap-3 mb-4">
             <div
