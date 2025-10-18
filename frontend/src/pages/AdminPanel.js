@@ -39,10 +39,12 @@ export default function AdminPanel() {
   const [spaceSelectDialog, setSpaceSelectDialog] = useState({ open: false, userId: null, userName: '', selectedSpaces: [] });
   const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', message: '', onConfirm: null, variant: 'default' });
   const [softBlockDialog, setSoftBlockDialog] = useState({ open: false, spaceId: null, spaceName: '', userId: null, userName: '' });
+  const [levelDialog, setLevelDialog] = useState({ open: false, mode: 'create', data: null });
   
   
   // Form states
   const [groupForm, setGroupForm] = useState({ name: '', description: '', icon: '', order: 0 });
+  const [levelForm, setLevelForm] = useState({ level_number: '', level_name: '', points_required: '' });
   const [spaceForm, setSpaceForm] = useState({
     name: '', description: '', icon: '', space_group_id: '', order: 0,
     visibility: 'public', requires_payment: false, subscription_tier_id: '', auto_join: false,
