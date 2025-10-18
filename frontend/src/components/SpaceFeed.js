@@ -339,6 +339,54 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
           <h2 className="text-2xl font-bold">{config.welcomeTitle}</h2>
         </div>
         <p style={{ color: '#E6EFFA' }}>{config.welcomeMessage}</p>
+        
+        {/* Join/Request Button for Non-Members */}
+        {!isMember && (
+          <div className="mt-4">
+            {hasPendingRequest ? (
+              <div className="flex items-center gap-3">
+                <Button
+                  disabled
+                  className="px-6 py-2 rounded-lg font-semibold bg-white/20 cursor-not-allowed"
+                >
+                  Request Pending ⏳
+                </Button>
+                <Button
+                  onClick={handleCancelRequest}
+                  disabled={joiningSpace}
+                  className="px-4 py-2 rounded-lg font-semibold bg-red-500 hover:bg-red-600 text-white"
+                >
+                  Cancel Request
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={handleJoinSpace}
+                disabled={joiningSpace}
+                className="px-6 py-2 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors"
+                style={{ backgroundColor: 'white', color: '#0462CB' }}
+              >
+                {joiningSpace ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {spaceVisibility === 'public' ? 'Joining...' : 'Sending Request...'}
+                  </span>
+                ) : (
+                  <span>
+                    {spaceVisibility === 'public' ? '➕ Join Space' : '🔒 Request to Join'}
+                  </span>
+                )}
+              </Button>
+            )}
+            <p className="mt-2 text-sm" style={{ color: '#E6EFFA' }}>
+              {spaceVisibility === 'public' 
+                ? 'Join this space to post, comment, and react!' 
+                : spaceVisibility === 'private'
+                ? 'This is a private space. Your join request will need approval.'
+                : 'This is a secret space. Your join request will need approval.'}
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Create Post with Collapsible Rich Editor */}
