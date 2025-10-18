@@ -116,21 +116,6 @@ export default function Sidebar({ spaceGroups, spaces }) {
           <span>Welcome & Next Steps</span>
         </Link>
 
-        {/* Leaderboard */}
-        <Link
-          to="/leaderboard"
-          className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-            location.pathname === '/leaderboard'
-              ? 'text-white font-medium'
-              : 'text-gray-300 hover:text-white'
-          }`}
-          style={location.pathname === '/leaderboard' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
-          data-testid="sidebar-leaderboard"
-        >
-          <span className="text-lg">🏆</span>
-          <span>Leaderboard</span>
-        </Link>
-
         {/* Mixed Groups and Spaces in Order */}
         {getSidebarItems().map((item, index) => {
           if (item.type === 'space') {
