@@ -154,7 +154,7 @@ class MemberManagerTester:
         space_data = {
             "name": "Test Manager Space",
             "description": "Space for testing manager functionality",
-            "visibility": "private",
+            "visibility": "public",
             "space_type": "post",
             "allow_member_posts": True
         }
