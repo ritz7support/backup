@@ -142,29 +142,59 @@ export default function PostDetailPage() {
   const hasReacted = hasUserReacted(post.reactions);
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: '#F3F4F6' }}>
-      {/* Left Sidebar would go here if needed */}
-      
-      {/* Main Content */}
-      <div className="flex-1">
-        {/* Header - keeping your existing header */}
-        <div className="bg-white border-b sticky top-0 z-10" style={{ borderColor: '#E5E7EB' }}>
-          <div className="max-w-5xl mx-auto px-6 py-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate(`/space/${spaceId}`)}
-              className="flex items-center gap-2 hover:bg-gray-100"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to {getSpaceName()}
-            </Button>
+    <div className="min-h-screen flex flex-col">
+      {/* Top Header - Same as Dashboard */}
+      <header className="bg-white shadow-sm border-b z-50" style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' }}>
+        <div className="max-w-full mx-auto px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <h1 className="text-2xl font-bold" style={{ color: '#011328' }}>ABCD</h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                  <div 
+                    className="h-8 w-8 rounded-full flex items-center justify-center text-white font-semibold"
+                    style={{ backgroundColor: '#0462CB' }}
+                  >
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="font-medium" style={{ color: '#011328' }}>{user?.name}</span>
+                  <ChevronDown className="h-4 w-4" style={{ color: '#6B7280' }} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem onClick={() => navigate(`/profile/${user?.id}`)}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                {user?.role === 'admin' && (
+                  <DropdownMenuItem onClick={() => navigate('/admin/spaces')}>
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Manage Spaces</span>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
+      </header>
 
-        {/* Post Content */}
-        <div className="max-w-5xl mx-auto px-6 py-8">
-          {/* Post Card */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+      {/* Main Content Area with Sidebar */}
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <Sidebar />
+
+        {/* Post Content Area */}
+        <main className="flex-1 overflow-y-auto" style={{ backgroundColor: '#E6EFFA' }}>
+          <div className="max-w-4xl mx-auto p-6">
+            {/* Post Card */}
+            <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
           {/* Post Header */}
           <div className="flex items-center gap-3 mb-4">
             <div
