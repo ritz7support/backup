@@ -3,11 +3,10 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import Sidebar from '../components/Sidebar';
 import SpaceFeed from '../components/SpaceFeed';
-import EventsPage from './EventsPage';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
-import { Home, Users, MessageCircle, Bell, LogOut, Crown, Settings, Loader2 } from 'lucide-react';
+import { Home, Users, MessageCircle, Bell, LogOut, Crown, Settings, Loader2, Calendar } from 'lucide-react';
 import { spacesAPI } from '../lib/api';
 import {
   DropdownMenu,
