@@ -1746,6 +1746,140 @@ export default function AdminPanel() {
         </DialogContent>
       </Dialog>
 
+
+      {/* Space Selector Dialog - Assign user as manager to multiple spaces */}
+      <Dialog open={spaceSelectDialog.open} onOpenChange={(open) => setSpaceSelectDialog({ ...spaceSelectDialog, open })}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Manage Space Assignments for {spaceSelectDialog.userName}</DialogTitle>
+            <p className="text-sm" style={{ color: '#8E8E8E' }}>Select spaces where this user should be a manager</p>
+          </DialogHeader>
+          <div className="py-4 space-y-2">
+            {spaces.map((space) => (
+              <div key={space.id} className="flex items-center justify-between p-3 border rounded-lg" style={{ borderColor: '#E5E7EB' }}>
+                <div>
+                  <p className="font-medium" style={{ color: '#011328' }}>{space.name}</p>
+                  <p className="text-xs" style={{ color: '#8E8E8E' }}>{space.description || 'No description'}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={async () => {
+                    // Check if user is already a manager
+                    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${space.id}/members-detailed`, {
+                      credentials: 'include'
+                    });
+                    const data = await response.json();
+                    const membership = data.members.find(m => m.user_id === spaceSelectDialog.userId);
+                    
+                    if (membership && membership.role === 'manager') {
+                      // Demote
+                      await handleDemoteFromManager(space.id, spaceSelectDialog.userId, spaceSelectDialog.userName);
+                    } else {
+                      // Promote
+                      await handlePromoteToManager(space.id, spaceSelectDialog.userId, spaceSelectDialog.userName);
+                    }
+                    // Force reload
+                    window.location.reload();
+                  }}
+                  className={spaceSelectDialog.selectedSpaces.includes(space.id) ? 'bg-purple-100 text-purple-700' : ''}
+                >
+                  Toggle Manager
+                </Button>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button onClick={() => {
+              setSpaceSelectDialog({ open: false, userId: null, userName: '', selectedSpaces: [] });
+              window.location.reload();
+            }}>
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Space Managers Dialog - View and manage managers for a specific space */}
+      <Dialog open={managersDialog.open} onOpenChange={(open) => setManagersDialog({ ...managersDialog, open })}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Space Managers of {managersDialog.spaceName}</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            {/* Current Managers */}
+            <div className="mb-6">
+              <h3 className="font-semibold mb-3" style={{ color: '#011328' }}>Current Managers</h3>
+              {managersDialog.managers.length === 0 ? (
+                <p className="text-center py-4" style={{ color: '#8E8E8E' }}>No managers assigned</p>
+              ) : (
+                <div className="space-y-2">
+                  {managersDialog.managers.map((membership) => (
+                    <div key={membership.id} className="flex items-center justify-between p-3 border rounded-lg" style={{ borderColor: '#E5E7EB' }}>
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold">
+                          {membership.user?.name?.charAt(0) || '?'}
+                        </div>
+                        <div>
+                          <p className="font-medium" style={{ color: '#011328' }}>{membership.user?.name || 'Unknown'}</p>
+                          <p className="text-sm" style={{ color: '#8E8E8E' }}>{membership.user?.email}</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleRemoveManager(managersDialog.spaceId, membership.user_id, membership.user?.name)}
+                        style={{ color: '#EF4444', borderColor: '#EF4444' }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Add New Manager */}
+            <div>
+              <h3 className="font-semibold mb-3" style={{ color: '#011328' }}>Add New Manager</h3>
+              {managersDialog.allMembers.length === 0 ? (
+                <p className="text-center py-4" style={{ color: '#8E8E8E' }}>No members available to promote</p>
+              ) : (
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {managersDialog.allMembers.map((membership) => (
+                    <div key={membership.id} className="flex items-center justify-between p-3 border rounded-lg" style={{ borderColor: '#E5E7EB' }}>
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-between font-semibold">
+                          {membership.user?.name?.charAt(0) || '?'}
+                        </div>
+                        <div>
+                          <p className="font-medium" style={{ color: '#011328' }}>{membership.user?.name || 'Unknown'}</p>
+                          <p className="text-sm" style={{ color: '#8E8E8E' }}>{membership.user?.email}</p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAddManager(managersDialog.spaceId, membership.user_id, membership.user?.name)}
+                        className="border-purple-400 text-purple-600"
+                      >
+                        Add as Manager
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setManagersDialog({ ...managersDialog, open: false })}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
     </div>
   );
 }
