@@ -23,6 +23,7 @@ import {
   Crown,
   Loader2,
   Home,
+  Trophy,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
