@@ -381,7 +381,7 @@ export default function PostDetailPage() {
                         {new Date(comment.created_at).toLocaleString()}
                       </p>
                     </div>
-                    <p style={{ color: '#4B5563' }}>{comment.content}</p>
+                    <p style={{ color: '#4B5563' }} dangerouslySetInnerHTML={{ __html: comment.content }} />
                   </div>
                 </div>
               ))
