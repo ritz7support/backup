@@ -1707,6 +1707,180 @@ async def cancel_join_request(request_id: str, user: User = Depends(require_auth
     
     return {"message": "Request cancelled"}
 
+
+# ==================== MEMBER MANAGEMENT ENDPOINTS ====================
+
+@api_router.get("/spaces/{space_id}/members-detailed")
+async def get_space_members_detailed(space_id: str, user: User = Depends(require_auth)):
+    """Get detailed member list for a space (admin/manager only)"""
+    # Check if user is admin or manager
+    is_authorized = await is_space_manager_or_admin(user, space_id)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
+    
+    memberships = await db.space_memberships.find({
+        "space_id": space_id
+    }, {"_id": 0}).to_list(1000)
+    
+    # Enrich with user data
+    for membership in memberships:
+        user_data = await db.users.find_one(
+            {"id": membership['user_id']}, 
+            {"_id": 0, "id": 1, "name": 1, "email": 1, "picture": 1, "role": 1, "badges": 1}
+        )
+        membership['user'] = user_data
+    
+    return {"members": memberships, "count": len(memberships)}
+
+@api_router.delete("/spaces/{space_id}/members/{user_id}")
+async def remove_space_member(space_id: str, user_id: str, user: User = Depends(require_auth)):
+    """Remove a member from a space (admin/manager only)"""
+    # Check if user is admin or manager
+    is_authorized = await is_space_manager_or_admin(user, space_id)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
+    
+    # Can't remove yourself if you're the only manager
+    if user_id == user.id:
+        managers_count = await db.space_memberships.count_documents({
+            "space_id": space_id,
+            "role": "manager"
+        })
+        if managers_count == 1:
+            raise HTTPException(status_code=400, detail="Cannot remove yourself as the only manager")
+    
+    result = await db.space_memberships.delete_one({
+        "space_id": space_id,
+        "user_id": user_id
+    })
+    
+    if result.deleted_count > 0:
+        await db.spaces.update_one({"id": space_id}, {"$inc": {"member_count": -1}})
+        return {"message": "Member removed successfully"}
+    
+    raise HTTPException(status_code=404, detail="Member not found")
+
+@api_router.put("/spaces/{space_id}/members/{user_id}/block")
+async def block_space_member(space_id: str, user_id: str, user: User = Depends(require_auth)):
+    """Block a member from a space (admin/manager only)"""
+    # Check if user is admin or manager
+    is_authorized = await is_space_manager_or_admin(user, space_id)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
+    
+    # Can't block yourself
+    if user_id == user.id:
+        raise HTTPException(status_code=400, detail="Cannot block yourself")
+    
+    result = await db.space_memberships.update_one(
+        {
+            "space_id": space_id,
+            "user_id": user_id
+        },
+        {
+            "$set": {
+                "status": "blocked",
+                "blocked_at": datetime.now(timezone.utc).isoformat(),
+                "blocked_by": user.id
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    return {"message": "Member blocked successfully"}
+
+@api_router.put("/spaces/{space_id}/members/{user_id}/unblock")
+async def unblock_space_member(space_id: str, user_id: str, user: User = Depends(require_auth)):
+    """Unblock a member from a space (admin/manager only)"""
+    # Check if user is admin or manager
+    is_authorized = await is_space_manager_or_admin(user, space_id)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Admin or manager access required")
+    
+    result = await db.space_memberships.update_one(
+        {
+            "space_id": space_id,
+            "user_id": user_id,
+            "status": "blocked"
+        },
+        {
+            "$set": {
+                "status": "member",
+                "blocked_at": None,
+                "blocked_by": None
+            }
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Blocked member not found")
+    
+    return {"message": "Member unblocked successfully"}
+
+@api_router.put("/spaces/{space_id}/members/{user_id}/promote")
+async def promote_to_manager(space_id: str, user_id: str, user: User = Depends(require_auth)):
+    """Promote a member to manager (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can promote members to manager")
+    
+    # Check if user is a member
+    membership = await db.space_memberships.find_one({
+        "space_id": space_id,
+        "user_id": user_id,
+        "status": "member"
+    })
+    
+    if not membership:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    result = await db.space_memberships.update_one(
+        {
+            "space_id": space_id,
+            "user_id": user_id
+        },
+        {
+            "$set": {"role": "manager"}
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Member not found")
+    
+    return {"message": "Member promoted to manager successfully"}
+
+@api_router.put("/spaces/{space_id}/members/{user_id}/demote")
+async def demote_from_manager(space_id: str, user_id: str, user: User = Depends(require_auth)):
+    """Demote a manager to regular member (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Only admins can demote managers")
+    
+    # Can't demote yourself if you're the only manager
+    if user_id == user.id:
+        managers_count = await db.space_memberships.count_documents({
+            "space_id": space_id,
+            "role": "manager"
+        })
+        if managers_count == 1:
+            raise HTTPException(status_code=400, detail="Cannot demote yourself as the only manager")
+    
+    result = await db.space_memberships.update_one(
+        {
+            "space_id": space_id,
+            "user_id": user_id,
+            "role": "manager"
+        },
+        {
+            "$set": {"role": "member"}
+        }
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Manager not found")
+    
+    return {"message": "Manager demoted to member successfully"}
+
 # Subscription Tiers Management
 @api_router.get("/subscription-tiers")
 async def get_subscription_tiers():
