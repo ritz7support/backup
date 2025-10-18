@@ -98,9 +98,11 @@ export const adminAPI = {
 // User Management API
 export const usersAPI = {
   getAllUsers: () => api.get('/users/all'),
+  getAllUsersWithMemberships: () => api.get('/users/all-with-memberships'),
   promoteToAdmin: (userId) => api.put(`/users/${userId}/promote-to-admin`),
   demoteFromAdmin: (userId) => api.put(`/users/${userId}/demote-from-admin`),
   getManagedSpaces: (userId) => api.get(`/users/${userId}/managed-spaces`),
+  setTeamMember: (userId, isTeamMember) => api.put(`/users/${userId}/set-team-member`, { is_team_member: isTeamMember }),
 };
 
 // Posts API
