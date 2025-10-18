@@ -172,15 +172,18 @@ backend:
 
   - task: "Join Request Approval - Support Managers"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Updated approve/reject join request endpoints to allow both admins and managers"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Join request approval working correctly for managers. Managers can successfully approve join requests for spaces they manage. Approved users are properly added to the space membership. Manager permissions are correctly validated."
 
   - task: "Post/Comment/React - Check for blocked users and membership"
     implemented: true
