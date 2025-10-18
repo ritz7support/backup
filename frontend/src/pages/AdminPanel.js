@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 export default function AdminPanel() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('groups'); // groups | spaces | subscriptions
+  const [activeTab, setActiveTab] = useState('overview'); // overview | subscriptions
   
   // Data states
   const [spaceGroups, setSpaceGroups] = useState([]);
