@@ -338,7 +338,7 @@ export default function PostDetailPage() {
           </h3>
 
           {/* Add Comment Form */}
-          <form onSubmit={handleAddComment} className="mb-6">
+          <div className="mb-6">
             <div className="flex items-start gap-3">
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold flex-shrink-0"
@@ -347,30 +347,19 @@ export default function PostDetailPage() {
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </div>
               <div className="flex-1">
-                <textarea
+                <CommentEditor
                   value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  placeholder="Write a comment..."
-                  className="w-full px-3 py-2 border rounded-lg resize-none focus:outline-none focus:ring-2"
-                  style={{
-                    borderColor: '#D1D5DB',
-                    minHeight: '80px',
-                    '--tw-ring-color': '#3B82F6'
+                  onChange={(text, image) => {
+                    setComment(text);
+                    setCommentImage(image);
                   }}
+                  onSubmit={handleAddComment}
+                  placeholder="Write a comment..."
                   disabled={submittingComment}
                 />
-                <div className="flex justify-end mt-2">
-                  <Button
-                    type="submit"
-                    disabled={!comment.trim() || submittingComment}
-                    style={{ backgroundColor: '#3B82F6' }}
-                  >
-                    {submittingComment ? 'Posting...' : 'Post Comment'}
-                  </Button>
-                </div>
               </div>
             </div>
-          </form>
+          </div>
 
           {/* Comments List */}
           <div className="space-y-4">
