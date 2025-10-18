@@ -314,11 +314,10 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Create Event API"
-    - "Update Event API"
-    - "Delete Event API"
-    - "RSVP Event API"
-    - "Get Events API"
+    - "CommentEditor Component"
+    - "Dynamic Back Button"
+    - "Comment Submission - No Page Refresh"
+    - "All Spaces Generic Functionality"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -326,25 +325,33 @@ test_plan:
 agent_communication:
   - agent: "main"
     message: |
-      Completed all Events Page enhancements as requested:
-      1. ✅ Date picker opens on input click (using showPicker())
-      2. ✅ End time validation with min attribute and form check
-      3. ✅ Events clickable for admin to edit
-      4. ✅ My Events filter toggle working
-      5. ✅ Empty state message implemented
+      Implemented comment functionality and space improvements as requested:
       
-      All frontend features verified via screenshots. Now requesting backend testing to verify all event-related API endpoints are working correctly with proper auth, validation, and data handling.
-  - agent: "testing"
-    message: |
-      ✅ BACKEND TESTING COMPLETE - All event APIs working correctly!
+      ✅ CommentEditor Component:
+      - Created /app/frontend/src/components/CommentEditor.js
+      - Supports text + image upload (no rich text)
+      - 3000 character limit with counter (LinkedIn-style)
+      - Max image size 5MB, image preview functionality
       
-      Comprehensive testing performed on all 5 event-related endpoints:
-      • GET /api/events - ✅ Working (returns proper event structure)
-      • POST /api/events - ✅ Working (admin auth, event creation)
-      • PUT /api/events/{id} - ✅ Working (admin-only, proper updates)
-      • DELETE /api/events/{id} - ✅ Working (admin-only, complete deletion)
-      • POST /api/events/{id}/rsvp - ✅ Working (toggle behavior, auth required)
+      ✅ Dynamic Back Button:
+      - PostDetailPage now receives space name via route state
+      - Falls back to API fetch if space name not available
+      - Back button shows "Back to [Space Name]" dynamically
+      - Works for all spaces generically
       
-      All authentication and authorization working properly. Admin-only endpoints correctly reject non-admin users with 403 status. RSVP toggle behavior working as expected. All 8/8 tests passed.
+      ✅ Comment Submission - No Page Refresh:
+      - Fixed both PostDetailPage and SpaceFeed quick popup
+      - Comments added to state directly (optimistic UI)
+      - Post comment_count updated locally
+      - No more full page reload after commenting
       
-      Minor note: Date validation (end_time > start_time) not implemented on backend but core functionality is solid.
+      ✅ All Spaces Generic:
+      - Added SPACE_CONFIG for resources, showcase, discussions
+      - Updated feedSpaces array to include all 6 spaces
+      - All spaces now work consistently
+      
+      Frontend restarted. Ready for testing to verify:
+      1. Comment submission works smoothly without refresh
+      2. Images in comments render properly
+      3. Back button shows correct space name
+      4. All 6 spaces (Introduction, Ask-Doubts, Gratitude, Resources, Showcase, Discussions) work the same way
