@@ -376,7 +376,7 @@ async def check_and_unblock_expired_memberships(user_id: str, space_id: str):
 async def get_effective_block_status(user_id: str, space_id: str) -> dict:
     """Get the effective block status for a user in a space, checking for expiry"""
     # First, check and auto-unblock if expired
-    status = await check_and_unblock_expired_memberships(user_id, space_id)
+    await check_and_unblock_expired_memberships(user_id, space_id)
     
     # Re-fetch membership to get current status
     membership = await db.space_memberships.find_one({
