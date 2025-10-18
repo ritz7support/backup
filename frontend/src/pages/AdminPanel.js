@@ -103,6 +103,42 @@ export default function AdminPanel() {
   };
 
 
+  const loadAllUsers = async () => {
+    try {
+      const { data } = await usersAPI.getAllUsers();
+      setAllUsers(data || []);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  };
+
+  // User role management
+  const handlePromoteToAdmin = async (userId, userName) => {
+    if (!window.confirm(`Promote ${userName} to Admin? They will have full access to all admin features.`)) return;
+    
+    try {
+      await usersAPI.promoteToAdmin(userId);
+      toast.success(`${userName} promoted to Admin!`);
+      loadAllUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to promote user');
+    }
+  };
+
+  const handleDemoteFromAdmin = async (userId, userName) => {
+    if (!window.confirm(`Demote ${userName} from Admin to Learner? They will lose admin access.`)) return;
+    
+    try {
+      await usersAPI.demoteFromAdmin(userId);
+      toast.success(`${userName} demoted to Learner`);
+      loadAllUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to demote user');
+    }
+  };
+
+
+
   // Members management
   const handleViewMembers = async (spaceId, spaceName) => {
     try {
