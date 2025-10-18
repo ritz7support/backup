@@ -865,4 +865,180 @@ agent_communication:
       
       **OVERALL RESULT: ALL PHASE 2 ENHANCED USER MANAGEMENT FEATURES FULLY FUNCTIONAL ✅**
       
+
+user_problem_statement: |
+  Phase 3 (NEW): Implement Payment Gateway Integration for Indian and International Users:
+  1. Razorpay Integration - For INR payments (monthly ₹99, yearly ₹999), with SDK loaded in index.html, payment verification endpoint
+  2. Stripe Integration - For USD payments (monthly $5, yearly $49), with checkout session and payment status polling
+  3. Payment Flow - Create order, redirect to payment gateway, verify payment, create subscription, update user membership tier
+
+backend:
+  - task: "Razorpay Payment Order Creation"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Razorpay order creation in /api/payments/create-order endpoint. Razorpay client initialized with test credentials (rzp_test_RV4wn86cLe1vtg). Creates order, stores transaction in payment_transactions collection with status='pending'. Returns order_id, amount, currency, and key_id for frontend."
+
+  - task: "Razorpay Payment Verification"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added /api/payments/razorpay/verify endpoint to verify payment signature using razorpay_client.utility.verify_payment_signature(). Updates transaction status to 'completed', creates subscription record with proper dates, updates user membership_tier to 'paid'."
+
+  - task: "Stripe Payment Checkout Session Creation"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Stripe checkout session creation in /api/payments/create-order endpoint using emergentintegrations library. Updated Stripe API key with user's test credentials (sk_test_51HQDY5FJbX6FDilD...). Creates checkout session with dynamic success/cancel URLs from origin_url. Stores transaction with session_id in payment_transactions collection. Returns url and session_id for frontend redirect."
+
+  - task: "Stripe Payment Status Polling"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added GET /api/payments/status/{session_id} endpoint to check Stripe payment status using stripe_checkout.get_checkout_status(). Updates transaction status only once when payment_status='paid'. Creates subscription record and updates user membership_tier to 'paid'. Prevents duplicate processing of same payment."
+
+  - task: "Stripe Webhook Handler"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Stripe webhook endpoint exists at /api/webhook/stripe for handling Stripe events. Uses stripe_checkout.handle_webhook() with signature verification."
+
+frontend:
+  - task: "Razorpay SDK Loading"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/public/index.html"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "user"
+        comment: "User reported 'Payment initializing failed' error when clicking Get Started on pricing page. Razorpay SDK was incorrectly placed as JSX script tag in PricingPage.js component which doesn't work in React."
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed Razorpay SDK loading by moving script tag from PricingPage.js to index.html <head> section. Added <script src='https://checkout.razorpay.com/v1/checkout.js'></script> to ensure window.Razorpay is available globally before component renders."
+
+  - task: "PricingPage - Payment Flow Handler"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/PricingPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated handleSubscribe() function to handle both Razorpay and Stripe flows. For Razorpay (INR plans): opens modal with verification handler. For Stripe (USD plans): redirects to checkout URL. Sends origin_url (window.location.origin) to backend for dynamic URL construction."
+
+  - task: "PaymentSuccess - Status Polling"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/PaymentSuccess.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "PaymentSuccess page implements polling mechanism for Stripe payments. Extracts session_id from URL query params, polls /api/payments/status/{session_id} every 2 seconds for max 5 attempts. Shows loading spinner during processing, success message when payment_status='paid', refreshes user auth data after successful payment."
+
+  - task: "Payment API Methods"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/lib/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added paymentsAPI with methods: createOrder(plan, originUrl), checkStatus(sessionId), verifyRazorpayPayment(data). All methods properly integrated with axios instance and use correct API endpoints with /api prefix."
+
+metadata:
+  created_by: "main_agent"
+  version: "3.0"
+  test_sequence: 3
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Razorpay Payment Order Creation"
+    - "Razorpay Payment Verification"
+    - "Stripe Payment Checkout Session Creation"
+    - "Stripe Payment Status Polling"
+    - "Razorpay SDK Loading"
+    - "PricingPage - Payment Flow Handler"
+    - "PaymentSuccess - Status Polling"
+    - "Payment API Methods"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      **Payment Integration Setup Complete - Ready for Testing**
+      
+      I've completed the following:
+      
+      1. **Razorpay Integration (INR Plans)**:
+         - Fixed SDK loading issue by moving script from component to index.html
+         - Backend has order creation and payment verification endpoints
+         - Frontend handles Razorpay modal and verification callback
+         - Test credentials configured in backend .env
+      
+      2. **Stripe Integration (USD Plans)**:
+         - Updated Stripe API key with user-provided test credentials
+         - Backend creates checkout sessions with dynamic URLs using emergentintegrations
+         - Frontend redirects to Stripe checkout and polls payment status on return
+         - PaymentSuccess page implements proper polling mechanism (5 attempts, 2s interval)
+      
+      3. **Payment Flow**:
+         - PricingPage detects plan type (INR=Razorpay, USD=Stripe) and handles appropriately
+         - Both flows create payment_transactions record with status='pending'
+         - On successful payment, transaction updated to 'completed'
+         - Subscription record created with proper start/end dates
+         - User membership_tier updated to 'paid'
+      
+      **Test Scenarios Needed**:
+      1. Test Razorpay flow: Create order for INR plan, verify order_id returned, check transaction record created
+      2. Test Stripe flow: Create checkout session for USD plan, verify redirect URL returned, check transaction record created
+      3. Test payment status polling for Stripe
+      4. Verify subscription creation and user membership update logic
+      
+      **Authentication**: Tests should use authenticated user. User needs to be logged in to access /api/payments/* endpoints.
+      
+      **Note**: Frontend testing not needed yet - focus on backend API testing first to ensure payment gateway integrations are working correctly.
+
       The backend system is ready for production use with all requested Phase 2 features working correctly.
