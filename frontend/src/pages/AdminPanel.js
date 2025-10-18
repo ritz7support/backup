@@ -1890,6 +1890,64 @@ export default function AdminPanel() {
       </Dialog>
 
 
+      {/* Custom Confirmation Dialog */}
+      <Dialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              {confirmDialog.variant === 'success' && (
+                <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                  <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+              )}
+              {confirmDialog.variant === 'warning' && (
+                <div className="h-8 w-8 rounded-full bg-yellow-100 flex items-center justify-center">
+                  <svg className="h-5 w-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+              )}
+              {confirmDialog.variant === 'danger' && (
+                <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center">
+                  <svg className="h-5 w-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+              )}
+              <span>{confirmDialog.title}</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p style={{ color: '#3B3B3B' }}>{confirmDialog.message}</p>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setConfirmDialog({ ...confirmDialog, open: false })}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => confirmDialog.onConfirm && confirmDialog.onConfirm()}
+              style={
+                confirmDialog.variant === 'success' 
+                  ? { background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', color: 'white' }
+                  : confirmDialog.variant === 'warning'
+                  ? { background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', color: 'white' }
+                  : confirmDialog.variant === 'danger'
+                  ? { background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)', color: 'white' }
+                  : { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }
+              }
+            >
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
     </div>
   );
 }
