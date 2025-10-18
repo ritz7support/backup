@@ -1649,10 +1649,10 @@ def main():
     success = tester.run_all_tests()
     
     if success:
-        print("\n✅ Phase 2 enhanced user management testing completed successfully")
+        print("\n✅ Phase 2 & 3 enhanced user management and payment gateway testing completed successfully")
         sys.exit(0)
     else:
-        print("\n❌ Phase 2 enhanced user management testing completed with failures")
+        print("\n❌ Phase 2 & 3 enhanced user management and payment gateway testing completed with failures")
         sys.exit(1)
 
 if __name__ == "__main__":
