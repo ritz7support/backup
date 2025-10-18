@@ -115,18 +115,48 @@ export default function ProfilePage() {
           <div className="flex flex-col md:flex-row gap-8">
             {/* Avatar Section */}
             <div className="flex flex-col items-center">
-              <Avatar className="h-32 w-32 mb-4">
-                {member.picture ? (
-                  <AvatarImage src={member.picture} />
-                ) : (
-                  <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white', fontSize: '3rem' }}>
-                    {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                  </AvatarFallback>
+              <div className="relative group">
+                <Avatar className="h-32 w-32 mb-4">
+                  {member.picture ? (
+                    <AvatarImage src={member.picture} />
+                  ) : (
+                    <AvatarFallback style={{ backgroundColor: '#0462CB', color: 'white', fontSize: '3rem' }}>
+                      {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                
+                {/* Edit Picture Overlay (only for own profile) */}
+                {isOwnProfile && !isArchived && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer mb-4">
+                    <label htmlFor="profile-picture-upload" className="cursor-pointer text-white text-sm font-medium">
+                      📷 Change
+                      <input
+                        id="profile-picture-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handlePictureUpload}
+                      />
+                    </label>
+                  </div>
                 )}
-              </Avatar>
+              </div>
+              
+              {/* Remove Picture Button (only if user has a picture and it's their own profile) */}
+              {isOwnProfile && !isArchived && member.picture && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleRemovePicture}
+                  className="text-xs text-red-600 border-red-300 hover:bg-red-50"
+                >
+                  Remove Picture
+                </Button>
+              )}
               
               {isArchived && (
-                <div className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium mt-2" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
                   <Archive className="h-4 w-4" />
                   Archived
                 </div>
