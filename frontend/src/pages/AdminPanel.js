@@ -67,7 +67,8 @@ export default function AdminPanel() {
         loadSpaceGroups(),
         loadSpaces(),
         loadSubscriptionTiers(),
-        loadAllUsers()
+        loadAllUsers(),
+        loadLevels()
       ]);
     } catch (error) {
       toast.error('Failed to load data');
