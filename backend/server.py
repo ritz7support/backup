@@ -187,6 +187,30 @@ class SpaceInvite(BaseModel):
     max_uses: Optional[int] = None  # None = unlimited uses
     uses_count: int = 0
     expires_at: Optional[datetime] = None  # Optional expiry
+
+
+# ==================== LEADERBOARD MODELS ====================
+
+class Level(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    level_number: int  # 1, 2, 3, etc.
+    level_name: str = ""  # Optional name like "Beginner", "Pro"
+    points_required: int  # Points needed to reach this level
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class PointTransaction(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    points: int  # Points awarded (can be negative for penalties)
+    action_type: str  # "like", "comment", "post", "receive_like", "receive_comment", "admin_award"
+    related_entity_type: Optional[str] = None  # "post", "comment"
+    related_entity_id: Optional[str] = None  # ID of the post/comment
+    related_user_id: Optional[str] = None  # User who performed the action (for receive actions)
+    description: Optional[str] = None  # Human-readable description
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
