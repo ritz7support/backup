@@ -657,6 +657,24 @@ export default function AdminPanel() {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => handleViewMembers(space.id, space.name)}
+                              title="Manage Members"
+                            >
+                              <UsersIcon className="h-4 w-4" />
+                            </Button>
+                            {(space.visibility === 'private' || space.visibility === 'secret') && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleViewJoinRequests(space.id, space.name)}
+                                title="Join Requests"
+                              >
+                                <Shield className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleEditSpace(space)}
                             >
                               <Pencil className="h-4 w-4" />
