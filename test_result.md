@@ -198,6 +198,54 @@ backend:
         comment: "✅ TESTED: GET /api/events working correctly. Returns list of events with proper structure including all required fields: id, title, description, event_type, start_time, end_time, requires_membership, rsvp_list. No authentication required for reading events."
 
 frontend:
+  - task: "CommentEditor Component"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/CommentEditor.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created new CommentEditor component with text + image support, 3000 char limit, character counter. No rich text formatting."
+
+  - task: "Dynamic Back Button"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/PostDetailPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Implemented dynamic back button that shows correct space name (e.g., 'Back to Introduction', 'Back to Resources'). Space name passed via route state or fetched from API."
+
+  - task: "Comment Submission - No Page Refresh"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/PostDetailPage.js, /app/frontend/src/components/SpaceFeed.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed comment submission to update state directly instead of full page reload. Comments are added optimistically, comment_count updated locally. Works in both PostDetailPage and quick comment popup."
+
+  - task: "All Spaces Generic Functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/components/SpaceFeed.js, /app/frontend/src/pages/SpaceView.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added SPACE_CONFIG for all 6 spaces (resources, showcase, discussions added). Updated feedSpaces array to include all spaces. All spaces now have consistent functionality."
+
   - task: "Date Picker UX - Click to Open"
     implemented: true
     working: true
