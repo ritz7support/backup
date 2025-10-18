@@ -170,18 +170,15 @@ class SpaceManagementTester:
                 members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
                 
                 if members_response.status_code == 200:
-                    members = members_response.json()
+                    response_data = members_response.json()
+                    members = response_data.get('members', [])
                     
                     # Find the regular user's membership
                     regular_membership = None
                     for member in members:
-                        # Handle both dict and string responses
-                        if isinstance(member, dict):
-                            if member.get('user_id') == self.regular_user_id:
-                                regular_membership = member
-                                break
-                        else:
-                            self.log(f"⚠️ Unexpected member format: {type(member)} - {member}", "WARNING")
+                        if isinstance(member, dict) and member.get('user_id') == self.regular_user_id:
+                            regular_membership = member
+                            break
                     
                     if regular_membership:
                         # Check if role field exists and has correct default value
