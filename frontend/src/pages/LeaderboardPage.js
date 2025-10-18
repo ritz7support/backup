@@ -72,15 +72,18 @@ export default function LeaderboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F4F6' }}>
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-      </div>
+      <Dashboard>
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F3F4F6' }}>
+          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        </div>
+      </Dashboard>
     );
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F3F4F6' }}>
-      <div className="max-w-6xl mx-auto p-8">
+    <Dashboard>
+      <div className="min-h-screen" style={{ backgroundColor: '#F3F4F6' }}>
+        <div className="max-w-6xl mx-auto p-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
