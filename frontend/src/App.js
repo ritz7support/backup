@@ -13,7 +13,7 @@ import PostDetailPage from './pages/PostDetailPage';
 import EventsPage from './pages/EventsPage';
 import MembersPage from './pages/MembersPage';
 import ProfilePage from './pages/ProfilePage';
-import AdminSpacesPage from './pages/AdminSpacesPage';
+import AdminPanel from './pages/AdminPanel';
 import DMsPage from './pages/DMsPage';
 import PricingPage from './pages/PricingPage';
 import PaymentSuccess from './pages/PaymentSuccess';
