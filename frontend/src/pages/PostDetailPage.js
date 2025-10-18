@@ -38,12 +38,26 @@ export default function PostDetailPage() {
 
   useEffect(() => {
     fetchSpaces();
+    fetchSpaceGroups();
     fetchPost();
     // Get space name from route state if available
     if (location.state?.spaceName) {
       setSpaceName(location.state.spaceName);
     }
   }, [postId, spaceId, location.state]);
+
+  const fetchSpaceGroups = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/space-groups`, {
+        credentials: 'include'
+      });
+      const data = await response.json();
+      setSpaceGroups(data || []);
+    } catch (error) {
+      console.error('Error fetching space groups:', error);
+      setSpaceGroups([]);
+    }
+  };
 
   const fetchSpaces = async () => {
     try {
