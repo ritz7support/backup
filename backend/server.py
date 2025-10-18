@@ -525,17 +525,6 @@ async def get_user_leaderboard_stats(user_id: str):
         "points_to_next_level": points_to_next_level
     }
 
-        return {"is_blocked": False, "block_type": None}
-    
-    block_type = membership.get('block_type', 'hard')
-    return {
-        "is_blocked": True,
-        "block_type": block_type,
-        "blocked_at": membership.get('blocked_at'),
-        "block_expires_at": membership.get('block_expires_at')
-    }
-
-
 
 # ==================== AUTH ENDPOINTS ====================
 
