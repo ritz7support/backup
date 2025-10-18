@@ -864,6 +864,80 @@ export default function AdminPanel() {
         {/* Old separate tabs removed - now using unified overview tab */}
 
         {/* Subscription Tiers Tab */}
+
+
+        {/* Users Management Tab */}
+        {activeTab === 'users' && (
+          <div>
+            <div className="bg-white rounded-2xl p-6 shadow-sm border" style={{ borderColor: '#D1D5DB' }}>
+              <h2 className="text-xl font-bold mb-6" style={{ color: '#011328' }}>User Management</h2>
+              
+              <div className="space-y-3">
+                {allUsers.map((u) => (
+                  <div key={u.id} className="flex items-center justify-between p-4 border rounded-lg" style={{ borderColor: '#E5E7EB' }}>
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="h-12 w-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-lg">
+                        {u.name?.charAt(0) || '?'}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-lg" style={{ color: '#011328' }}>{u.name || 'Unknown'}</span>
+                          {u.role === 'admin' && (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              Admin
+                            </span>
+                          )}
+                          {u.is_founding_member && (
+                            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                              Founding Member
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm" style={{ color: '#8E8E8E' }}>{u.email}</p>
+                        {u.badges && u.badges.length > 0 && (
+                          <div className="flex gap-1 mt-1">
+                            {u.badges.map((badge, i) => (
+                              <span key={i} className="text-sm">{badge}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      {u.role === 'admin' && u.id !== user?.id ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDemoteFromAdmin(u.id, u.name)}
+                          className="border-red-400 text-red-600 hover:bg-red-50"
+                        >
+                          Demote from Admin
+                        </Button>
+                      ) : u.role === 'learner' ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePromoteToAdmin(u.id, u.name)}
+                          className="border-green-400 text-green-600 hover:bg-green-50"
+                        >
+                          Promote to Admin
+                        </Button>
+                      ) : null}
+                      {u.id === user?.id && (
+                        <span className="text-sm" style={{ color: '#8E8E8E' }}>(You)</span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {allUsers.length === 0 && (
+                <p className="text-center py-12" style={{ color: '#8E8E8E' }}>No users found</p>
+              )}
+            </div>
+          </div>
+        )}
+
         {activeTab === 'subscriptions' && (
           <div>
             <div className="flex justify-between items-center mb-4">
