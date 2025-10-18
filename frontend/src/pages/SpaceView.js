@@ -69,18 +69,34 @@ export default function SpaceView() {
     );
   }
 
-  // Render SpaceFeed for posting spaces (introductions, ask-doubts, gratitude, resources, showcase, discussions)
+  // Render content based on space type
   const renderSpaceContent = () => {
-    const feedSpaces = ['introductions', 'ask-doubts', 'gratitude', 'resources', 'showcase', 'discussions'];
+    // Find the current space
+    const currentSpace = spaces.find(s => s.id === spaceId);
     
-    if (feedSpaces.includes(spaceId)) {
+    if (!currentSpace) {
+      return (
+        <ComingSoonPage 
+          title={getSpaceTitle()}
+          description="This space is being prepared with exciting content. Check back soon!" 
+        />
+      );
+    }
+    
+    // Check space type and render accordingly
+    const spaceType = currentSpace.space_type || 'post';
+    
+    if (spaceType === 'post' || spaceType === 'qa') {
+      // Both post and Q&A use SpaceFeed for now
+      // SpaceFeed will handle different layouts based on space type
       return <SpaceFeed spaceId={spaceId} />;
     }
     
+    // For other types, show coming soon for now
     return (
       <ComingSoonPage 
         title={getSpaceTitle()}
-        description="This space is being prepared with exciting content. Check back soon!" 
+        description={`${spaceType.charAt(0).toUpperCase() + spaceType.slice(1)} type spaces are coming soon!`}
       />
     );
   };
