@@ -1906,6 +1906,113 @@ export default function AdminPanel() {
       </Dialog>
 
 
+      {/* Invites Dialog (for Secret Spaces) */}
+      <Dialog open={invitesDialog.open} onOpenChange={(open) => setInvitesDialog({ ...invitesDialog, open })}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Invites for {invitesDialog.spaceName}</DialogTitle>
+            <p className="text-sm text-gray-600">Create and manage invite links for this secret space</p>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            {/* Create New Invite */}
+            <div className="border rounded-lg p-4" style={{ borderColor: '#E5E7EB', background: '#F9FAFB' }}>
+              <h3 className="font-medium mb-3">Create New Invite</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Max Uses (Optional)</label>
+                  <Input 
+                    id="invite-max-uses"
+                    type="number" 
+                    placeholder="Unlimited" 
+                    min="1"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Expires At (Optional)</label>
+                  <Input 
+                    id="invite-expires"
+                    type="datetime-local"
+                  />
+                </div>
+              </div>
+              <Button
+                className="mt-3 w-full"
+                onClick={() => {
+                  const maxUses = document.getElementById('invite-max-uses').value;
+                  const expires = document.getElementById('invite-expires').value;
+                  handleCreateInvite(
+                    invitesDialog.spaceId,
+                    maxUses ? parseInt(maxUses) : null,
+                    expires ? new Date(expires).toISOString() : null
+                  );
+                }}
+                style={{ background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)' }}
+              >
+                Create Invite Link
+              </Button>
+            </div>
+
+            {/* Existing Invites */}
+            <div>
+              <h3 className="font-medium mb-3">Active Invites</h3>
+              {invitesDialog.invites.length === 0 ? (
+                <p className="text-center py-4" style={{ color: '#8E8E8E' }}>No active invites</p>
+              ) : (
+                <div className="space-y-3">
+                  {invitesDialog.invites.map((invite) => (
+                    <div key={invite.id} className="border rounded-lg p-3" style={{ borderColor: '#E5E7EB' }}>
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <code className="px-2 py-1 bg-gray-100 rounded text-sm font-mono">
+                              {invite.invite_code}
+                            </code>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => {
+                                const link = `${window.location.origin}/join/${invite.invite_code}`;
+                                navigator.clipboard.writeText(link);
+                                toast.success('Link copied!');
+                              }}
+                              className="h-6 px-2"
+                            >
+                              📋 Copy
+                            </Button>
+                          </div>
+                          <div className="text-xs space-y-1" style={{ color: '#8E8E8E' }}>
+                            <p>Uses: {invite.uses_count}{invite.max_uses ? ` / ${invite.max_uses}` : ' (unlimited)'}</p>
+                            <p>Created: {new Date(invite.created_at).toLocaleDateString()}</p>
+                            {invite.expires_at && (
+                              <p>Expires: {new Date(invite.expires_at).toLocaleString()}</p>
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeactivateInvite(invite.invite_code)}
+                          style={{ color: '#EF4444', borderColor: '#EF4444' }}
+                        >
+                          Deactivate
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInvitesDialog({ ...invitesDialog, open: false })}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+
       {/* Space Selector Dialog - Assign user as manager to multiple spaces */}
       <Dialog open={spaceSelectDialog.open} onOpenChange={(open) => setSpaceSelectDialog({ ...spaceSelectDialog, open })}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
