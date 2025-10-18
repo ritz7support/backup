@@ -56,6 +56,8 @@ class User(BaseModel):
     badges: List[str] = []
     membership_tier: str = "free"  # free, paid
     archived: bool = False
+    total_points: int = 0  # Leaderboard: Total points earned
+    current_level: int = 1  # Leaderboard: Current level number
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
