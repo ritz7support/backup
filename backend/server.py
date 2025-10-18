@@ -1100,6 +1100,26 @@ async def add_comment(post_id: str, request: Request, user: User = Depends(requi
     """Add comment to post"""
     data = await request.json()
     
+    # Get post to find space_id
+    post = await db.posts.find_one({"id": post_id}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
+    
+    # Check if user is blocked from this space
+    membership = await db.space_memberships.find_one({
+        "user_id": user.id,
+        "space_id": post['space_id']
+    })
+    if membership and membership.get('status') == 'blocked':
+        raise HTTPException(status_code=403, detail="You are blocked from commenting in this space")
+    
+    # Check if user is a member for non-public spaces
+    space = await db.spaces.find_one({"id": post['space_id']}, {"_id": 0})
+    if space and space.get('visibility') != 'public':
+        is_member = await is_space_member(user, post['space_id'])
+        if not is_member:
+            raise HTTPException(status_code=403, detail="You must be a member to comment in this space")
+    
     comment = Comment(
         post_id=post_id,
         author_id=user.id,
