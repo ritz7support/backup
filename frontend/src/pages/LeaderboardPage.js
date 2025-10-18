@@ -79,9 +79,19 @@ export default function LeaderboardPage() {
       <div className="max-w-6xl mx-auto p-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <Trophy className="h-8 w-8" style={{ color: '#0462CB' }} />
-            <h1 className="text-3xl font-bold" style={{ color: '#011328' }}>Leaderboard</h1>
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <Trophy className="h-8 w-8" style={{ color: '#0462CB' }} />
+              <h1 className="text-3xl font-bold" style={{ color: '#011328' }}>Leaderboard</h1>
+            </div>
+            <Button
+              onClick={() => setShowHowItWorks(true)}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <HelpCircle className="h-4 w-4" />
+              How It Works
+            </Button>
           </div>
           <p className="text-lg" style={{ color: '#8E8E8E' }}>Compete with the community and climb the ranks!</p>
         </div>
