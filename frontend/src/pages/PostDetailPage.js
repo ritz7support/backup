@@ -3,8 +3,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { postsAPI } from '../lib/api';
 import { Button } from '../components/ui/button';
-import { ArrowLeft, Heart, MessageCircle } from 'lucide-react';
+import Sidebar from '../components/Sidebar';
+import { Heart, MessageCircle, User, ChevronDown, LogOut, Settings } from 'lucide-react';
 import { toast } from 'sonner';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
 
 export default function PostDetailPage() {
   const { spaceId, postId } = useParams();
