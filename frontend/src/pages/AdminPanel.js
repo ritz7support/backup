@@ -875,7 +875,6 @@ export default function AdminPanel() {
                 <ArrowLeft className="h-4 w-4" />
                 Back
               </Button>
-            </div>
               <div>
                 <h1 className="text-2xl font-bold" style={{ color: '#011328' }}>Admin Settings</h1>
                 <p className="text-sm" style={{ color: '#8E8E8E' }}>Manage spaces, groups, and subscriptions</p>
