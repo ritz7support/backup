@@ -145,6 +145,8 @@ class Space(BaseModel):
     auto_join: bool = False  # Auto-join users when they register
     space_type: str = "post"  # post, qa, announcement, resource, event
     allow_member_posts: bool = True  # If False, only admins/managers can create posts
+    welcome_title: Optional[str] = None  # Custom welcome title (defaults to "Welcome to {space name}!")
+    welcome_message: Optional[str] = None  # Custom welcome message (defaults to generic message)
     member_count: int = 0
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
