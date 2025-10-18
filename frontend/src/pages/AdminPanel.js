@@ -2046,6 +2046,66 @@ export default function AdminPanel() {
       </Dialog>
 
 
+      {/* Soft Block Dialog */}
+      <Dialog open={softBlockDialog.open} onOpenChange={(open) => setSoftBlockDialog({ ...softBlockDialog, open })}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Block Member</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-gray-600">
+              Block <strong>{softBlockDialog.userName}</strong> from <strong>{softBlockDialog.spaceName}</strong>
+            </p>
+            
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium mb-2">Block Type</label>
+                <select 
+                  id="blockType"
+                  className="w-full p-2 border rounded"
+                  defaultValue="hard"
+                >
+                  <option value="hard">Hard Block (Cannot read or engage)</option>
+                  <option value="soft">Soft Block (Can read but cannot engage)</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-2">Expiry (Optional)</label>
+                <input 
+                  type="datetime-local"
+                  id="blockExpiry"
+                  className="w-full p-2 border rounded"
+                />
+                <p className="text-xs text-gray-500 mt-1">Leave empty for permanent block</p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setSoftBlockDialog({ ...softBlockDialog, open: false })}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                const blockType = document.getElementById('blockType').value;
+                const expiryInput = document.getElementById('blockExpiry').value;
+                const expiresAt = expiryInput ? new Date(expiryInput).toISOString() : null;
+                handleConfirmSoftBlock(blockType, expiresAt);
+              }}
+              style={{ background: 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' }}
+              className="text-white"
+            >
+              Block Member
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+
     </div>
   );
 }
