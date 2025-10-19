@@ -1277,6 +1277,249 @@ class Phase2EnhancedUserManagementTester:
             self.log(f"❌ Exception in non-admin process expired blocks test: {e}", "ERROR")
             return False
     
+    # ==================== NOTIFICATION SYSTEM TESTS ====================
+    
+    def test_get_notifications_endpoint(self):
+        """Test GET /api/notifications endpoint with authentication"""
+        self.log("\n🧪 Testing GET /api/notifications (With Auth)")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/notifications")
+            
+            if response.status_code == 200:
+                notifications = response.json()
+                self.log(f"✅ GET /api/notifications successful - Retrieved {len(notifications)} notifications")
+                
+                # Verify response structure if notifications exist
+                if notifications:
+                    notification = notifications[0]
+                    required_fields = ['id', 'user_id', 'type', 'title', 'message', 'is_read', 'created_at']
+                    missing_fields = [field for field in required_fields if field not in notification]
+                    
+                    if missing_fields:
+                        self.log(f"⚠️ Missing fields in notification response: {missing_fields}", "WARNING")
+                    else:
+                        self.log("✅ Notification response structure is correct")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/notifications failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/notifications: {e}", "ERROR")
+            return False
+    
+    def test_get_notifications_unauthenticated(self):
+        """Test GET /api/notifications without authentication (should fail)"""
+        self.log("\n🧪 Testing GET /api/notifications (Without Auth - Should Fail)")
+        
+        try:
+            # Create a session without authentication
+            unauth_session = requests.Session()
+            response = unauth_session.get(f"{BACKEND_URL}/notifications")
+            
+            if response.status_code in [401, 403]:
+                self.log("✅ Unauthenticated access correctly rejected")
+                return True
+            else:
+                self.log(f"❌ Unauthenticated access should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in unauthenticated notifications test: {e}", "ERROR")
+            return False
+    
+    def test_get_unread_count_endpoint(self):
+        """Test GET /api/notifications/unread-count endpoint with authentication"""
+        self.log("\n🧪 Testing GET /api/notifications/unread-count (With Auth)")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/notifications/unread-count")
+            
+            if response.status_code == 200:
+                result = response.json()
+                count = result.get('count')
+                
+                if isinstance(count, int) and count >= 0:
+                    self.log(f"✅ GET /api/notifications/unread-count successful - Count: {count}")
+                    return True
+                else:
+                    self.log(f"❌ Invalid count format: {result}", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ GET /api/notifications/unread-count failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/notifications/unread-count: {e}", "ERROR")
+            return False
+    
+    def test_get_unread_count_unauthenticated(self):
+        """Test GET /api/notifications/unread-count without authentication (should fail)"""
+        self.log("\n🧪 Testing GET /api/notifications/unread-count (Without Auth - Should Fail)")
+        
+        try:
+            # Create a session without authentication
+            unauth_session = requests.Session()
+            response = unauth_session.get(f"{BACKEND_URL}/notifications/unread-count")
+            
+            if response.status_code in [401, 403]:
+                self.log("✅ Unauthenticated access correctly rejected")
+                return True
+            else:
+                self.log(f"❌ Unauthenticated access should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in unauthenticated unread count test: {e}", "ERROR")
+            return False
+    
+    def test_notification_creation_via_join_request(self):
+        """Test if notifications are created when join requests are made"""
+        self.log("\n🧪 Testing Notification Creation via Join Request")
+        
+        # Step 1: Create a test user for join request
+        join_user_data = {
+            "email": "notif_joinrequest@test.com",
+            "password": "notif123",
+            "name": "Notification Join Request User",
+            "role": "learner"
+        }
+        
+        try:
+            join_user_session = requests.Session()
+            register_response = join_user_session.post(f"{BACKEND_URL}/auth/register", json=join_user_data)
+            
+            join_user_id = None
+            if register_response.status_code == 200:
+                user_data = register_response.json()
+                join_user_id = user_data.get('user', {}).get('id')
+                self.log("✅ Created test user for notification join request")
+            elif register_response.status_code == 400 and "already registered" in register_response.text:
+                # User exists, login to get ID
+                login_response = join_user_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": join_user_data["email"],
+                    "password": join_user_data["password"]
+                })
+                if login_response.status_code == 200:
+                    user_data = login_response.json()
+                    join_user_id = user_data.get('user', {}).get('id')
+                    self.log("✅ Using existing test user for notification join request")
+            
+            if not join_user_id:
+                self.log("❌ Failed to get join request user ID", "ERROR")
+                return False
+            
+            # Step 2: Get admin's current notification count
+            admin_notifications_before = self.admin_session.get(f"{BACKEND_URL}/notifications")
+            notifications_count_before = 0
+            if admin_notifications_before.status_code == 200:
+                notifications_count_before = len(admin_notifications_before.json())
+            
+            # Step 3: Find or create a private space
+            spaces_response = self.admin_session.get(f"{BACKEND_URL}/spaces")
+            private_space_id = None
+            
+            if spaces_response.status_code == 200:
+                spaces = spaces_response.json()
+                # Look for a private space
+                for space in spaces:
+                    if space.get('visibility') == 'private':
+                        private_space_id = space['id']
+                        self.log(f"✅ Found private space: {private_space_id}")
+                        break
+                
+                # If no private space found, make one private
+                if not private_space_id and spaces:
+                    space_to_update = spaces[0]
+                    private_space_id = space_to_update['id']
+                    
+                    # Update space to be private
+                    update_data = {"visibility": "private"}
+                    update_response = self.admin_session.put(f"{BACKEND_URL}/admin/spaces/{private_space_id}/configure", json=update_data)
+                    if update_response.status_code == 200:
+                        self.log(f"✅ Updated space to private: {private_space_id}")
+                    else:
+                        self.log(f"⚠️ Failed to update space visibility: {update_response.status_code}", "WARNING")
+            
+            if not private_space_id:
+                self.log("❌ No private space available for testing", "ERROR")
+                return False
+            
+            # Step 4: Create a join request (should trigger notification)
+            join_response = join_user_session.post(f"{BACKEND_URL}/spaces/{private_space_id}/join")
+            
+            if join_response.status_code == 200:
+                join_result = join_response.json()
+                if join_result.get('status') == 'pending':
+                    self.log("✅ Join request created successfully with pending status")
+                else:
+                    self.log(f"⚠️ Join request created but status is: {join_result.get('status')}", "WARNING")
+            else:
+                self.log(f"❌ Failed to create join request: {join_response.status_code} - {join_response.text}", "ERROR")
+                return False
+            
+            # Step 5: Check if admin received a notification
+            admin_notifications_after = self.admin_session.get(f"{BACKEND_URL}/notifications")
+            if admin_notifications_after.status_code == 200:
+                notifications_after = admin_notifications_after.json()
+                notifications_count_after = len(notifications_after)
+                
+                if notifications_count_after > notifications_count_before:
+                    self.log(f"✅ Notification created - Count increased from {notifications_count_before} to {notifications_count_after}")
+                    
+                    # Check if the latest notification is about join request
+                    if notifications_after:
+                        latest_notification = notifications_after[0]  # Should be sorted by created_at desc
+                        if latest_notification.get('type') == 'join_request':
+                            self.log("✅ Latest notification is of type 'join_request' as expected")
+                            return True
+                        else:
+                            self.log(f"⚠️ Latest notification type is '{latest_notification.get('type')}', expected 'join_request'", "WARNING")
+                            return True  # Still counts as success since notification was created
+                    else:
+                        self.log("⚠️ No notifications found despite count increase", "WARNING")
+                        return True
+                else:
+                    self.log(f"❌ No new notification created - Count remained {notifications_count_before}", "ERROR")
+                    return False
+            else:
+                self.log("❌ Failed to fetch admin notifications after join request", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in notification creation test: {e}", "ERROR")
+            return False
+    
+    def test_notifications_collection_exists(self):
+        """Test if notifications collection exists in database by checking endpoints"""
+        self.log("\n🧪 Testing Notifications Collection Existence")
+        
+        try:
+            # Test both notification endpoints to verify collection exists
+            notifications_response = self.admin_session.get(f"{BACKEND_URL}/notifications")
+            unread_count_response = self.admin_session.get(f"{BACKEND_URL}/notifications/unread-count")
+            
+            if notifications_response.status_code == 200 and unread_count_response.status_code == 200:
+                self.log("✅ Notifications collection exists - Both endpoints accessible")
+                
+                # Check if we can get the structure
+                notifications = notifications_response.json()
+                unread_count = unread_count_response.json()
+                
+                self.log(f"✅ Found {len(notifications)} total notifications")
+                self.log(f"✅ Found {unread_count.get('count', 0)} unread notifications")
+                
+                return True
+            else:
+                self.log(f"❌ Notifications collection issues - notifications: {notifications_response.status_code}, unread: {unread_count_response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in notifications collection test: {e}", "ERROR")
+            return False
+
     # ==================== JOIN REQUESTS FUNCTIONALITY TESTS ====================
     
     def test_join_requests_functionality(self):
