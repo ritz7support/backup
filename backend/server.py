@@ -1744,6 +1744,35 @@ async def add_comment(post_id: str, request: Request, user: User = Depends(requi
             related_user_id=user.id,
             description="Received a comment on post"
         )
+        
+        # Notify post author
+        await create_notification(
+            user_id=post['author_id'],
+            notif_type="comment",
+            title="New comment on your post",
+            message=f"{user.name} commented on your post",
+            related_entity_id=post_id,
+            related_entity_type="post",
+            actor_id=user.id,
+            actor_name=user.name,
+            send_email=False
+        )
+    
+    # If replying to another comment, notify that commenter
+    if comment.parent_comment_id:
+        parent_comment = await db.comments.find_one({"id": comment.parent_comment_id})
+        if parent_comment and parent_comment['author_id'] != user.id:
+            await create_notification(
+                user_id=parent_comment['author_id'],
+                notif_type="comment_reply",
+                title="Someone replied to your comment",
+                message=f"{user.name} replied to your comment",
+                related_entity_id=post_id,
+                related_entity_type="post",
+                actor_id=user.id,
+                actor_name=user.name,
+                send_email=False
+            )
     
     return comment
 
