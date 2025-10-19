@@ -512,6 +512,88 @@ async def create_notification(
     return notification
 
 
+# ==================== REFERRAL HELPERS ====================
+
+def generate_referral_code(user_id: str, name: str) -> str:
+    """Generate a unique referral code based on user info"""
+    import hashlib
+    # Create code from first 3 letters of name + hash of user_id
+    name_part = ''.join(filter(str.isalnum, name[:3])).upper()
+    hash_part = hashlib.md5(user_id.encode()).hexdigest()[:6].upper()
+    return f"{name_part}{hash_part}"
+
+async def get_or_create_referral_code(user_id: str) -> str:
+    """Get existing referral code or create a new one"""
+    user = await db.users.find_one({"id": user_id})
+    if user and user.get('referral_code'):
+        return user['referral_code']
+    
+    # Generate new code
+    referral_code = generate_referral_code(user_id, user.get('name', 'USER'))
+    
+    # Ensure uniqueness
+    existing = await db.users.find_one({"referral_code": referral_code})
+    counter = 1
+    while existing:
+        referral_code = f"{referral_code}{counter}"
+        existing = await db.users.find_one({"referral_code": referral_code})
+        counter += 1
+    
+    # Update user with referral code
+    await db.users.update_one(
+        {"id": user_id},
+        {"$set": {"referral_code": referral_code}}
+    )
+    
+    return referral_code
+
+def calculate_credits_from_points(points: int, currency: str = "INR") -> float:
+    """
+    Calculate credit value from points
+    1 point = ₹1 INR
+    1 point = $0.05 USD (based on ₹99 = $5 ratio)
+    """
+    if currency == "USD":
+        return round(points * 0.05, 2)  # $0.05 per point
+    else:
+        return float(points)  # ₹1 per point
+
+async def award_referral_points(referrer_id: str, referee_id: str, referee_name: str):
+    """Award points to referrer when referee completes registration"""
+    REFERRAL_POINTS = 50  # Points for successful referral
+    WELCOME_BONUS = 25   # Welcome bonus for referee
+    
+    # Award points to referrer
+    await db.users.update_one(
+        {"id": referrer_id},
+        {"$inc": {"total_points": REFERRAL_POINTS}}
+    )
+    
+    # Award welcome bonus to referee
+    await db.users.update_one(
+        {"id": referee_id},
+        {"$inc": {"total_points": WELCOME_BONUS}}
+    )
+    
+    # Create notification for referrer
+    await create_notification(
+        user_id=referrer_id,
+        notif_type="referral_success",
+        title="Referral Successful! 🎉",
+        message=f"{referee_name} joined using your referral link! You earned {REFERRAL_POINTS} points.",
+        actor_id=referee_id,
+        actor_name=referee_name
+    )
+    
+    # Create notification for referee
+    await create_notification(
+        user_id=referee_id,
+        notif_type="welcome_bonus",
+        title="Welcome Bonus! 🎁",
+        message=f"You received {WELCOME_BONUS} bonus points for joining through a referral link!"
+    )
+
+
 
 async def is_space_manager_or_admin(user: User, space_id: str) -> bool:
     """Check if user is an admin or manager of the space"""
