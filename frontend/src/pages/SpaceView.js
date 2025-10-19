@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import Sidebar from '../components/Sidebar';
 import SpaceFeed from '../components/SpaceFeed';
 import EventsCalendar from '../components/EventsCalendar';
+import Header from '../components/Header';
 import { Link, useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import { Button } from '../components/ui/button';
