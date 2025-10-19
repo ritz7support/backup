@@ -5,18 +5,9 @@ import Sidebar from '../components/Sidebar';
 import SpaceFeed from '../components/SpaceFeed';
 import EventsCalendar from '../components/EventsCalendar';
 import Header from '../components/Header';
-import { Link, useNavigate } from 'react-router-dom';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import { Button } from '../components/ui/button';
-import { Home, Users, MessageCircle, Bell, LogOut, Crown, Settings, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { spacesAPI } from '../lib/api';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '../components/ui/dropdown-menu';
 
 export default function SpaceView() {
   const { spaceId } = useParams();
