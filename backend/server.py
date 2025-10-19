@@ -373,7 +373,13 @@ async def get_platform_settings() -> dict:
         default_settings['created_at'] = default_settings['created_at'].isoformat()
         default_settings['updated_at'] = default_settings['updated_at'].isoformat()
         await db.platform_settings.insert_one(default_settings)
+        # Remove _id from returned settings
+        if '_id' in default_settings:
+            del default_settings['_id']
         return default_settings
+    # Remove _id from returned settings
+    if '_id' in settings:
+        del settings['_id']
     return settings
 
 async def user_has_active_subscription(user_id: str) -> bool:
