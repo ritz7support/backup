@@ -146,6 +146,17 @@ export default function AdminPanel() {
   };
 
 
+  const loadPlatformSettings = async () => {
+    try {
+      const { data } = await platformSettingsAPI.getSettings();
+      setPlatformSettings(data || { requires_payment_to_join: false, allowed_tier_ids: [] });
+    } catch (error) {
+      console.error('Error loading platform settings:', error);
+    }
+  };
+
+
+
   // User role management
   const handlePromoteToAdmin = async (userId, userName) => {
     setConfirmDialog({
