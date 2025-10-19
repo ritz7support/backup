@@ -120,7 +120,7 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
 
   // Load join requests when space info is loaded for admins/managers
   useEffect(() => {
-    if (user && (spaceVisibility === 'private' || spaceVisibility === 'secret')) {
+    if (user && spaceId && (spaceVisibility === 'private' || spaceVisibility === 'secret')) {
       loadJoinRequests();
     }
   }, [spaceId, spaceVisibility, user]);
