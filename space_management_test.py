@@ -11,7 +11,7 @@ import sys
 import os
 
 # Configuration
-BACKEND_URL = "https://engage-space.preview.emergentagent.com/api"
+BACKEND_URL = "https://engage-central-2.preview.emergentagent.com/api"
 
 class SpaceManagementTester:
     def __init__(self):

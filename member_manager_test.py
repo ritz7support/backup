@@ -11,7 +11,7 @@ import sys
 import os
 
 # Configuration
-BACKEND_URL = "https://engage-space.preview.emergentagent.com/api"
+BACKEND_URL = "https://engage-central-2.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@test.com"
 ADMIN_PASSWORD = "admin123"
 MANAGER_EMAIL = "manager@test.com"
