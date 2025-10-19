@@ -483,82 +483,81 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
         </div>
       </div>
 
-      {/* Join Requests Panel - Collapsible, shown when "Requests" button is clicked */}
-      {showRequestsPanel && joinRequests.length > 0 && (
-        <div className="mb-6 bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl p-6 border-2 shadow-lg" style={{ borderColor: '#FF6B6B' }}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="bg-red-500 rounded-full p-3 animate-bounce">
-                <Bell className="h-6 w-6 text-white" />
+      {/* Join Requests Modal Popup */}
+      <Dialog open={showRequestsPanel} onOpenChange={setShowRequestsPanel}>
+        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-6 border-2" style={{ borderColor: '#FF6B6B' }}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-500 rounded-full p-3 animate-bounce">
+                  <Bell className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-2xl" style={{ color: '#DC2626' }}>
+                    {joinRequests.length} Pending Join Request{joinRequests.length > 1 ? 's' : ''}
+                  </h3>
+                  <p className="text-sm font-medium" style={{ color: '#EA580C' }}>
+                    {joinRequests.length === 1 ? 'Someone wants' : 'People want'} to join this space
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-xl" style={{ color: '#DC2626' }}>
-                  {joinRequests.length} Pending Join Request{joinRequests.length > 1 ? 's' : ''}
-                </h3>
-                <p className="text-sm font-medium" style={{ color: '#EA580C' }}>
-                  {joinRequests.length === 1 ? 'Someone wants' : 'People want'} to join this space
-                </p>
-              </div>
-            </div>
-            <div className="flex gap-2">
               {joinRequests.length > 1 && (
                 <Button
                   onClick={handleApproveAll}
-                  size="sm"
                   className="bg-green-600 hover:bg-green-700 text-white font-semibold"
                 >
                   ✓ Approve All ({joinRequests.length})
                 </Button>
               )}
-              <Button
-                onClick={() => setShowRequestsPanel(false)}
-                variant="outline"
-                size="sm"
-                className="border-red-300 hover:bg-red-100"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+            </div>
+            
+            <div className="space-y-4">
+              {joinRequests.map((request) => (
+                <div key={request.id} className="bg-white rounded-lg p-5 border-2 border-orange-200 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="h-14 w-14 rounded-full flex items-center justify-center font-bold text-xl text-white flex-shrink-0" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
+                        {request.user?.name?.charAt(0) || '?'}
+                      </div>
+                      <div className="flex-1">
+                        <p className="font-semibold text-lg" style={{ color: '#011328' }}>{request.user?.name || 'Unknown'}</p>
+                        <p className="text-sm" style={{ color: '#8E8E8E' }}>{request.user?.email}</p>
+                        {request.message && (
+                          <p className="text-sm mt-2 italic p-2 bg-gray-50 rounded" style={{ color: '#6B7280' }}>
+                            💬 "{request.message}"
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <Button
+                        onClick={() => {
+                          handleApproveRequest(request.id, request.user?.name);
+                          if (joinRequests.length === 1) setShowRequestsPanel(false);
+                        }}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2"
+                      >
+                        ✓ Approve
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          handleRejectRequest(request.id, request.user?.name);
+                          if (joinRequests.length === 1) setShowRequestsPanel(false);
+                        }}
+                        size="sm"
+                        className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2"
+                      >
+                        ✕ Reject
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-          
-          <div className="space-y-3">
-            {joinRequests.map((request) => (
-              <div key={request.id} className="bg-white rounded-lg p-4 border-2 border-orange-200 shadow-sm hover:shadow-md transition-shadow flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-full flex items-center justify-center font-bold text-lg text-white" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
-                    {request.user?.name?.charAt(0) || '?'}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-lg" style={{ color: '#011328' }}>{request.user?.name || 'Unknown'}</p>
-                    <p className="text-sm" style={{ color: '#8E8E8E' }}>{request.user?.email}</p>
-                    {request.message && (
-                      <p className="text-sm mt-1 italic p-2 bg-gray-50 rounded" style={{ color: '#6B7280' }}>
-                        💬 "{request.message}"
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => handleApproveRequest(request.id, request.user?.name)}
-                    size="sm"
-                    className="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2"
-                  >
-                    ✓ Approve
-                  </Button>
-                  <Button
-                    onClick={() => handleRejectRequest(request.id, request.user?.name)}
-                    size="sm"
-                    className="bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-2"
-                  >
-                    ✕ Reject
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {/* Welcome Banner */}
       <div className="mb-6 p-6 rounded-2xl text-white" style={{ background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' }}>
