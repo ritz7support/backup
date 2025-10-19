@@ -215,28 +215,35 @@ export default function PricingPage() {
           </p>
 
           {/* Currency Toggle */}
-          <div className="flex justify-center gap-2 mt-8">
-            <Button
-              variant={currency === 'INR' ? 'default' : 'outline'}
-              onClick={() => setCurrency('INR')}
-              className={currency === 'INR' ? 'bg-gradient-to-r from-purple-600 to-indigo-600' : ''}
-              data-testid="currency-inr-btn"
-            >
-              🇮🇳 Indian Users (₹)
-            </Button>
-            <Button
-              variant={currency === 'USD' ? 'default' : 'outline'}
-              onClick={() => setCurrency('USD')}
-              className={currency === 'USD' ? 'bg-gradient-to-r from-purple-600 to-indigo-600' : ''}
-              data-testid="currency-usd-btn"
-            >
-              🌍 International ($)
-            </Button>
-          </div>
+          {currency && (
+            <div className="flex justify-center gap-2 mt-8">
+              <Button
+                variant={currency === 'INR' ? 'default' : 'outline'}
+                onClick={() => setCurrency('INR')}
+                className={currency === 'INR' ? 'bg-gradient-to-r from-purple-600 to-indigo-600' : ''}
+                data-testid="currency-inr-btn"
+              >
+                🇮🇳 Indian Users (₹)
+              </Button>
+              <Button
+                variant={currency === 'USD' ? 'default' : 'outline'}
+                onClick={() => setCurrency('USD')}
+                className={currency === 'USD' ? 'bg-gradient-to-r from-purple-600 to-indigo-600' : ''}
+                data-testid="currency-usd-btn"
+              >
+                🌍 International ($)
+              </Button>
+            </div>
+          )}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {plans[currency].map((plan) => (
+        {fetchingTiers ? (
+          <div className="flex justify-center items-center py-20">
+            <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {tiersByCurrency[currency]?.map((tier, index) => (
             <div
               key={plan.id}
               className={`bg-white rounded-3xl p-8 shadow-lg hover-lift ${
