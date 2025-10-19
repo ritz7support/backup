@@ -29,6 +29,12 @@ export default function ProfilePage() {
   const [actionLoading, setActionLoading] = useState(false);
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState({
+    bio: '',
+    location: '',
+    linkedin: ''
+  });
 
   useEffect(() => {
     loadMember();
