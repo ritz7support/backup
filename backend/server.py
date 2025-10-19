@@ -1007,25 +1007,36 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
             webhook_url = f"{origin_url}api/webhook/stripe"
             stripe_checkout = StripeCheckout(api_key=stripe_api_key, webhook_url=webhook_url)
             
-            checkout_request = CheckoutSessionRequest(
-                amount=plan_info['amount'],
-                currency=plan_info['currency'].lower(),
-                success_url=success_url,
-                cancel_url=cancel_url,
-                metadata={"plan": plan, "user_id": user.id}
-            )
+            # Build checkout request based on payment type
+            if tier['payment_type'] == 'one-time':
+                checkout_request = CheckoutSessionRequest(
+                    amount=amount,
+                    currency=currency.lower(),
+                    success_url=success_url,
+                    cancel_url=cancel_url,
+                    metadata={"tier_id": tier_id, "user_id": user.id, "payment_type": "one-time"}
+                )
+            else:
+                # Recurring payment using Stripe Price ID
+                checkout_request = CheckoutSessionRequest(
+                    stripe_price_id=tier['stripe_price_id'],
+                    quantity=1,
+                    success_url=success_url,
+                    cancel_url=cancel_url,
+                    metadata={"tier_id": tier_id, "user_id": user.id, "payment_type": "recurring"}
+                )
             
             session = await stripe_checkout.create_checkout_session(checkout_request)
             
             # Create transaction record
             transaction = PaymentTransaction(
                 user_id=user.id,
-                amount=plan_info['amount'],
-                currency=plan_info['currency'],
+                amount=amount,
+                currency=currency,
                 payment_gateway='stripe',
                 session_id=session.session_id,
                 status='pending',
-                metadata={"plan": plan}
+                metadata={"tier_id": tier_id, "payment_type": tier['payment_type']}
             )
             trans_dict = transaction.model_dump()
             trans_dict['created_at'] = trans_dict['created_at'].isoformat()
