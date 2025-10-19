@@ -1827,14 +1827,24 @@ class Phase2EnhancedUserManagementTester:
 def main():
     """Main test runner"""
     tester = Phase2EnhancedUserManagementTester()
-    success = tester.run_all_tests()
     
-    if success:
-        print("\n✅ Phase 2 & 3 enhanced user management and payment gateway testing completed successfully")
-        sys.exit(0)
+    # Check if we should run only join requests test
+    if len(sys.argv) > 1 and sys.argv[1] == "--join-requests-only":
+        success = tester.run_join_requests_test_only()
+        if success:
+            print("\n✅ Join requests functionality testing completed successfully")
+            sys.exit(0)
+        else:
+            print("\n❌ Join requests functionality testing completed with failures")
+            sys.exit(1)
     else:
-        print("\n❌ Phase 2 & 3 enhanced user management and payment gateway testing completed with failures")
-        sys.exit(1)
+        success = tester.run_all_tests()
+        if success:
+            print("\n✅ Phase 2 & 3 enhanced user management and payment gateway testing completed successfully")
+            sys.exit(0)
+        else:
+            print("\n❌ Phase 2 & 3 enhanced user management and payment gateway testing completed with failures")
+            sys.exit(1)
 
 if __name__ == "__main__":
     main()
