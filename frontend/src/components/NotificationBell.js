@@ -202,8 +202,8 @@ export default function NotificationBell() {
               </div>
             )}
           </div>
-        </DialogContent>
-      </Dialog>
-    </>
+        </div>
+      )}
+    </div>
   );
 }
