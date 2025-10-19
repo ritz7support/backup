@@ -1988,6 +1988,14 @@ class Phase2EnhancedUserManagementTester:
             ('Process Expired Blocks', self.test_process_expired_blocks),
             ('Process Expired Blocks Non-Admin (Should Fail)', self.test_process_expired_blocks_non_admin),
             
+            # Notification System Tests (specific request)
+            ('GET Notifications Endpoint', self.test_get_notifications_endpoint),
+            ('GET Notifications Unauthenticated (Should Fail)', self.test_get_notifications_unauthenticated),
+            ('GET Unread Count Endpoint', self.test_get_unread_count_endpoint),
+            ('GET Unread Count Unauthenticated (Should Fail)', self.test_get_unread_count_unauthenticated),
+            ('Notification Creation via Join Request', self.test_notification_creation_via_join_request),
+            ('Notifications Collection Exists', self.test_notifications_collection_exists),
+            
             # Join Requests Functionality Tests (specific request)
             ('Join Requests Functionality', self.test_join_requests_functionality),
             
