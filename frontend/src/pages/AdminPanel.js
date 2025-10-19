@@ -1593,6 +1593,54 @@ export default function AdminPanel() {
                     <Sparkles className="h-5 w-5" style={{ color: '#0462CB' }} />
                     <h3 className="font-semibold" style={{ color: '#011328' }}>Branding</h3>
                   </div>
+                  
+                  {/* Logo Upload */}
+                  <div className="mb-6">
+                    <Label>Community Logo</Label>
+                    <div className="flex items-center gap-4 mt-2">
+                      {platformSettings.logo ? (
+                        <div className="relative">
+                          <img 
+                            src={platformSettings.logo} 
+                            alt="Community Logo" 
+                            className="h-16 w-16 object-contain rounded border"
+                            style={{ borderColor: '#E5E7EB' }}
+                          />
+                          <button
+                            onClick={handleRemoveLogo}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                            title="Remove logo"
+                          >
+                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="h-16 w-16 rounded border flex items-center justify-center" style={{ borderColor: '#E5E7EB', backgroundColor: '#F9FAFB' }}>
+                          <span className="text-xs text-gray-400">No logo</span>
+                        </div>
+                      )}
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                          id="logo-upload"
+                        />
+                        <label htmlFor="logo-upload">
+                          <Button type="button" variant="outline" size="sm" className="cursor-pointer" onClick={() => document.getElementById('logo-upload').click()}>
+                            Upload Logo
+                          </Button>
+                        </label>
+                        <p className="text-xs mt-1" style={{ color: '#8E8E8E' }}>
+                          Recommended: Square image, max 2MB
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label>Community Name</Label>
