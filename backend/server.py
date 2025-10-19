@@ -149,6 +149,22 @@ class PlatformSettings(BaseModel):
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+
+class Notification(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str  # Recipient of the notification
+    type: str  # post_like, comment, comment_reply, join_approved, join_rejected, added_to_space, promoted, join_request, announcement
+    title: str  # Short title for the notification
+    message: str  # Detailed message
+    related_entity_id: Optional[str] = None  # ID of related post, comment, space, etc.
+    related_entity_type: Optional[str] = None  # post, comment, space, user
+    actor_id: Optional[str] = None  # ID of user who triggered the notification
+    actor_name: Optional[str] = None  # Name of user who triggered the notification
+    is_read: bool = False
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class Space(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
