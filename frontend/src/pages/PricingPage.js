@@ -70,6 +70,18 @@ export default function PricingPage() {
       const originUrl = window.location.origin;
       const { data } = await paymentsAPI.createOrder(tierId, currency, originUrl);
 
+      // Check if subscription was activated using credits (no payment needed)
+      if (data.success && data.amount_paid === 0) {
+        toast.success(`🎉 ${data.message}! Used ${currency === 'INR' ? '₹' : '$'}${data.credits_used} in credits.`);
+        navigate('/dashboard');
+        return;
+      }
+
+      // Show credits applied message if any
+      if (data.credits_applied && data.credits_applied > 0) {
+        toast.info(`✅ ${currency === 'INR' ? '₹' : '$'}${data.credits_applied} credits applied to your order!`);
+      }
+
       if (data.url) {
         // Stripe checkout
         window.location.href = data.url;
