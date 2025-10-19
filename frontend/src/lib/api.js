@@ -92,6 +92,15 @@ export const paymentsAPI = {
   verifyRazorpayPayment: (data) => api.post('/payments/razorpay/verify', data),
 };
 
+// Subscription Tiers API
+export const subscriptionTiersAPI = {
+  getTiers: () => api.get('/subscription-tiers'),
+  createTier: (data) => api.post('/admin/subscription-tiers', data),
+  updateTier: (tierId, data) => api.put(`/admin/subscription-tiers/${tierId}`, data),
+  deleteTier: (tierId) => api.delete(`/admin/subscription-tiers/${tierId}`),
+};
+
+
 
 // Leaderboard & Levels API
 export const leaderboardAPI = {
