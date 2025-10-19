@@ -1277,6 +1277,148 @@ class Phase2EnhancedUserManagementTester:
             self.log(f"❌ Exception in non-admin process expired blocks test: {e}", "ERROR")
             return False
     
+    # ==================== JOIN REQUESTS FUNCTIONALITY TESTS ====================
+    
+    def test_join_requests_functionality(self):
+        """Test join requests functionality - admin can see approve/reject buttons"""
+        self.log("\n🧪 Testing Join Requests Functionality")
+        
+        # Step 1: Create a test user for join request
+        join_user_data = {
+            "email": "joinrequest@test.com",
+            "password": "join123",
+            "name": "Join Request User",
+            "role": "learner"
+        }
+        
+        try:
+            join_user_session = requests.Session()
+            register_response = join_user_session.post(f"{BACKEND_URL}/auth/register", json=join_user_data)
+            
+            join_user_id = None
+            if register_response.status_code == 200:
+                user_data = register_response.json()
+                join_user_id = user_data.get('user', {}).get('id')
+                self.log("✅ Created test user for join request")
+            elif register_response.status_code == 400 and "already registered" in register_response.text:
+                # User exists, login to get ID
+                login_response = join_user_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": join_user_data["email"],
+                    "password": join_user_data["password"]
+                })
+                if login_response.status_code == 200:
+                    user_data = login_response.json()
+                    join_user_id = user_data.get('user', {}).get('id')
+                    self.log("✅ Using existing test user for join request")
+            
+            if not join_user_id:
+                self.log("❌ Failed to get join request user ID", "ERROR")
+                return False
+            
+            # Step 2: Find or create a private space
+            spaces_response = self.admin_session.get(f"{BACKEND_URL}/spaces")
+            private_space_id = None
+            
+            if spaces_response.status_code == 200:
+                spaces = spaces_response.json()
+                # Look for a private space
+                for space in spaces:
+                    if space.get('visibility') == 'private':
+                        private_space_id = space['id']
+                        self.log(f"✅ Found private space: {private_space_id}")
+                        break
+                
+                # If no private space found, make one private
+                if not private_space_id and spaces:
+                    space_to_update = spaces[0]
+                    private_space_id = space_to_update['id']
+                    
+                    # Update space to be private
+                    update_data = {"visibility": "private"}
+                    update_response = self.admin_session.put(f"{BACKEND_URL}/admin/spaces/{private_space_id}/configure", json=update_data)
+                    if update_response.status_code == 200:
+                        self.log(f"✅ Updated space to private: {private_space_id}")
+                    else:
+                        self.log(f"⚠️ Failed to update space visibility: {update_response.status_code}", "WARNING")
+            
+            if not private_space_id:
+                self.log("❌ No private space available for testing", "ERROR")
+                return False
+            
+            # Step 3: Create a join request (POST /api/spaces/{space_id}/join)
+            join_response = join_user_session.post(f"{BACKEND_URL}/spaces/{private_space_id}/join")
+            
+            if join_response.status_code == 200:
+                join_result = join_response.json()
+                if join_result.get('status') == 'pending':
+                    self.log("✅ Join request created successfully with pending status")
+                else:
+                    self.log(f"⚠️ Join request created but status is: {join_result.get('status')}", "WARNING")
+            else:
+                self.log(f"❌ Failed to create join request: {join_response.status_code} - {join_response.text}", "ERROR")
+                return False
+            
+            # Step 4: Test GET /api/spaces/{space_id}/join-requests with admin token
+            admin_requests_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{private_space_id}/join-requests")
+            
+            if admin_requests_response.status_code == 200:
+                join_requests = admin_requests_response.json()
+                self.log(f"✅ Admin successfully retrieved join requests - Found {len(join_requests)} requests")
+                
+                # Verify response contains join request with user data enrichment
+                if join_requests:
+                    request = join_requests[0]
+                    required_fields = ['id', 'user_id', 'space_id', 'status', 'user']
+                    missing_fields = [field for field in required_fields if field not in request]
+                    
+                    if missing_fields:
+                        self.log(f"❌ Missing fields in join request response: {missing_fields}", "ERROR")
+                        return False
+                    
+                    # Check user data enrichment
+                    user_data = request.get('user', {})
+                    if user_data and 'name' in user_data and 'email' in user_data:
+                        self.log("✅ Join request contains enriched user data")
+                        
+                        # Verify no password_hash in user data
+                        if 'password_hash' in user_data:
+                            self.log("⚠️ Security issue: password_hash included in user data", "WARNING")
+                        else:
+                            self.log("✅ Security check passed: password_hash not in user data")
+                    else:
+                        self.log("❌ Join request missing user data enrichment", "ERROR")
+                        return False
+                    
+                    # Check if our test user's request is in the list
+                    test_request = next((r for r in join_requests if r.get('user_id') == join_user_id), None)
+                    if test_request:
+                        self.log("✅ Test user's join request found in admin response")
+                    else:
+                        self.log("⚠️ Test user's join request not found in response", "WARNING")
+                else:
+                    self.log("⚠️ No join requests found - this may be expected if no pending requests", "WARNING")
+            else:
+                self.log(f"❌ Admin failed to retrieve join requests: {admin_requests_response.status_code} - {admin_requests_response.text}", "ERROR")
+                return False
+            
+            # Step 5: Test non-admin/non-manager access (should get 403)
+            non_admin_requests_response = join_user_session.get(f"{BACKEND_URL}/spaces/{private_space_id}/join-requests")
+            
+            if non_admin_requests_response.status_code == 403:
+                self.log("✅ Non-admin access correctly rejected (403 Forbidden)")
+            elif non_admin_requests_response.status_code == 401:
+                self.log("✅ Non-admin access correctly rejected (401 Unauthorized)")
+            else:
+                self.log(f"❌ Non-admin access should be rejected but got: {non_admin_requests_response.status_code}", "ERROR")
+                return False
+            
+            self.log("✅ All join requests functionality tests passed")
+            return True
+            
+        except Exception as e:
+            self.log(f"❌ Exception in join requests functionality test: {e}", "ERROR")
+            return False
+
     # ==================== PHASE 3 PAYMENT GATEWAY TESTS ====================
     
     def test_razorpay_order_creation(self):
