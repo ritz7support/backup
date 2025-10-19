@@ -2242,6 +2242,13 @@ class Phase2EnhancedUserManagementTester:
             ('Payment Transaction Records', self.test_payment_transaction_records),
             ('Invalid Payment Plan (Should Fail)', self.test_invalid_payment_plan),
             ('Payment Authentication Required', self.test_payment_authentication_required),
+            
+            # Platform Settings Tests (logo upload feature)
+            ('GET Platform Settings', self.test_get_platform_settings),
+            ('Update Platform Settings with Logo', self.test_update_platform_settings_with_logo),
+            ('Remove Platform Settings Logo', self.test_update_platform_settings_remove_logo),
+            ('Platform Settings Non-Admin (Should Fail)', self.test_update_platform_settings_non_admin),
+            ('Platform Settings Upsert Behavior', self.test_platform_settings_upsert_behavior),
         ]
         
         for test_name, test_method in test_methods:
