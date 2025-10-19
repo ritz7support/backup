@@ -10,6 +10,8 @@ export default function NotificationBell() {
   const [showPanel, setShowPanel] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const panelRef = useRef(null);
+  const buttonRef = useRef(null);
 
   const loadUnreadCount = async () => {
     try {
