@@ -33,9 +33,11 @@ export default function Dashboard({ children }) {
   const [spaceGroups, setSpaceGroups] = useState([]);
   const [spaces, setSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [subscriptionStatus, setSubscriptionStatus] = useState(null);
 
   useEffect(() => {
     loadSpaces();
+    checkSubscriptionStatus();
   }, []);
 
   const loadSpaces = async () => {
