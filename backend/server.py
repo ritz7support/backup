@@ -1467,28 +1467,29 @@ async def join_space(space_id: str, user: User = Depends(require_auth)):
     
     # If it's a join request (private space), notify admins and managers
     if status == "pending":
-        # Notify global admins
+        # Notify global admins (except the requester themselves)
         admins = await db.users.find({"role": "admin"}, {"_id": 0, "id": 1}).to_list(100)
         for admin in admins:
-            await create_notification(
-                user_id=admin['id'],
-                notif_type="join_request",
-                title="New join request",
-                message=f"{user.name} wants to join {space.get('name', 'a space')}",
-                related_entity_id=space_id,
-                related_entity_type="space",
-                actor_id=user.id,
-                actor_name=user.name,
-                send_email=False
-            )
+            if admin['id'] != user.id:  # Don't notify yourself
+                await create_notification(
+                    user_id=admin['id'],
+                    notif_type="join_request",
+                    title="New join request",
+                    message=f"{user.name} wants to join {space.get('name', 'a space')}",
+                    related_entity_id=space_id,
+                    related_entity_type="space",
+                    actor_id=user.id,
+                    actor_name=user.name,
+                    send_email=False
+                )
         
-        # Notify space managers
+        # Notify space managers (except the requester themselves)
         managers = await db.space_memberships.find({
             "space_id": space_id,
             "role": "manager"
         }, {"_id": 0, "user_id": 1}).to_list(100)
         for manager in managers:
-            if manager['user_id'] not in [admin['id'] for admin in admins]:  # Don't duplicate for admin-managers
+            if manager['user_id'] != user.id and manager['user_id'] not in [admin['id'] for admin in admins]:  # Don't notify yourself and don't duplicate for admin-managers
                 await create_notification(
                     user_id=manager['user_id'],
                     notif_type="join_request",
