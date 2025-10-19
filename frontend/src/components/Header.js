@@ -17,6 +17,19 @@ import { Home, Users, MessageCircle, Settings, LogOut, Crown, Trophy } from 'luc
 export default function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [logo, setLogo] = useState(null);
+
+  useEffect(() => {
+    const loadPlatformSettings = async () => {
+      try {
+        const { data } = await platformSettingsAPI.getSettings();
+        setLogo(data.logo);
+      } catch (error) {
+        console.error('Failed to load platform settings:', error);
+      }
+    };
+    loadPlatformSettings();
+  }, []);
 
   const handleLogout = async () => {
     await logout();
