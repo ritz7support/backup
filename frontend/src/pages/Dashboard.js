@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { spacesAPI, subscriptionStatusAPI } from '../lib/api';
+import { spacesAPI, subscriptionStatusAPI, onboardingAPI } from '../lib/api';
 import Header from '../components/Header';
+import { Button } from '../components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,8 @@ import {
   Loader2,
   Home,
   Trophy,
+  CheckCircle2,
+  Circle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
