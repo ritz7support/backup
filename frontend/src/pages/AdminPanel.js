@@ -153,6 +153,23 @@ export default function AdminPanel() {
     } catch (error) {
       console.error('Error loading platform settings:', error);
     }
+
+
+  // Platform settings handler
+  const handleUpdatePlatformSettings = async (newSettings) => {
+    setProcessing(true);
+    try {
+      await platformSettingsAPI.updateSettings(newSettings);
+      setPlatformSettings(newSettings);
+      toast.success('Platform settings updated successfully!');
+    } catch (error) {
+      toast.error('Failed to update platform settings');
+      console.error('Error updating platform settings:', error);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   };
 
 
