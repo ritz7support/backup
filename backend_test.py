@@ -2448,6 +2448,14 @@ def main():
             else:
                 print("\n❌ Join requests functionality testing completed with failures")
                 sys.exit(1)
+        elif sys.argv[1] == "--platform-settings-only":
+            success = tester.run_platform_settings_tests_only()
+            if success:
+                print("\n✅ Platform settings API testing completed successfully")
+                sys.exit(0)
+            else:
+                print("\n❌ Platform settings API testing completed with failures")
+                sys.exit(1)
     
     # Run all tests by default
     success = tester.run_all_tests()
