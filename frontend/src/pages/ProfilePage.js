@@ -451,6 +451,13 @@ export default function ProfilePage() {
             </div>
           )}
         </div>
+        
+        {/* Referral Section (only for own profile) */}
+        {isOwnProfile && !isArchived && (
+          <div className="mt-6">
+            <ReferralSection />
+          </div>
+        )}
       </div>
 
       {/* Archive Confirmation Dialog */}
