@@ -3435,6 +3435,112 @@ async def get_user_subscription_status(user: User = Depends(require_auth)):
     }
 
 
+
+# ==================== ONBOARDING ENDPOINTS ====================
+
+@api_router.get("/me/onboarding-progress")
+async def get_user_onboarding_progress(user: User = Depends(require_auth)):
+    """Get user's onboarding progress with auto-detection"""
+    
+    # Check profile picture
+    has_profile_picture = bool(user.picture)
+    
+    # Check profile completion (bio, location, linkedin)
+    has_bio = bool(user.bio)
+    has_location = bool(user.location)
+    has_linkedin = bool(user.linkedin)
+    profile_complete = has_bio and has_location and has_linkedin
+    
+    # Check if user has joined any space
+    joined_space = await db.space_memberships.find_one({
+        "user_id": user.id,
+        "status": "member"
+    })
+    has_joined_space = bool(joined_space)
+    
+    # Check if user has posted in Introduction space
+    intro_space = await db.spaces.find_one({"name": "Introduction"})
+    has_intro_post = False
+    if intro_space:
+        intro_post = await db.posts.find_one({
+            "author_id": user.id,
+            "space_id": intro_space['id']
+        })
+        has_intro_post = bool(intro_post)
+    
+    # Check if user has made any comment
+    first_comment = await db.comments.find_one({"author_id": user.id})
+    has_commented = bool(first_comment)
+    
+    # Check if user has reacted to any post
+    post_with_reaction = await db.posts.find_one({
+        f"reactions": {"$exists": True}
+    })
+    has_reacted = False
+    if post_with_reaction:
+        for emoji, user_ids in post_with_reaction.get('reactions', {}).items():
+            if user.id in user_ids:
+                has_reacted = True
+                break
+    
+    steps = [
+        {
+            "id": "profile_picture",
+            "title": "Upload your profile picture",
+            "description": "Add a photo to personalize your profile",
+            "completed": has_profile_picture,
+            "points": 5
+        },
+        {
+            "id": "complete_profile",
+            "title": "Complete your profile",
+            "description": "Add your bio, location, and LinkedIn",
+            "completed": profile_complete,
+            "points": 5
+        },
+        {
+            "id": "join_space",
+            "title": "Join your first space",
+            "description": "Explore and join a community space",
+            "completed": has_joined_space,
+            "points": 1
+        },
+        {
+            "id": "intro_post",
+            "title": "Introduce yourself",
+            "description": "Share your introduction in the Introduction space",
+            "completed": has_intro_post,
+            "points": 3
+        },
+        {
+            "id": "first_comment",
+            "title": "Leave your first comment",
+            "description": "Engage with the community by commenting",
+            "completed": has_commented,
+            "points": 2
+        },
+        {
+            "id": "first_reaction",
+            "title": "React to a post",
+            "description": "Show appreciation with a reaction",
+            "completed": has_reacted,
+            "points": 1
+        }
+    ]
+    
+    completed_count = sum(1 for step in steps if step['completed'])
+    total_steps = len(steps)
+    progress_percentage = int((completed_count / total_steps) * 100) if total_steps > 0 else 0
+    
+    return {
+        "steps": steps,
+        "completed_count": completed_count,
+        "total_steps": total_steps,
+        "progress_percentage": progress_percentage,
+        "is_complete": completed_count == total_steps
+    }
+
+
 # Include router
 
 
