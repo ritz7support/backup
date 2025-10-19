@@ -1048,11 +1048,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "SubscriptionTier Model Enhancement"
-    - "Dynamic Payment Order Creation with Tiers"
-    - "Payment Verification with Tier-based Subscription Creation"
-    - "Dynamic Pricing Page with Tier Fetching"
-    - "Admin Panel - Enhanced Tier Management UI"
+    - "Logo Upload and Display System"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
