@@ -3182,6 +3182,37 @@ async def update_platform_settings(request: Request, user: User = Depends(requir
         {"$set": update_data},
         upsert=True
     )
+
+@api_router.get("/me/subscription-status")
+async def get_user_subscription_status(user: User = Depends(require_auth)):
+    """Get current user's subscription status"""
+    settings = await get_platform_settings()
+    has_subscription = await user_has_active_subscription(user.id)
+    
+    # Get active subscription details if exists
+    subscription = None
+    if has_subscription:
+        sub = await db.subscriptions.find_one({
+            "user_id": user.id,
+            "status": "active",
+            "ends_at": {"$gt": datetime.now(timezone.utc).isoformat()}
+        })
+        if sub:
+            subscription = {
+                "tier_id": sub.get('tier_id'),
+                "ends_at": sub.get('ends_at'),
+                "auto_renew": sub.get('auto_renew', False),
+                "payment_type": sub.get('payment_type', 'recurring')
+            }
+    
+    return {
+        "requires_payment": settings.get('requires_payment_to_join', False),
+        "has_subscription": has_subscription,
+        "subscription": subscription,
+        "is_admin": user.role == 'admin'
+    }
+
+
     
     return {"message": "Platform settings updated successfully", "settings": update_data}
 
