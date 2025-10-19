@@ -3160,6 +3160,9 @@ async def delete_subscription_tier(tier_id: str, user: User = Depends(require_au
 async def get_platform_settings_endpoint():
     """Get platform settings (public)"""
     settings = await get_platform_settings()
+    # Remove MongoDB _id field for JSON serialization
+    if settings and '_id' in settings:
+        del settings['_id']
     return settings
 
 @api_router.put("/admin/platform-settings")
