@@ -3393,6 +3393,7 @@ async def update_platform_settings(request: Request, user: User = Depends(requir
         "allowed_tier_ids": data.get('allowed_tier_ids', []),
         "community_name": data.get('community_name', 'Community'),
         "primary_color": data.get('primary_color', '#0462CB'),
+        "logo": data.get('logo'),  # Base64 encoded logo
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
