@@ -12,6 +12,7 @@ import { Sparkles, User, Mail, Lock, Loader2, Link2 } from 'lucide-react';
 export default function RegisterPage() {
   const [searchParams] = useSearchParams();
   const inviteToken = searchParams.get('invite');
+  const referralCode = searchParams.get('ref');
   
   const [formData, setFormData] = useState({
     name: '',
@@ -23,6 +24,7 @@ export default function RegisterPage() {
   const [inviteValid, setInviteValid] = useState(false);
   const [inviteRole, setInviteRole] = useState('');
   const [validatingInvite, setValidatingInvite] = useState(false);
+  const [referrerName, setReferrerName] = useState('');
   const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
@@ -30,7 +32,11 @@ export default function RegisterPage() {
     if (inviteToken) {
       validateInvite();
     }
-  }, [inviteToken]);
+    if (referralCode) {
+      // Show referral message
+      toast.info('🎁 You\'re signing up with a referral! You\'ll get 25 bonus points.', { duration: 5000 });
+    }
+  }, [inviteToken, referralCode]);
 
   const validateInvite = async () => {
     setValidatingInvite(true);
