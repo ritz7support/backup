@@ -58,8 +58,12 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await register({ ...formData, invite_token: inviteToken });
-      toast.success('Welcome to ABCD! 🎉');
+      await register({ ...formData, invite_token: inviteToken, ref: referralCode });
+      if (referralCode) {
+        toast.success('Welcome to ABCD! 🎉 You earned 25 bonus points!');
+      } else {
+        toast.success('Welcome to ABCD! 🎉');
+      }
       navigate('/dashboard');
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Registration failed');
