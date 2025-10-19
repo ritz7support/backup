@@ -1,0 +1,176 @@
+import { useState, useEffect } from 'react';
+import { Bell, X } from 'lucide-react';
+import { notificationsAPI } from '../lib/api';
+import { useNavigate } from 'react-router-dom';
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
+
+export default function NotificationBell() {
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
+  const [showPanel, setShowPanel] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const loadUnreadCount = async () => {
+    try {
+      const { data } = await notificationsAPI.getUnreadCount();
+      setUnreadCount(data.count);
+    } catch (error) {
+      console.error('Failed to load unread count:', error);
+    }
+  };
+
+  const loadNotifications = async () => {
+    try {
+      setLoading(true);
+      const { data } = await notificationsAPI.getNotifications(20);
+      setNotifications(data);
+    } catch (error) {
+      console.error('Failed to load notifications:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNotificationClick = async (notification) => {
+    // Mark as read
+    if (!notification.is_read) {
+      await notificationsAPI.markAsRead(notification.id);
+      loadUnreadCount();
+      loadNotifications();
+    }
+
+    // Navigate to related content
+    if (notification.related_entity_type === 'post') {
+      navigate(`/posts/${notification.related_entity_id}`);
+    } else if (notification.related_entity_type === 'space') {
+      navigate(`/spaces/${notification.related_entity_id}`);
+    }
+
+    setShowPanel(false);
+  };
+
+  const handleMarkAllRead = async () => {
+    await notificationsAPI.markAllAsRead();
+    loadUnreadCount();
+    loadNotifications();
+  };
+
+  useEffect(() => {
+    loadUnreadCount();
+    // Poll for new notifications every 30 seconds
+    const interval = setInterval(loadUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (showPanel) {
+      loadNotifications();
+    }
+  }, [showPanel]);
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'post_like':
+      case 'comment_like':
+        return '❤️';
+      case 'comment':
+        return '💬';
+      case 'comment_reply':
+        return '🔔';
+      case 'join_approved':
+        return '✅';
+      case 'join_rejected':
+        return '❌';
+      case 'join_request':
+        return '📩';
+      case 'announcement':
+        return '📢';
+      default:
+        return '🔔';
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setShowPanel(true)}
+        className="relative p-2 hover:bg-gray-100 rounded-full transition-colors"
+      >
+        <Bell className="h-6 w-6" style={{ color: '#0462CB' }} />
+        {unreadCount > 0 && (
+          <span 
+            className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold animate-pulse"
+            style={{ fontSize: '10px' }}
+          >
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      <Dialog open={showPanel} onOpenChange={setShowPanel}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-between">
+              <span>Notifications</span>
+              {unreadCount > 0 && (
+                <Button size="sm" variant="ghost" onClick={handleMarkAllRead}>
+                  Mark all read
+                </Button>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="py-4">
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="text-sm text-gray-500 mt-2">Loading...</p>
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="text-center py-8">
+                <Bell className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-500">No notifications yet</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {notifications.map((notif) => (
+                  <div
+                    key={notif.id}
+                    onClick={() => handleNotificationClick(notif)}
+                    className={`p-3 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
+                      !notif.is_read 
+                        ? 'bg-blue-50 border-l-4 border-blue-500' 
+                        : 'bg-white border border-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="text-2xl flex-shrink-0">
+                        {getNotificationIcon(notif.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-semibold text-sm ${!notif.is_read ? 'text-blue-900' : 'text-gray-900'}`}>
+                          {notif.title}
+                        </p>
+                        <p className="text-sm text-gray-600 truncate">
+                          {notif.message}
+                        </p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(notif.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      {!notif.is_read && (
+                        <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-2"></div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}
