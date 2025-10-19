@@ -113,6 +113,16 @@ export const subscriptionStatusAPI = {
 };
 
 
+// Notifications API
+export const notificationsAPI = {
+  getNotifications: (limit = 50) => api.get('/notifications', { params: { limit } }),
+  getUnreadCount: () => api.get('/notifications/unread-count'),
+  markAsRead: (notificationId) => api.put(`/notifications/${notificationId}/read`),
+  markAllAsRead: () => api.put('/notifications/mark-all-read'),
+};
+
+
+
 
 
 // Leaderboard & Levels API
