@@ -984,6 +984,15 @@ export default function AdminPanel() {
             <CreditCard className="h-4 w-4" />
             Subscription Tiers ({subscriptionTiers.length})
           </Button>
+          <Button
+            variant={activeTab === 'platform-settings' ? 'default' : 'outline'}
+            onClick={() => setActiveTab('platform-settings')}
+            className="flex items-center gap-2"
+            style={activeTab === 'platform-settings' ? { background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)' } : {}}
+          >
+            <Settings className="h-4 w-4" />
+            Platform Settings
+          </Button>
         </div>
 
         {/* Unified Overview Tab - Spaces & Groups */}
