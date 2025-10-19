@@ -1541,6 +1541,68 @@ export default function AdminPanel() {
 
             <div className="bg-white rounded-lg p-6 border" style={{ borderColor: '#E5E7EB' }}>
               <div className="space-y-6">
+                {/* Branding Section */}
+                <div className="pb-6 border-b" style={{ borderColor: '#E5E7EB' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <Sparkles className="h-5 w-5" style={{ color: '#0462CB' }} />
+                    <h3 className="font-semibold" style={{ color: '#011328' }}>Branding</h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Community Name</Label>
+                      <Input
+                        value={platformSettings.community_name || 'Community'}
+                        onChange={(e) => {
+                          const newSettings = {
+                            ...platformSettings,
+                            community_name: e.target.value
+                          };
+                          setPlatformSettings(newSettings);
+                        }}
+                        onBlur={() => handleUpdatePlatformSettings(platformSettings)}
+                        placeholder="e.g., My Awesome Community"
+                      />
+                      <p className="text-xs mt-1" style={{ color: '#8E8E8E' }}>
+                        This name appears in the header and emails
+                      </p>
+                    </div>
+                    <div>
+                      <Label>Primary Brand Color</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          type="color"
+                          value={platformSettings.primary_color || '#0462CB'}
+                          onChange={(e) => {
+                            const newSettings = {
+                              ...platformSettings,
+                              primary_color: e.target.value
+                            };
+                            setPlatformSettings(newSettings);
+                          }}
+                          className="w-20 h-10 cursor-pointer"
+                        />
+                        <Input
+                          type="text"
+                          value={platformSettings.primary_color || '#0462CB'}
+                          onChange={(e) => {
+                            const newSettings = {
+                              ...platformSettings,
+                              primary_color: e.target.value
+                            };
+                            setPlatformSettings(newSettings);
+                          }}
+                          onBlur={() => handleUpdatePlatformSettings(platformSettings)}
+                          placeholder="#0462CB"
+                          className="flex-1"
+                        />
+                      </div>
+                      <p className="text-xs mt-1" style={{ color: '#8E8E8E' }}>
+                        Used for buttons, links, and accents (refresh page to see changes)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Payment Requirement Toggle */}
                 <div className="flex items-start justify-between pb-6 border-b" style={{ borderColor: '#E5E7EB' }}>
                   <div className="flex-1">
