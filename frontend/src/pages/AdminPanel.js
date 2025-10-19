@@ -1819,13 +1819,13 @@ export default function AdminPanel() {
           <DialogHeader>
             <DialogTitle>{tierDialog.mode === 'create' ? 'Create' : 'Edit'} Subscription Tier</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-y-auto">
             <div>
               <Label>Name *</Label>
               <Input
                 value={tierForm.name}
                 onChange={(e) => setTierForm({ ...tierForm, name: e.target.value })}
-                placeholder="e.g., Pro"
+                placeholder="e.g., Premium Yearly"
               />
             </div>
             <div>
@@ -1837,26 +1837,78 @@ export default function AdminPanel() {
                 rows={2}
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Price *</Label>
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={tierForm.price}
-                  onChange={(e) => setTierForm({ ...tierForm, price: parseFloat(e.target.value) || 0 })}
-                  placeholder="9.99"
-                />
-              </div>
-              <div>
-                <Label>Currency</Label>
-                <Input
-                  value={tierForm.currency}
-                  onChange={(e) => setTierForm({ ...tierForm, currency: e.target.value })}
-                  placeholder="USD"
-                />
-              </div>
+            
+            <div>
+              <Label>Payment Type *</Label>
+              <select
+                value={tierForm.payment_type}
+                onChange={(e) => setTierForm({ ...tierForm, payment_type: e.target.value })}
+                className="w-full p-2 border rounded"
+              >
+                <option value="recurring">Recurring Subscription</option>
+                <option value="one-time">One-time Payment</option>
+              </select>
             </div>
+
+            {tierForm.payment_type === 'one-time' ? (
+              <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Price (INR)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={tierForm.price_inr || ''}
+                      onChange={(e) => setTierForm({ ...tierForm, price_inr: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="999"
+                    />
+                  </div>
+                  <div>
+                    <Label>Price (USD)</Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      value={tierForm.price_usd || ''}
+                      onChange={(e) => setTierForm({ ...tierForm, price_usd: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="49"
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <Label>Razorpay Plan ID (for INR)</Label>
+                  <Input
+                    value={tierForm.razorpay_plan_id}
+                    onChange={(e) => setTierForm({ ...tierForm, razorpay_plan_id: e.target.value })}
+                    placeholder="plan_abc123"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Optional: Leave empty if not using Razorpay</p>
+                </div>
+                <div>
+                  <Label>Stripe Price ID (for USD)</Label>
+                  <Input
+                    value={tierForm.stripe_price_id}
+                    onChange={(e) => setTierForm({ ...tierForm, stripe_price_id: e.target.value })}
+                    placeholder="price_xyz789"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Optional: Leave empty if not using Stripe</p>
+                </div>
+              </>
+            )}
+
+            <div>
+              <Label>Duration (days) *</Label>
+              <Input
+                type="number"
+                value={tierForm.duration_days}
+                onChange={(e) => setTierForm({ ...tierForm, duration_days: parseInt(e.target.value) || 30 })}
+                placeholder="30"
+              />
+              <p className="text-xs text-gray-500 mt-1">Billing cycle for recurring or access duration for one-time (e.g., 30, 365)</p>
+            </div>
+
             <div>
               <Label>Features (comma-separated)</Label>
               <Textarea
