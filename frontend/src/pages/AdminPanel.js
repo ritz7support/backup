@@ -51,7 +51,16 @@ export default function AdminPanel() {
     space_type: 'post', allow_member_posts: true, welcome_title: '', welcome_message: ''
   });
   const [tierForm, setTierForm] = useState({
-    name: '', description: '', price: 0, currency: 'USD', features: [], is_active: true
+    name: '', 
+    description: '', 
+    payment_type: 'recurring',
+    price_inr: null, 
+    price_usd: null,
+    razorpay_plan_id: '',
+    stripe_price_id: '',
+    duration_days: 30,
+    features: [], 
+    is_active: true
   });
   
   const [processing, setProcessing] = useState(false);
