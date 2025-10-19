@@ -27,6 +27,11 @@ db = client[os.environ['DB_NAME']]
 # Payment gateway clients
 razorpay_client = razorpay.Client(auth=(os.environ.get('RAZORPAY_KEY_ID', 'test_key'), os.environ.get('RAZORPAY_KEY_SECRET', 'test_secret')))
 
+# SendGrid client
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
+sendgrid_client = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY', ''))
+
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
