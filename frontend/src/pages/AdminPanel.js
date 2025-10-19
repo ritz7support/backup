@@ -682,8 +682,12 @@ export default function AdminPanel() {
     setTierForm({
       name: tier.name,
       description: tier.description || '',
-      price: tier.price || 0,
-      currency: tier.currency || 'USD',
+      payment_type: tier.payment_type || 'recurring',
+      price_inr: tier.price_inr,
+      price_usd: tier.price_usd,
+      razorpay_plan_id: tier.razorpay_plan_id || '',
+      stripe_price_id: tier.stripe_price_id || '',
+      duration_days: tier.duration_days || 30,
       features: tier.features || [],
       is_active: tier.is_active !== false
     });
