@@ -898,6 +898,21 @@ backend:
         agent: "testing"
         comment: "✅ PASS - Platform Settings API endpoints working correctly. GET /api/platform-settings returns proper structure with all required fields (requires_payment_to_join, community_name, primary_color, logo). PUT /api/admin/platform-settings accepts Base64 logo uploads and updates. Logo can be set with Base64 data and removed (set to null). Admin-only access properly enforced (403 Forbidden for non-admins). MongoDB _id field correctly excluded from responses. Upsert behavior creates default settings when needed. All 6/6 platform settings tests passed successfully."
 
+  - task: "Referral/Affiliate Program System"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Referral/affiliate program system implemented with GET /api/me/referral-code, GET /api/me/referral-stats endpoints. Registration with referral code support via ?ref= query parameter. Points system: 50 points for referrer, 25 points for referee. Credit calculation: 1 point = ₹1 INR, 1 point = $0.05 USD. Payment integration with automatic credit application."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Complete referral/affiliate program system working perfectly. GET /api/me/referral-code generates unique codes (format: ADM24880B). GET /api/me/referral-stats returns all required fields (total_referrals, points_earned_from_referrals, total_points, credits_inr, credits_usd, referred_users). Registration with referral code (?ref=CODE) successfully awards 50 points to referrer and 25 points to referee. Credit calculations correct: 1 point = ₹1, 1 point = $0.05. Payment integration automatically applies credits (tested ₹57 credits applied to ₹99 order, reducing to ₹42). Notifications created for both parties. All 8/8 referral system tests passed with 100% success rate."
+
 ## NOTIFICATION SYSTEM - BACKEND COMPLETE ✅
 
 **Status**: Backend notification system fully implemented and tested
