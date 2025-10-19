@@ -44,11 +44,44 @@ export default function ProfilePage() {
     try {
       const { data } = await membersAPI.getMember(userId);
       setMember(data);
+      // Initialize edit form with current data
+      setEditForm({
+        bio: data.bio || '',
+        location: data.location || '',
+        linkedin: data.linkedin || ''
+      });
     } catch (error) {
       toast.error('Failed to load member profile');
       navigate('/members');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // Cancel editing - reset form
+      setEditForm({
+        bio: member.bio || '',
+        location: member.location || '',
+        linkedin: member.linkedin || ''
+      });
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleSaveProfile = async () => {
+    setActionLoading(true);
+    try {
+      await membersAPI.updateProfile(editForm);
+      toast.success('Profile updated successfully!');
+      setIsEditing(false);
+      await checkAuth(); // Update user in context
+      loadMember(); // Reload member data
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to update profile');
+    } finally {
+      setActionLoading(false);
     }
   };
 
