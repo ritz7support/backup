@@ -14,6 +14,37 @@ export default function PricingPage() {
   const [fetchingTiers, setFetchingTiers] = useState(true);
   const [currency, setCurrency] = useState(null); // Will be auto-detected
 
+  // Auto-detect user location and fetch tiers
+  useEffect(() => {
+    const detectLocationAndFetchTiers = async () => {
+      try {
+        // Fetch tiers
+        const { data } = await subscriptionTiersAPI.getTiers();
+        setTiers(data.filter(tier => tier.is_active));
+
+        // Auto-detect currency based on location (simple detection)
+        // In production, use a proper geolocation API
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const isIndian = timezone.includes('Asia/Kolkata') || timezone.includes('Asia/Calcutta');
+        setCurrency(isIndian ? 'INR' : 'USD');
+      } catch (error) {
+        console.error('Error fetching tiers:', error);
+        toast.error('Failed to load pricing plans');
+        setCurrency('USD'); // Default to USD
+      } finally {
+        setFetchingTiers(false);
+      }
+    };
+
+    detectLocationAndFetchTiers();
+  }, []);
+
+  // Group tiers by currency
+  const tiersByCurrency = {
+    INR: tiers.filter(tier => tier.price_inr != null),
+    USD: tiers.filter(tier => tier.price_usd != null),
+  };
+
   const plans = {
     INR: [
       {
