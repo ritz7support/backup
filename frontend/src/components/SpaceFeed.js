@@ -245,39 +245,43 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
 
   // Load join requests for admin/manager
   const loadJoinRequests = async () => {
-    if (!user) {
+    if (!user || !spaceId) {
       setIsAdminOrManager(false);
       return;
     }
     
-    // Check if user is admin or manager of this space
-    const isAdmin = user.role === 'admin';
-    let isManager = false;
+    console.log('[SpaceFeed] Loading join requests for space:', spaceId, 'user:', user.email, 'role:', user.role);
     
-    if (!isAdmin) {
-      try {
-        const { data } = await spacesAPI.getSpaceMembersDetailed(spaceId);
-        const myMembership = data.members?.find(m => m.user_id === user.id);
-        isManager = myMembership?.role === 'manager';
-      } catch (error) {
-        console.error('Failed to check manager status:', error);
-      }
-    }
-    
-    const hasPermission = isAdmin || isManager;
-    setIsAdminOrManager(hasPermission);
-    
-    if (!hasPermission) {
-      return;
-    }
-    
+    // Optimistically try to fetch join requests
+    // The backend will return 403 if user doesn't have permission
     try {
       setLoadingRequests(true);
       const { data } = await spacesAPI.getJoinRequests(spaceId);
+      console.log('[SpaceFeed] Join requests loaded:', data.length, 'requests');
+      
       const pending = data.filter(r => r.status === 'pending');
       setJoinRequests(pending);
+      
+      // If we successfully got join requests, user has permission
+      setIsAdminOrManager(true);
+      console.log('[SpaceFeed] User has admin/manager permission, pending requests:', pending.length);
     } catch (error) {
-      console.error('Failed to load join requests:', error);
+      console.error('[SpaceFeed] Failed to load join requests:', error);
+      
+      // If 403, user doesn't have permission - this is expected for regular members
+      if (error.response?.status === 403) {
+        console.log('[SpaceFeed] User does not have admin/manager permission (403)');
+        setIsAdminOrManager(false);
+        setJoinRequests([]);
+      } else {
+        // For other errors, check if user is admin and retry
+        if (user.role === 'admin') {
+          console.warn('[SpaceFeed] Admin user failed to load join requests, setting permission anyway');
+          setIsAdminOrManager(true);
+        } else {
+          setIsAdminOrManager(false);
+        }
+      }
     } finally {
       setLoadingRequests(false);
     }
