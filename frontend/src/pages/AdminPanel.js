@@ -179,6 +179,46 @@ export default function AdminPanel() {
   };
 
 
+  // Logo upload handler
+  const handleLogoUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image size should be less than 2MB');
+      return;
+    }
+
+    // Convert to Base64
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64 = reader.result;
+      const newSettings = {
+        ...platformSettings,
+        logo: base64
+      };
+      await handleUpdatePlatformSettings(newSettings);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveLogo = async () => {
+    const newSettings = {
+      ...platformSettings,
+      logo: null
+    };
+    await handleUpdatePlatformSettings(newSettings);
+  };
+
+
+
 
   // User role management
   const handlePromoteToAdmin = async (userId, userName) => {
