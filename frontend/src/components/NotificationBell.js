@@ -71,6 +71,25 @@ export default function NotificationBell() {
     }
   }, [showPanel]);
 
+  // Close panel when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        panelRef.current && 
+        !panelRef.current.contains(event.target) &&
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target)
+      ) {
+        setShowPanel(false);
+      }
+    };
+
+    if (showPanel) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [showPanel]);
+
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'post_like':
