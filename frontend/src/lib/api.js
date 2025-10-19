@@ -72,12 +72,6 @@ export const dmsAPI = {
   sendDM: (receiverId, content) => api.post('/dms', { receiver_id: receiverId, content }),
 };
 
-// Notifications API
-export const notificationsAPI = {
-  getNotifications: () => api.get('/notifications'),
-  markAsRead: (notificationId) => api.put(`/notifications/${notificationId}/read`),
-};
-
 // Feature Requests API
 export const featureRequestsAPI = {
   getRequests: (sort = 'votes') => api.get('/feature-requests', { params: { sort } }),
