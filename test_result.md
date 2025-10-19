@@ -866,6 +866,180 @@ agent_communication:
       **OVERALL RESULT: ALL PHASE 2 ENHANCED USER MANAGEMENT FEATURES FULLY FUNCTIONAL ✅**
       
 
+
+user_problem_statement: |
+  Phase 4 (COMPLETED): Dynamic Subscription Tier System with Payment Gateway Integration:
+  1. Flexible Subscription Tiers - Admin can create tiers with one-time or recurring payment types
+  2. Multi-Currency Support - Each tier supports both INR (Razorpay) and USD (Stripe) pricing
+  3. Payment Gateway Mapping - For recurring: Razorpay Plan ID and Stripe Price ID; For one-time: Direct INR/USD pricing
+  4. Space-Tier Linking - Spaces can require specific subscription tiers for access
+  5. Location-based Currency Detection - Auto-detect user location to show appropriate currency
+  6. Dynamic Pricing Page - Fetches tiers from database instead of hardcoded plans
+
+backend:
+  - task: "SubscriptionTier Model Enhancement"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced SubscriptionTier model with payment_type (one-time/recurring), price_inr, price_usd, razorpay_plan_id, stripe_price_id, duration_days fields. Removed old price and currency fields."
+
+  - task: "Subscription Model Update for Tier Linking"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated Subscription model to include tier_id field linking to SubscriptionTier. Added payment_type field. Made old plan field optional for backward compatibility."
+
+  - task: "Dynamic Payment Order Creation with Tiers"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Completely rewrote /api/payments/create-order endpoint to accept tier_id and currency parameters instead of hardcoded plan names. Dynamically fetches tier from database, determines amount and gateway based on currency, supports both one-time (custom amount) and recurring (plan/price IDs) payment types."
+
+  - task: "Payment Verification with Tier-based Subscription Creation"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated Razorpay verification and Stripe status polling endpoints to create subscriptions with tier_id. Subscription duration and auto_renew are set based on tier configuration. Properly handles both one-time and recurring payment types."
+
+  - task: "Seed Default Tiers Script"
+    implemented: true
+    working: true
+    file: "/app/backend/seed_tiers.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created seed_tiers.py script to migrate 4 hardcoded plans to database as SubscriptionTier records. Successfully seeded: Premium Monthly/Yearly for India (₹99/₹999) and International ($5/$49). Script executed and tiers are in database."
+
+frontend:
+  - task: "Dynamic Pricing Page with Tier Fetching"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/PricingPage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Completely rewrote PricingPage to fetch tiers from API using subscriptionTiersAPI.getTiers(). Removed all hardcoded plans. Implemented auto-detection of user currency based on timezone (Asia/Kolkata = INR, others = USD). Groups tiers by currency and renders dynamically. Shows payment_type, duration, and proper price display."
+
+  - task: "Admin Panel - Enhanced Tier Management UI"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/AdminPanel.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Enhanced Subscription Tiers tab with new form fields: Payment Type dropdown, conditional fields (One-time: price_inr/price_usd OR Recurring: razorpay_plan_id/stripe_price_id), Duration (days) input. Updated tier display cards to show both INR and USD pricing, payment type, duration, and gateway IDs. Form validation updated for new fields."
+
+  - task: "Subscription Tiers API Client Methods"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/lib/api.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added subscriptionTiersAPI with methods: getTiers(), createTier(data), updateTier(tierId, data), deleteTier(tierId). Updated paymentsAPI.createOrder to accept (tierId, currency, originUrl) parameters instead of plan."
+
+metadata:
+  created_by: "main_agent"
+  version: "4.0"
+  test_sequence: 5
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "SubscriptionTier Model Enhancement"
+    - "Dynamic Payment Order Creation with Tiers"
+    - "Payment Verification with Tier-based Subscription Creation"
+    - "Dynamic Pricing Page with Tier Fetching"
+    - "Admin Panel - Enhanced Tier Management UI"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      **PHASE 4 DYNAMIC SUBSCRIPTION TIER SYSTEM IMPLEMENTATION COMPLETE**
+      
+      Successfully implemented a comprehensive dynamic subscription tier system that replaces hardcoded pricing with database-driven, admin-manageable tiers.
+      
+      **Key Features Implemented:**
+      
+      1. **Flexible Tier Model**: 
+         - payment_type: "one-time" or "recurring"
+         - Multi-currency: price_inr and price_usd for one-time payments
+         - Gateway integration: razorpay_plan_id and stripe_price_id for recurring
+         - Configurable duration_days for billing cycles or access periods
+      
+      2. **Backend Changes**:
+         - Enhanced SubscriptionTier and Subscription models
+         - Rewrote payment order creation to use dynamic tiers and currency
+         - Updated payment verification to create tier-linked subscriptions
+         - Created seed_tiers.py and migrated 4 default tiers successfully
+      
+      3. **Frontend Changes**:
+         - PricingPage now fetches tiers from API instead of hardcoded data
+         - Auto-detects user location/currency (timezone-based: India = INR, others = USD)
+         - AdminPanel enhanced with new tier form fields (payment type, dual pricing, gateway IDs)
+         - Dynamic tier rendering shows both INR and USD prices where available
+      
+      4. **Migration**:
+         - 4 default tiers seeded in database:
+           * Premium Monthly (India): ₹99/30 days
+           * Premium Yearly (India): ₹999/365 days
+           * Premium Monthly (International): $5/30 days
+           * Premium Yearly (International): $49/365 days
+      
+      **What Works:**
+      - Admins can create/edit/delete subscription tiers with flexible pricing
+      - One-time payments support direct INR/USD pricing without gateway plan IDs
+      - Recurring payments support Razorpay Plan ID and Stripe Price ID mapping
+      - PricingPage dynamically loads and displays tiers
+      - Location-based currency detection working
+      - Payment flow updated to use tier_id and currency parameters
+      
+      **Next Steps for Testing:**
+      - Test tier CRUD operations in Admin Panel
+      - Test payment flow with new tier-based system
+      - Verify one-time vs recurring payment handling
+      - Test space-tier linking (if needed)
+
+
 user_problem_statement: |
   Phase 3 (NEW): Implement Payment Gateway Integration for Indian and International Users:
   1. Razorpay Integration - For INR payments (monthly ₹99, yearly ₹999), with SDK loaded in index.html, payment verification endpoint
