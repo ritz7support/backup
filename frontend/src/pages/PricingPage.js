@@ -1,16 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../hooks/useAuth';
-import { paymentsAPI } from '../lib/api';
+import { paymentsAPI, subscriptionTiersAPI } from '../lib/api';
 import { toast } from 'sonner';
-import { Sparkles, Check, Zap, Crown } from 'lucide-react';
+import { Sparkles, Check, Zap, Crown, Loader2 } from 'lucide-react';
 
 export default function PricingPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(null);
-  const [currency, setCurrency] = useState('INR'); // INR or USD
+  const [tiers, setTiers] = useState([]);
+  const [fetchingTiers, setFetchingTiers] = useState(true);
+  const [currency, setCurrency] = useState(null); // Will be auto-detected
 
   const plans = {
     INR: [
