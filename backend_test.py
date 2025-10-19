@@ -2039,6 +2039,58 @@ class Phase2EnhancedUserManagementTester:
             self.log(f"⚠️ {total - passed} tests failed")
             return False
     
+    def run_notification_tests_only(self):
+        """Run only the notification system tests as requested"""
+        self.log("🚀 Starting Notification System Tests")
+        self.log(f"Backend URL: {BACKEND_URL}")
+        
+        results = {}
+        
+        # Setup test users
+        if not self.setup_test_users():
+            self.log("❌ Failed to setup test users - aborting tests", "ERROR")
+            return False
+        
+        # Run notification tests
+        notification_tests = [
+            ('GET Notifications Endpoint', self.test_get_notifications_endpoint),
+            ('GET Notifications Unauthenticated (Should Fail)', self.test_get_notifications_unauthenticated),
+            ('GET Unread Count Endpoint', self.test_get_unread_count_endpoint),
+            ('GET Unread Count Unauthenticated (Should Fail)', self.test_get_unread_count_unauthenticated),
+            ('Notification Creation via Join Request', self.test_notification_creation_via_join_request),
+            ('Notifications Collection Exists', self.test_notifications_collection_exists),
+        ]
+        
+        for test_name, test_method in notification_tests:
+            try:
+                results[test_name] = test_method()
+            except Exception as e:
+                self.log(f"❌ Unexpected error in {test_name}: {e}", "ERROR")
+                results[test_name] = False
+        
+        # Summary
+        self.log("\n" + "="*80)
+        self.log("📊 NOTIFICATION SYSTEM TEST RESULTS SUMMARY")
+        self.log("="*80)
+        
+        passed = 0
+        total = len(results)
+        
+        for test_name, result in results.items():
+            status = "✅ PASS" if result else "❌ FAIL"
+            self.log(f"{test_name}: {status}")
+            if result:
+                passed += 1
+        
+        self.log(f"\nOverall: {passed}/{total} notification tests passed")
+        
+        if passed == total:
+            self.log("🎉 All notification system tests passed!")
+            return True
+        else:
+            self.log(f"⚠️ {total - passed} notification tests failed")
+            return False
+
     def run_join_requests_test_only(self):
         """Run only the join requests functionality test as requested"""
         self.log("🚀 Starting Join Requests Functionality Test")
