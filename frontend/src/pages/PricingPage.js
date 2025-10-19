@@ -163,6 +163,36 @@ export default function PricingPage() {
 
       {/* Pricing Section */}
       <section className="max-w-7xl mx-auto px-6 py-20">
+        {/* Credits Banner (only if user is logged in and has credits) */}
+        {user && (credits.inr > 0 || credits.usd > 0) && (
+          <div className="mb-8 p-6 rounded-2xl border-2 shadow-lg" style={{ 
+            backgroundColor: '#F0F9FF',
+            borderColor: '#0462CB'
+          }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 rounded-full" style={{ backgroundColor: '#0462CB' }}>
+                  <Gift className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold" style={{ color: '#011328' }}>
+                    You have credits available!
+                  </h3>
+                  <p className="text-sm" style={{ color: '#3B3B3B' }}>
+                    Your credits will be automatically applied at checkout
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-3xl font-bold" style={{ color: '#0462CB' }}>
+                  {currency === 'INR' ? `₹${credits.inr}` : `$${credits.usd.toFixed(2)}`}
+                </p>
+                <p className="text-xs" style={{ color: '#8E8E8E' }}>Available Credits</p>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
             <Crown className="h-4 w-4" />
