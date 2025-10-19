@@ -331,18 +331,6 @@ class DirectMessage(BaseModel):
     is_read: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-# Notification Models
-class Notification(BaseModel):
-    model_config = ConfigDict(extra="ignore")
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    user_id: str
-    type: str  # comment, reaction, tag, event_invite, dm
-    title: str
-    message: str
-    link: Optional[str] = None
-    is_read: bool = False
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
 # Feature Request Models
 class FeatureRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
