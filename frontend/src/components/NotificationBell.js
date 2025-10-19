@@ -186,7 +186,7 @@ export default function NotificationBell() {
                         <p className={`font-semibold text-sm ${!notif.is_read ? 'text-blue-900' : 'text-gray-900'}`}>
                           {notif.title}
                         </p>
-                        <p className="text-sm text-gray-600 truncate">
+                        <p className="text-sm text-gray-600">
                           {notif.message}
                         </p>
                         <p className="text-xs text-gray-400 mt-1">
