@@ -1063,7 +1063,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Logo Upload and Display System"
+    - "Referral/Affiliate Program System"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
