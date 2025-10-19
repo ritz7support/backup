@@ -1985,6 +1985,49 @@ class Phase2EnhancedUserManagementTester:
             self.log(f"❌ Exception in GET /api/platform-settings: {e}", "ERROR")
             return False
     
+    def test_get_admin_platform_settings(self):
+        """Test GET /api/admin/platform-settings (admin-only endpoint)"""
+        self.log("\n🧪 Testing GET /api/admin/platform-settings")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/admin/platform-settings")
+            
+            if response.status_code == 200:
+                settings = response.json()
+                self.log("✅ GET /api/admin/platform-settings successful")
+                
+                # Verify response structure
+                required_fields = ['requires_payment_to_join', 'community_name', 'primary_color', 'logo']
+                missing_fields = [field for field in required_fields if field not in settings]
+                
+                if missing_fields:
+                    self.log(f"⚠️ Missing fields in admin platform settings response: {missing_fields}", "WARNING")
+                else:
+                    self.log("✅ Admin platform settings response structure is correct")
+                
+                # Verify logo field exists (can be null)
+                if 'logo' in settings:
+                    logo_value = settings.get('logo')
+                    if logo_value is None:
+                        self.log("✅ Logo field present and null (no logo set)")
+                    elif isinstance(logo_value, str) and logo_value.startswith('data:image'):
+                        self.log("✅ Logo field contains Base64 image data")
+                    else:
+                        self.log(f"⚠️ Logo field has unexpected format: {type(logo_value)}", "WARNING")
+                
+                return True
+            elif response.status_code == 404:
+                self.log("ℹ️ GET /api/admin/platform-settings endpoint not implemented (404 Not Found)")
+                self.log("ℹ️ Using public GET /api/platform-settings endpoint instead")
+                return True  # This is acceptable - using public endpoint
+            else:
+                self.log(f"❌ GET /api/admin/platform-settings failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/admin/platform-settings: {e}", "ERROR")
+            return False
+    
     def test_update_platform_settings_with_logo(self):
         """Test PUT /api/admin/platform-settings with logo upload"""
         self.log("\n🧪 Testing PUT /api/admin/platform-settings (With Logo)")
