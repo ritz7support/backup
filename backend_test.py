@@ -1745,6 +1745,9 @@ class Phase2EnhancedUserManagementTester:
             ('Process Expired Blocks', self.test_process_expired_blocks),
             ('Process Expired Blocks Non-Admin (Should Fail)', self.test_process_expired_blocks_non_admin),
             
+            # Join Requests Functionality Tests (specific request)
+            ('Join Requests Functionality', self.test_join_requests_functionality),
+            
             # Phase 3 Payment Gateway Tests (new)
             ('Razorpay Order Creation', self.test_razorpay_order_creation),
             ('Razorpay Payment Verification', self.test_razorpay_payment_verification),
