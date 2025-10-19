@@ -127,8 +127,12 @@ class SubscriptionTier(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     name: str  # e.g., "Free", "Pro", "Enterprise"
     description: Optional[str] = None
-    price: float = 0  # Monthly price
-    currency: str = "USD"
+    payment_type: str = "recurring"  # "one-time" or "recurring"
+    price_inr: Optional[float] = None  # Price in INR (for one-time payments)
+    price_usd: Optional[float] = None  # Price in USD (for one-time payments)
+    razorpay_plan_id: Optional[str] = None  # For recurring INR subscriptions
+    stripe_price_id: Optional[str] = None  # For recurring USD subscriptions
+    duration_days: int = 30  # Billing cycle or access duration
     features: List[str] = []  # List of features
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
