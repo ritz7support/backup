@@ -30,7 +30,8 @@ export default function AdminPanel() {
     requires_payment_to_join: false, 
     allowed_tier_ids: [],
     community_name: 'Community',
-    primary_color: '#0462CB'
+    primary_color: '#0462CB',
+    logo: null
   });
   const [brandingSettings, setBrandingSettings] = useState({ logo: '', favicon: '', primary_color: '#0462CB', community_name: 'Community' });
   const [onboardingSteps, setOnboardingSteps] = useState([]);
