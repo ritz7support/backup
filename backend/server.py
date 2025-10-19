@@ -3643,6 +3643,49 @@ async def get_user_onboarding_progress(user: User = Depends(require_auth)):
     }
 
 
+# ==================== REFERRAL ENDPOINTS ====================
+
+@api_router.get("/me/referral-code")
+async def get_my_referral_code(user: User = Depends(require_auth)):
+    """Get or create user's referral code"""
+    referral_code = await get_or_create_referral_code(user.id)
+    return {"referral_code": referral_code}
+
+@api_router.get("/me/referral-stats")
+async def get_my_referral_stats(user: User = Depends(require_auth)):
+    """Get user's referral statistics"""
+    # Get total referrals
+    total_referrals = await db.users.count_documents({"referred_by": user.id})
+    
+    # Get list of referred users with their info
+    referred_users = await db.users.find(
+        {"referred_by": user.id},
+        {"_id": 0, "id": 1, "name": 1, "email": 1, "created_at": 1, "total_points": 1}
+    ).to_list(100)
+    
+    # Calculate points earned from referrals (50 points per referral)
+    REFERRAL_POINTS = 50
+    points_earned = total_referrals * REFERRAL_POINTS
+    
+    # Get user's current total points and calculate available credits
+    current_user = await db.users.find_one({"id": user.id}, {"_id": 0, "total_points": 1})
+    total_points = current_user.get('total_points', 0)
+    
+    # Calculate credits in both currencies
+    credits_inr = calculate_credits_from_points(total_points, "INR")
+    credits_usd = calculate_credits_from_points(total_points, "USD")
+    
+    return {
+        "total_referrals": total_referrals,
+        "points_earned_from_referrals": points_earned,
+        "total_points": total_points,
+        "credits_inr": credits_inr,
+        "credits_usd": credits_usd,
+        "referred_users": referred_users
+    }
+
+
+
 # Include router
 
 
