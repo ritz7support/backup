@@ -44,12 +44,15 @@ export default function NotificationBell() {
 
     // Navigate to related content
     if (notification.related_entity_type === 'post') {
-      navigate(`/space/${notification.related_entity_id}/post/${notification.related_entity_id}`);
+      // For post notifications, we need to fetch the post to get space_id
+      // For now, just close the panel - can enhance later
+      setShowPanel(false);
     } else if (notification.related_entity_type === 'space') {
       navigate(`/space/${notification.related_entity_id}`);
+      setShowPanel(false);
+    } else {
+      setShowPanel(false);
     }
-
-    setShowPanel(false);
   };
 
   const handleMarkAllRead = async () => {
