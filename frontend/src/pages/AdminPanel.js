@@ -1495,10 +1495,28 @@ export default function AdminPanel() {
                   <div className="flex items-start justify-between mb-4">
                     <div>
                       <h3 className="text-lg font-bold" style={{ color: '#011328' }}>{tier.name}</h3>
-                      <p className="text-2xl font-bold" style={{ color: '#0462CB' }}>
-                        ${tier.price}
-                        <span className="text-sm font-normal" style={{ color: '#8E8E8E' }}>/{tier.currency}/mo</span>
-                      </p>
+                      <div className="flex gap-4 items-baseline">
+                        {tier.price_inr && (
+                          <p className="text-xl font-bold" style={{ color: '#0462CB' }}>
+                            ₹{tier.price_inr}
+                          </p>
+                        )}
+                        {tier.price_usd && (
+                          <p className="text-xl font-bold" style={{ color: '#0462CB' }}>
+                            ${tier.price_usd}
+                          </p>
+                        )}
+                        <span className="text-sm font-normal" style={{ color: '#8E8E8E' }}>
+                          /{tier.duration_days}d ({tier.payment_type})
+                        </span>
+                      </div>
+                      {tier.payment_type === 'recurring' && (
+                        <div className="text-xs mt-1" style={{ color: '#8E8E8E' }}>
+                          {tier.razorpay_plan_id && <span>Razorpay: {tier.razorpay_plan_id}</span>}
+                          {tier.razorpay_plan_id && tier.stripe_price_id && <span> | </span>}
+                          {tier.stripe_price_id && <span>Stripe: {tier.stripe_price_id}</span>}
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       <Button
