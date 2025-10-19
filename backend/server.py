@@ -152,6 +152,7 @@ class PlatformSettings(BaseModel):
     allowed_tier_ids: List[str] = []  # Empty = any active subscription is valid
     community_name: str = "Community"  # Brand name for the platform
     primary_color: str = "#0462CB"  # Primary brand color
+    logo: Optional[str] = None  # Base64 encoded logo image
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
