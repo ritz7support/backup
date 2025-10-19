@@ -461,10 +461,10 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
             <span className="text-sm" style={{ color: '#3B3B3B' }}>members</span>
           </div>
           
-          {/* Join Requests Button - Visible to all (for now) */}
-          {joinRequests.length > 0 && (
+          {/* Join Requests Button - Only for Admins/Managers */}
+          {isAdminOrManager && joinRequests.length > 0 && (
             <Button
-              onClick={() => setShowRequestsPanel(!showRequestsPanel)}
+              onClick={() => setShowRequestsPanel(true)}
               className="relative px-4 py-2 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all animate-pulse"
               style={{ 
                 background: 'linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%)',
