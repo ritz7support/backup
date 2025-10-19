@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Bell, X } from 'lucide-react';
 import { notificationsAPI } from '../lib/api';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog';
 
 export default function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0);
