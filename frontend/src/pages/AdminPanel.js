@@ -170,8 +170,6 @@ export default function AdminPanel() {
     }
   };
 
-  };
-
 
 
   // User role management
