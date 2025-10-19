@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../components/ui/textarea';
 import { 
   Settings, Lock, Eye, EyeOff, DollarSign, Loader2, Plus, Pencil, Trash2, 
-  Folder, Grid, CreditCard, ArrowLeft, Users as UsersIcon, Shield 
+  Folder, Grid, CreditCard, ArrowLeft, Users as UsersIcon, Shield, Sparkles 
 } from 'lucide-react';
 import { toast } from 'sonner';
 
