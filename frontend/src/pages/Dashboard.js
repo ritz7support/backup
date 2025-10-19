@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth';
 import { spacesAPI, subscriptionStatusAPI } from '../lib/api';
 import { Button } from '../components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import NotificationBell from '../components/NotificationBell';
 import {
   DropdownMenu,
   DropdownMenuContent,
