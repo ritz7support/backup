@@ -3298,6 +3298,8 @@ async def update_platform_settings(request: Request, user: User = Depends(requir
     update_data = {
         "requires_payment_to_join": data.get('requires_payment_to_join', False),
         "allowed_tier_ids": data.get('allowed_tier_ids', []),
+        "community_name": data.get('community_name', 'Community'),
+        "primary_color": data.get('primary_color', '#0462CB'),
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
