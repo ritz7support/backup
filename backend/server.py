@@ -63,6 +63,8 @@ class User(BaseModel):
     archived: bool = False
     total_points: int = 0  # Leaderboard: Total points earned
     current_level: int = 1  # Leaderboard: Current level number
+    referral_code: Optional[str] = None  # Unique referral code for this user
+    referred_by: Optional[str] = None  # User ID of referrer
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
