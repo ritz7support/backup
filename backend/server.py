@@ -1447,6 +1447,14 @@ async def verify_razorpay_payment(request: Request, user: User = Depends(require
             }}
         )
         
+        # Deduct points if credits were applied
+        points_to_deduct = transaction['metadata'].get('points_to_deduct', 0)
+        if points_to_deduct > 0:
+            await db.users.update_one(
+                {"id": user.id},
+                {"$inc": {"total_points": -points_to_deduct}}
+            )
+        
         # Create subscription
         tier_id = transaction['metadata'].get('tier_id')
         if tier_id:
