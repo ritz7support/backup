@@ -1186,35 +1186,58 @@ async def get_invite_links(user: User = Depends(require_auth)):
 
 @api_router.post("/payments/create-order")
 async def create_payment_order(request: Request, tier_id: str, currency: str, user: User = Depends(require_auth)):
-    """Create payment order (Razorpay or Stripe) based on subscription tier"""
+    """Create payment order (Razorpay or Stripe) based on subscription tier with auto-applied credits"""
     # Get tier from database
     tier = await db.subscription_tiers.find_one({"id": tier_id, "is_active": True})
     if not tier:
         raise HTTPException(status_code=400, detail="Invalid or inactive subscription tier")
     
+    # Get user's current points and calculate available credits
+    current_user = await db.users.find_one({"id": user.id}, {"_id": 0, "total_points": 1})
+    total_points = current_user.get('total_points', 0)
+    
     # Determine amount and gateway based on currency
     if currency == "INR":
         if tier['payment_type'] == 'one-time':
-            amount = tier.get('price_inr')
-            if not amount:
+            original_amount = tier.get('price_inr')
+            if not original_amount:
                 raise HTTPException(status_code=400, detail="INR pricing not available for this tier")
         else:
             if not tier.get('razorpay_plan_id'):
                 raise HTTPException(status_code=400, detail="Razorpay plan ID not configured for this tier")
-            amount = tier.get('price_inr', 0)  # Amount may be retrieved from Razorpay plan
+            original_amount = tier.get('price_inr', 0)
         gateway = 'razorpay'
+        
+        # Calculate credits to apply (1 point = ₹1)
+        available_credits = calculate_credits_from_points(total_points, "INR")
+        credits_to_apply = min(available_credits, original_amount)  # Can't apply more than order total
+        
     elif currency == "USD":
         if tier['payment_type'] == 'one-time':
-            amount = tier.get('price_usd')
-            if not amount:
+            original_amount = tier.get('price_usd')
+            if not original_amount:
                 raise HTTPException(status_code=400, detail="USD pricing not available for this tier")
         else:
             if not tier.get('stripe_price_id'):
                 raise HTTPException(status_code=400, detail="Stripe price ID not configured for this tier")
-            amount = tier.get('price_usd', 0)  # Amount may be retrieved from Stripe price
+            original_amount = tier.get('price_usd', 0)
         gateway = 'stripe'
+        
+        # Calculate credits to apply (1 point = $0.05)
+        available_credits = calculate_credits_from_points(total_points, "USD")
+        credits_to_apply = min(available_credits, original_amount)
+        
     else:
         raise HTTPException(status_code=400, detail="Invalid currency. Use INR or USD")
+    
+    # Calculate final amount after applying credits
+    final_amount = max(0, original_amount - credits_to_apply)
+    
+    # Calculate points to deduct (reverse calculation)
+    if currency == "INR":
+        points_to_deduct = int(credits_to_apply)  # 1 point = ₹1
+    else:
+        points_to_deduct = int(credits_to_apply / 0.05)  # 1 point = $0.05
     
     if gateway == 'razorpay':
         # Razorpay order
