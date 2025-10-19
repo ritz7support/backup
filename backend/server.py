@@ -3215,10 +3215,6 @@ async def get_user_subscription_status(user: User = Depends(require_auth)):
     }
 
 
-    
-    return {"message": "Platform settings updated successfully", "settings": update_data}
-
-
 # Include router
 app.include_router(api_router)
 
