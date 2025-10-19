@@ -26,7 +26,12 @@ export default function AdminPanel() {
   const [allUsers, setAllUsers] = useState([]);
   const [levels, setLevels] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [platformSettings, setPlatformSettings] = useState({ requires_payment_to_join: false, allowed_tier_ids: [] });
+  const [platformSettings, setPlatformSettings] = useState({ 
+    requires_payment_to_join: false, 
+    allowed_tier_ids: [],
+    community_name: 'Community',
+    primary_color: '#0462CB'
+  });
   const [brandingSettings, setBrandingSettings] = useState({ logo: '', favicon: '', primary_color: '#0462CB', community_name: 'Community' });
   const [onboardingSteps, setOnboardingSteps] = useState([]);
   const [onboardingSettings, setOnboardingSettings] = useState({ completion_points: 5, enabled: true });
