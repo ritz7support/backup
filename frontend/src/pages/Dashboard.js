@@ -55,6 +55,23 @@ export default function Dashboard({ children }) {
     }
   };
 
+
+  const checkSubscriptionStatus = async () => {
+    try {
+      const { data } = await subscriptionStatusAPI.getMyStatus();
+      setSubscriptionStatus(data);
+      
+      // If payment is required and user doesn't have subscription (and is not admin)
+      if (data.requires_payment && !data.has_subscription && !data.is_admin) {
+        toast.error('Subscription required to access the community');
+        navigate('/pricing');
+      }
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+    }
+  };
+
+
   const handleLogout = async () => {
     await logout();
     navigate('/');
