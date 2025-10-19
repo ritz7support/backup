@@ -2452,6 +2452,19 @@ async def approve_join_request(request_id: str, user: User = Depends(require_aut
         description=f"Joined space: {space.get('name', 'Unknown') if space else 'Unknown'}"
     )
     
+    # Notify requester that they were approved
+    await create_notification(
+        user_id=join_request['user_id'],
+        notif_type="join_approved",
+        title="Join request approved!",
+        message=f"Your request to join {space.get('name', 'the space') if space else 'the space'} has been approved",
+        related_entity_id=join_request['space_id'],
+        related_entity_type="space",
+        actor_id=user.id,
+        actor_name=user.name,
+        send_email=False
+    )
+    
     return {"message": "Request approved"}
 
 @api_router.put("/join-requests/{request_id}/reject")
