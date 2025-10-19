@@ -87,10 +87,12 @@ class Subscription(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
-    plan: str  # monthly_inr, yearly_inr, monthly_usd, yearly_usd
+    tier_id: str  # Link to SubscriptionTier
+    plan: Optional[str] = None  # Legacy: monthly_inr, yearly_inr, monthly_usd, yearly_usd
     amount: float
     currency: str  # INR, USD
     payment_gateway: str  # razorpay, stripe
+    payment_type: str = "recurring"  # "one-time" or "recurring"
     status: str  # active, cancelled, expired
     starts_at: datetime
     ends_at: datetime
