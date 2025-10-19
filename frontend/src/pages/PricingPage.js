@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../hooks/useAuth';
-import { paymentsAPI, subscriptionTiersAPI } from '../lib/api';
+import { paymentsAPI, subscriptionTiersAPI, referralAPI } from '../lib/api';
 import { toast } from 'sonner';
-import { Sparkles, Check, Zap, Crown, Loader2 } from 'lucide-react';
+import { Sparkles, Check, Zap, Crown, Loader2, Gift } from 'lucide-react';
 
 export default function PricingPage() {
   const { user } = useAuth();
