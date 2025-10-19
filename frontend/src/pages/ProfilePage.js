@@ -262,6 +262,44 @@ export default function ProfilePage() {
                     {member.role?.replace('_', ' ')}
                   </p>
                 </div>
+                
+                {/* Edit Button (only for own profile) */}
+                {isOwnProfile && !isArchived && (
+                  <div className="flex gap-2">
+                    {isEditing ? (
+                      <>
+                        <Button
+                          onClick={handleSaveProfile}
+                          disabled={actionLoading}
+                          size="sm"
+                          style={{ backgroundColor: '#0462CB', color: 'white' }}
+                        >
+                          {actionLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                          Save
+                        </Button>
+                        <Button
+                          onClick={handleEditToggle}
+                          disabled={actionLoading}
+                          variant="outline"
+                          size="sm"
+                        >
+                          <X className="h-4 w-4 mr-2" />
+                          Cancel
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        onClick={handleEditToggle}
+                        variant="outline"
+                        size="sm"
+                        style={{ borderColor: '#0462CB', color: '#0462CB' }}
+                      >
+                        <Edit2 className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                    )}
+                  </div>
+                )}
               </div>
 
               {member.is_founding_member && (
