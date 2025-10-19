@@ -150,6 +150,8 @@ class PlatformSettings(BaseModel):
     id: str = "global_settings"  # Single document ID
     requires_payment_to_join: bool = False  # Global toggle for paid community
     allowed_tier_ids: List[str] = []  # Empty = any active subscription is valid
+    community_name: str = "Community"  # Brand name for the platform
+    primary_color: str = "#0462CB"  # Primary brand color
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
