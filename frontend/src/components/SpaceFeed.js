@@ -453,10 +453,33 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
           <h1 className="text-2xl font-bold" style={{ color: '#011328' }}>{config.title}</h1>
           <p className="text-sm" style={{ color: '#8E8E8E' }}>{config.description}</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#E6EFFA' }}>
-          <Users className="h-5 w-5" style={{ color: '#0462CB' }} />
-          <span className="font-semibold" style={{ color: '#011328' }}>{memberCount}</span>
-          <span className="text-sm" style={{ color: '#3B3B3B' }}>members</span>
+        <div className="flex items-center gap-3">
+          {/* Member Count */}
+          <div className="flex items-center gap-2 px-4 py-2 rounded-lg" style={{ backgroundColor: '#E6EFFA' }}>
+            <Users className="h-5 w-5" style={{ color: '#0462CB' }} />
+            <span className="font-semibold" style={{ color: '#011328' }}>{memberCount}</span>
+            <span className="text-sm" style={{ color: '#3B3B3B' }}>members</span>
+          </div>
+          
+          {/* Join Requests Button - Visible to all (for now) */}
+          {joinRequests.length > 0 && (
+            <Button
+              onClick={() => setShowRequestsPanel(!showRequestsPanel)}
+              className="relative px-4 py-2 rounded-lg font-semibold text-white shadow-lg hover:shadow-xl transition-all animate-pulse"
+              style={{ 
+                background: 'linear-gradient(135deg, #FF6B6B 0%, #FF5252 100%)',
+                border: '2px solid #FFD700'
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Bell className="h-4 w-4" />
+                <span>Requests</span>
+                <span className="bg-white text-red-600 px-2 py-0.5 rounded-full text-xs font-bold">
+                  {joinRequests.length}
+                </span>
+              </div>
+            </Button>
+          )}
         </div>
       </div>
 
