@@ -40,7 +40,7 @@ export default function Header() {
     <header className="border-b sticky top-0 z-50" style={{ backgroundColor: '#011328', borderColor: '#022955' }}>
       <div className="px-6 py-3 flex justify-between items-center">
         {/* Logo */}
-        <div className="flex items-center">
+        <div className="flex items-center gap-3">
           <Link to="/dashboard">
             <img 
               src="https://customer-assets.emergentagent.com/job_abcd-community/artifacts/2ftx37lf_white-blackbackground.png" 
@@ -48,6 +48,15 @@ export default function Header() {
               className="h-10 w-10"
             />
           </Link>
+          {logo && (
+            <Link to="/dashboard">
+              <img 
+                src={logo} 
+                alt="Community Logo" 
+                className="h-10 w-10 object-contain"
+              />
+            </Link>
+          )}
         </div>
 
         {/* Navigation */}
