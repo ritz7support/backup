@@ -363,6 +363,44 @@ async def require_auth(request: Request, authorization: Optional[str] = Header(N
         raise HTTPException(status_code=401, detail="Authentication required")
     return user
 
+
+async def get_platform_settings() -> dict:
+    """Get global platform settings"""
+    settings = await db.platform_settings.find_one({"id": "global_settings"})
+    if not settings:
+        # Create default settings if not exists
+        default_settings = PlatformSettings().model_dump()
+        default_settings['created_at'] = default_settings['created_at'].isoformat()
+        default_settings['updated_at'] = default_settings['updated_at'].isoformat()
+        await db.platform_settings.insert_one(default_settings)
+        return default_settings
+    return settings
+
+async def user_has_active_subscription(user_id: str) -> bool:
+    """Check if user has an active subscription"""
+    subscription = await db.subscriptions.find_one({
+        "user_id": user_id,
+        "status": "active",
+        "ends_at": {"$gt": datetime.now(timezone.utc).isoformat()}
+    })
+    return bool(subscription)
+
+async def check_payment_requirement(user: User) -> None:
+    """Check if platform requires payment and user has subscription"""
+    # Admins always have access
+    if user.role == 'admin':
+        return
+    
+    settings = await get_platform_settings()
+    if settings.get('requires_payment_to_join', False):
+        has_subscription = await user_has_active_subscription(user.id)
+        if not has_subscription:
+            raise HTTPException(
+                status_code=402,
+                detail="Payment required. Please subscribe to access the community."
+            )
+
+
 async def is_space_manager_or_admin(user: User, space_id: str) -> bool:
     """Check if user is an admin or manager of the space"""
     if user.role == 'admin':
