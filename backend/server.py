@@ -1242,7 +1242,35 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
     if gateway == 'razorpay':
         # Razorpay order
         try:
-            amount_paise = int(amount * 100)
+            # If final amount is 0 (fully covered by credits), skip payment
+            if final_amount <= 0:
+                # Deduct points and activate subscription immediately
+                await db.users.update_one(
+                    {"id": user.id},
+                    {"$inc": {"total_points": -points_to_deduct}}
+                )
+                
+                # Create subscription record
+                subscription = Subscription(
+                    user_id=user.id,
+                    tier_id=tier_id,
+                    status='active',
+                    start_date=datetime.now(timezone.utc),
+                    end_date=datetime.now(timezone.utc) + timedelta(days=tier.get('duration_days', 30))
+                )
+                sub_dict = subscription.model_dump()
+                sub_dict['start_date'] = sub_dict['start_date'].isoformat()
+                sub_dict['end_date'] = sub_dict['end_date'].isoformat()
+                await db.subscriptions.insert_one(sub_dict)
+                
+                return {
+                    "success": True,
+                    "message": "Subscription activated using credits",
+                    "credits_used": credits_to_apply,
+                    "amount_paid": 0
+                }
+            
+            amount_paise = int(final_amount * 100)
             order_data = {
                 "amount": amount_paise,
                 "currency": currency,
@@ -1253,12 +1281,18 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
             # Create transaction record
             transaction = PaymentTransaction(
                 user_id=user.id,
-                amount=amount,
+                amount=final_amount,
                 currency=currency,
                 payment_gateway='razorpay',
                 gateway_order_id=razor_order['id'],
                 status='pending',
-                metadata={"tier_id": tier_id, "payment_type": tier['payment_type']}
+                metadata={
+                    "tier_id": tier_id,
+                    "payment_type": tier['payment_type'],
+                    "original_amount": original_amount,
+                    "credits_applied": credits_to_apply,
+                    "points_to_deduct": points_to_deduct
+                }
             )
             trans_dict = transaction.model_dump()
             trans_dict['created_at'] = trans_dict['created_at'].isoformat()
@@ -1266,7 +1300,9 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
             
             return {
                 "order_id": razor_order['id'],
-                "amount": amount,
+                "amount": final_amount,
+                "original_amount": original_amount,
+                "credits_applied": credits_to_apply,
                 "currency": currency,
                 "key_id": os.environ.get('RAZORPAY_KEY_ID', 'test_key')
             }
