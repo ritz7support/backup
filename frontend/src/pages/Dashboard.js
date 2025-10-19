@@ -36,11 +36,33 @@ export default function Dashboard({ children }) {
   const [spaces, setSpaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [onboardingProgress, setOnboardingProgress] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   useEffect(() => {
     loadSpaces();
     checkSubscriptionStatus();
+    loadOnboardingProgress();
   }, []);
+
+  const loadOnboardingProgress = async () => {
+    try {
+      const { data } = await onboardingAPI.getMyProgress();
+      setOnboardingProgress(data);
+      
+      // Check if user just completed all steps
+      if (data.is_complete && !localStorage.getItem('onboarding_completed_notified')) {
+        toast.success('🎉 Congratulations! You\'ve completed all onboarding steps!', {
+          duration: 5000,
+        });
+        localStorage.setItem('onboarding_completed_notified', 'true');
+        // Auto-collapse after 3 seconds
+        setTimeout(() => setShowOnboarding(false), 3000);
+      }
+    } catch (error) {
+      console.error('Failed to load onboarding progress:', error);
+    }
+  };
 
   const loadSpaces = async () => {
     try {
