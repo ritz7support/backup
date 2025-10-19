@@ -865,6 +865,10 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
             {"$set": {"used": True, "used_by": user.id}}
         )
     
+    # Award referral points if user was referred
+    if referrer_id:
+        await award_referral_points(referrer_id, user.id, user.name)
+    
     # Create session
     session_token = str(uuid.uuid4())
     expires_at = datetime.now(timezone.utc) + timedelta(days=7)
