@@ -1129,7 +1129,7 @@ async def check_payment_status(session_id: str, user: User = Depends(require_aut
         
         status = await stripe_checkout.get_checkout_status(session_id)
         
-        # Update transaction
+        # Update transaction and create subscription
         transaction = await db.payment_transactions.find_one({"session_id": session_id, "user_id": user.id})
         if transaction and transaction['status'] == 'pending' and status.payment_status == 'paid':
             await db.payment_transactions.update_one(
@@ -1138,28 +1138,33 @@ async def check_payment_status(session_id: str, user: User = Depends(require_aut
             )
             
             # Create subscription
-            plan = transaction['metadata'].get('plan')
-            plan_info = PRICING.get(plan)
-            if plan_info:
-                duration_days = 365 if 'yearly' in plan else 30
-                subscription = Subscription(
-                    user_id=user.id,
-                    plan=plan,
-                    amount=plan_info['amount'],
-                    currency=plan_info['currency'],
-                    payment_gateway=plan_info['gateway'],
-                    status='active',
-                    starts_at=datetime.now(timezone.utc),
-                    ends_at=datetime.now(timezone.utc) + timedelta(days=duration_days)
-                )
-                sub_dict = subscription.model_dump()
-                sub_dict['created_at'] = sub_dict['created_at'].isoformat()
-                sub_dict['starts_at'] = sub_dict['starts_at'].isoformat()
-                sub_dict['ends_at'] = sub_dict['ends_at'].isoformat()
-                await db.subscriptions.insert_one(sub_dict)
-                
-                # Update user membership
-                await db.users.update_one({"id": user.id}, {"$set": {"membership_tier": "paid"}})
+            tier_id = transaction['metadata'].get('tier_id')
+            if tier_id:
+                tier = await db.subscription_tiers.find_one({"id": tier_id})
+                if tier:
+                    payment_type = transaction['metadata'].get('payment_type', 'recurring')
+                    duration_days = tier.get('duration_days', 30)
+                    
+                    subscription = Subscription(
+                        user_id=user.id,
+                        tier_id=tier_id,
+                        amount=transaction['amount'],
+                        currency=transaction['currency'],
+                        payment_gateway='stripe',
+                        payment_type=payment_type,
+                        status='active',
+                        starts_at=datetime.now(timezone.utc),
+                        ends_at=datetime.now(timezone.utc) + timedelta(days=duration_days),
+                        auto_renew=(payment_type == 'recurring')
+                    )
+                    sub_dict = subscription.model_dump()
+                    sub_dict['created_at'] = sub_dict['created_at'].isoformat()
+                    sub_dict['starts_at'] = sub_dict['starts_at'].isoformat()
+                    sub_dict['ends_at'] = sub_dict['ends_at'].isoformat()
+                    await db.subscriptions.insert_one(sub_dict)
+                    
+                    # Update user membership
+                    await db.users.update_one({"id": user.id}, {"$set": {"membership_tier": "paid"}})
         
         return status
     except Exception as e:
