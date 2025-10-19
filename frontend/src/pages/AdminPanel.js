@@ -26,6 +26,8 @@ export default function AdminPanel() {
   const [allUsers, setAllUsers] = useState([]);
   const [levels, setLevels] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [platformSettings, setPlatformSettings] = useState({ requires_payment_to_join: false, allowed_tier_ids: [] });
+
   
   // Dialog states
   const [groupDialog, setGroupDialog] = useState({ open: false, mode: 'create', data: null });
