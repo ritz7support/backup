@@ -243,57 +243,67 @@ export default function PricingPage() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-            {tiersByCurrency[currency]?.map((tier, index) => (
-            <div
-              key={plan.id}
-              className={`bg-white rounded-3xl p-8 shadow-lg hover-lift ${
-                plan.recommended ? 'ring-2 ring-purple-600 relative' : ''
-              }`}
-              data-testid={`plan-card-${plan.id}`}
-            >
-              {plan.recommended && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                  <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-1 rounded-full text-sm font-medium">
-                    Recommended
+            {tiersByCurrency[currency]?.map((tier, index) => {
+              const price = currency === 'INR' ? tier.price_inr : tier.price_usd;
+              const currencySymbol = currency === 'INR' ? '₹' : '$';
+              const isYearly = tier.duration_days >= 365;
+              const recommended = isYearly; // Recommend yearly plans
+              
+              return (
+                <div
+                  key={tier.id}
+                  className={`bg-white rounded-3xl p-8 shadow-lg hover-lift ${
+                    recommended ? 'ring-2 ring-purple-600 relative' : ''
+                  }`}
+                  data-testid={`tier-card-${tier.id}`}
+                >
+                  {recommended && (
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                      <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-1 rounded-full text-sm font-medium">
+                        Recommended
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-center mb-6">
+                    <h3 className="text-2xl font-bold mb-2">{tier.name}</h3>
+                    {tier.description && (
+                      <p className="text-sm text-gray-600 mb-2">{tier.description}</p>
+                    )}
+                    <div className="flex items-baseline justify-center gap-1">
+                      <span className="text-5xl font-bold gradient-text">{currencySymbol}{price}</span>
+                      <span className="text-gray-600">
+                        /{tier.payment_type === 'one-time' ? 'once' : isYearly ? 'year' : 'month'}
+                      </span>
+                    </div>
                   </div>
+
+                  <ul className="space-y-3 mb-8">
+                    {tier.features.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-3">
+                        <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-700">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Button
+                    className={`w-full ${
+                      recommended
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
+                        : 'bg-gray-900 hover:bg-gray-800'
+                    }`}
+                    onClick={() => handleSubscribe(tier.id)}
+                    disabled={loading === tier.id}
+                    data-testid={`subscribe-btn-${tier.id}`}
+                  >
+                    {loading === tier.id ? 'Processing...' : 'Get Started'}
+                  </Button>
                 </div>
-              )}
-
-              <div className="text-center mb-6">
-                <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                {plan.savings && (
-                  <div className="text-green-600 font-medium text-sm mb-2">{plan.savings}</div>
-                )}
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-5xl font-bold gradient-text">{plan.price}</span>
-                  <span className="text-gray-600">{plan.period}</span>
-                </div>
-              </div>
-
-              <ul className="space-y-3 mb-8">
-                {plan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-3">
-                    <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                className={`w-full ${
-                  plan.recommended
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700'
-                    : 'bg-gray-900 hover:bg-gray-800'
-                }`}
-                onClick={() => handleSubscribe(plan.id)}
-                disabled={loading === plan.id}
-                data-testid={`subscribe-btn-${plan.id}`}
-              >
-                {loading === plan.id ? 'Processing...' : 'Get Started'}
-              </Button>
-            </div>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         {/* Free Features */}
         <div className="mt-16 text-center">
