@@ -122,9 +122,7 @@ export default function Dashboard({ children }) {
               <Trophy className="h-5 w-5" />
             </Button>
 
-            <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white" style={{ backgroundColor: 'transparent' }} data-testid="notifications-btn">
-              <Bell className="h-5 w-5" />
-            </Button>
+            <NotificationBell />
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
