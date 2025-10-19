@@ -61,6 +61,21 @@ export default function NotificationBell() {
     loadNotifications();
   };
 
+  const handleDeleteNotification = async (notificationId, event) => {
+    // Stop propagation to prevent navigation
+    event.stopPropagation();
+    
+    try {
+      await notificationsAPI.deleteNotification(notificationId);
+      // Update local state
+      setNotifications(notifications.filter(n => n.id !== notificationId));
+      // Reload unread count
+      loadUnreadCount();
+    } catch (error) {
+      console.error('Failed to delete notification:', error);
+    }
+  };
+
   useEffect(() => {
     loadUnreadCount();
     // Poll for new notifications every 30 seconds
