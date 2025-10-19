@@ -428,6 +428,78 @@ async def check_payment_requirement(user: User) -> None:
             )
 
 
+
+# Email notification helper
+async def send_email_notification(to_email: str, subject: str, html_content: str):
+    """Send email via SendGrid"""
+    try:
+        sender_email = os.environ.get('SENDER_EMAIL', 'noreply@yourdomain.com')
+        message = Mail(
+            from_email=sender_email,
+            to_emails=to_email,
+            subject=subject,
+            html_content=html_content
+        )
+        response = sendgrid_client.send(message)
+        logger.info(f"Email sent to {to_email}: {response.status_code}")
+        return response.status_code == 202
+    except Exception as e:
+        logger.error(f"Failed to send email to {to_email}: {str(e)}")
+        return False
+
+# Notification creation helper
+async def create_notification(
+    user_id: str,
+    notif_type: str,
+    title: str,
+    message: str,
+    related_entity_id: Optional[str] = None,
+    related_entity_type: Optional[str] = None,
+    actor_id: Optional[str] = None,
+    actor_name: Optional[str] = None,
+    send_email: bool = False
+):
+    """Create a notification and optionally send email"""
+    notification = Notification(
+        user_id=user_id,
+        type=notif_type,
+        title=title,
+        message=message,
+        related_entity_id=related_entity_id,
+        related_entity_type=related_entity_type,
+        actor_id=actor_id,
+        actor_name=actor_name
+    )
+    
+    notif_dict = notification.model_dump()
+    notif_dict['created_at'] = notif_dict['created_at'].isoformat()
+    await db.notifications.insert_one(notif_dict)
+    
+    # Send email if requested and email is important
+    if send_email:
+        user = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 1, "name": 1})
+        if user and user.get('email'):
+            html_content = f"""
+            <html>
+                <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #0462CB;">{title}</h2>
+                        <p>{message}</p>
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+                            <p style="font-size: 12px; color: #888;">
+                                This is an automated notification from your community platform.
+                            </p>
+                        </div>
+                    </div>
+                </body>
+            </html>
+            """
+            await send_email_notification(user['email'], title, html_content)
+    
+    return notification
+
+
+
 async def is_space_manager_or_admin(user: User, space_id: str) -> bool:
     """Check if user is an admin or manager of the space"""
     if user.role == 'admin':
