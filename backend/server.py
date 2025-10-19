@@ -927,22 +927,39 @@ async def get_invite_links(user: User = Depends(require_auth)):
 
 # ==================== PAYMENT ENDPOINTS ====================
 
-PRICING = {
-    "monthly_inr": {"amount": 99.0, "currency": "INR", "gateway": "razorpay"},
-    "yearly_inr": {"amount": 999.0, "currency": "INR", "gateway": "razorpay"},
-    "monthly_usd": {"amount": 5.0, "currency": "USD", "gateway": "stripe"},
-    "yearly_usd": {"amount": 49.0, "currency": "USD", "gateway": "stripe"}
-}
-
 @api_router.post("/payments/create-order")
-async def create_payment_order(request: Request, plan: str, user: User = Depends(require_auth)):
-    """Create payment order (Razorpay or Stripe)"""
-    if plan not in PRICING:
-        raise HTTPException(status_code=400, detail="Invalid plan")
+async def create_payment_order(request: Request, tier_id: str, currency: str, user: User = Depends(require_auth)):
+    """Create payment order (Razorpay or Stripe) based on subscription tier"""
+    # Get tier from database
+    tier = await db.subscription_tiers.find_one({"id": tier_id, "is_active": True})
+    if not tier:
+        raise HTTPException(status_code=400, detail="Invalid or inactive subscription tier")
     
-    plan_info = PRICING[plan]
+    # Determine amount and gateway based on currency
+    if currency == "INR":
+        if tier['payment_type'] == 'one-time':
+            amount = tier.get('price_inr')
+            if not amount:
+                raise HTTPException(status_code=400, detail="INR pricing not available for this tier")
+        else:
+            if not tier.get('razorpay_plan_id'):
+                raise HTTPException(status_code=400, detail="Razorpay plan ID not configured for this tier")
+            amount = tier.get('price_inr', 0)  # Amount may be retrieved from Razorpay plan
+        gateway = 'razorpay'
+    elif currency == "USD":
+        if tier['payment_type'] == 'one-time':
+            amount = tier.get('price_usd')
+            if not amount:
+                raise HTTPException(status_code=400, detail="USD pricing not available for this tier")
+        else:
+            if not tier.get('stripe_price_id'):
+                raise HTTPException(status_code=400, detail="Stripe price ID not configured for this tier")
+            amount = tier.get('price_usd', 0)  # Amount may be retrieved from Stripe price
+        gateway = 'stripe'
+    else:
+        raise HTTPException(status_code=400, detail="Invalid currency. Use INR or USD")
     
-    if plan_info['gateway'] == 'razorpay':
+    if gateway == 'razorpay':
         # Razorpay order
         try:
             amount_paise = int(plan_info['amount'] * 100)
