@@ -134,6 +134,96 @@ export default function Dashboard({ children }) {
               </div>
             ) : (
               <div className="space-y-6">
+                {/* Onboarding Checklist */}
+                {onboardingProgress && !onboardingProgress.is_complete && showOnboarding && (
+                  <div className="bg-white rounded-2xl p-8 shadow-sm border" style={{ borderColor: '#D1D5DB' }}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <Sparkles className="h-6 w-6" style={{ color: '#0462CB' }} />
+                        <h2 className="text-2xl font-bold" style={{ color: '#011328' }}>Welcome & Next Steps</h2>
+                      </div>
+                      <button
+                        onClick={() => setShowOnboarding(false)}
+                        className="text-gray-400 hover:text-gray-600"
+                        title="Hide checklist"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    
+                    <p className="mb-4" style={{ color: '#3B3B3B' }}>
+                      Complete these steps to get started and earn points!
+                    </p>
+                    
+                    {/* Progress Bar */}
+                    <div className="mb-6">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium" style={{ color: '#3B3B3B' }}>
+                          {onboardingProgress.completed_count} of {onboardingProgress.total_steps} completed
+                        </span>
+                        <span className="text-sm font-bold" style={{ color: '#0462CB' }}>
+                          {onboardingProgress.progress_percentage}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-3">
+                        <div
+                          className="h-3 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${onboardingProgress.progress_percentage}%`,
+                            background: 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)'
+                          }}
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Checklist Items */}
+                    <div className="space-y-3">
+                      {onboardingProgress.steps.map((step, index) => (
+                        <div
+                          key={step.id}
+                          className="flex items-start gap-3 p-4 rounded-lg border transition-all"
+                          style={{
+                            backgroundColor: step.completed ? '#F0F9FF' : '#FFFFFF',
+                            borderColor: step.completed ? '#0462CB' : '#E5E7EB',
+                            opacity: step.completed ? 0.8 : 1
+                          }}
+                        >
+                          {step.completed ? (
+                            <CheckCircle2 className="h-6 w-6 flex-shrink-0 mt-0.5" style={{ color: '#0462CB' }} />
+                          ) : (
+                            <Circle className="h-6 w-6 flex-shrink-0 mt-0.5" style={{ color: '#D1D5DB' }} />
+                          )}
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h3
+                                className="font-semibold"
+                                style={{
+                                  color: step.completed ? '#0462CB' : '#011328',
+                                  textDecoration: step.completed ? 'line-through' : 'none'
+                                }}
+                              >
+                                {step.title}
+                              </h3>
+                              <span
+                                className="text-xs font-medium px-2 py-1 rounded"
+                                style={{
+                                  backgroundColor: step.completed ? '#DCFCE7' : '#FEF3C7',
+                                  color: step.completed ? '#166534' : '#92400E'
+                                }}
+                              >
+                                +{step.points} pts
+                              </span>
+                            </div>
+                            <p className="text-sm mt-1" style={{ color: '#6B7280' }}>
+                              {step.description}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Quick Start Section */}
                 <div className="bg-white rounded-2xl p-8 shadow-sm border" style={{ borderColor: '#D1D5DB' }}>
                   <h2 className="text-2xl font-bold mb-4" style={{ color: '#011328' }}>Quick Start</h2>
