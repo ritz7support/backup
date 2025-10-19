@@ -314,27 +314,78 @@ export default function ProfilePage() {
                   <Mail className="h-5 w-5" style={{ color: '#8E8E8E' }} />
                   {member.email}
                 </div>
-                {member.location && (
-                  <div className="flex items-center gap-2" style={{ color: '#3B3B3B' }}>
-                    <MapPin className="h-5 w-5" style={{ color: '#8E8E8E' }} />
-                    {member.location}
+                
+                {/* Location */}
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="location">Location</Label>
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-5 w-5" style={{ color: '#8E8E8E' }} />
+                      <Input
+                        id="location"
+                        value={editForm.location}
+                        onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                        placeholder="Add your location"
+                        className="flex-1"
+                      />
+                    </div>
                   </div>
+                ) : (
+                  member.location && (
+                    <div className="flex items-center gap-2" style={{ color: '#3B3B3B' }}>
+                      <MapPin className="h-5 w-5" style={{ color: '#8E8E8E' }} />
+                      {member.location}
+                    </div>
+                  )
                 )}
-                {member.linkedin && (
-                  <div className="flex items-center gap-2">
-                    <Linkedin className="h-5 w-5" style={{ color: '#8E8E8E' }} />
-                    <a href={member.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: '#0462CB' }} className="hover:underline">
-                      LinkedIn Profile
-                    </a>
+                
+                {/* LinkedIn */}
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedin">LinkedIn Profile URL</Label>
+                    <div className="flex items-center gap-2">
+                      <Linkedin className="h-5 w-5" style={{ color: '#8E8E8E' }} />
+                      <Input
+                        id="linkedin"
+                        value={editForm.linkedin}
+                        onChange={(e) => setEditForm({ ...editForm, linkedin: e.target.value })}
+                        placeholder="https://linkedin.com/in/yourprofile"
+                        className="flex-1"
+                      />
+                    </div>
                   </div>
+                ) : (
+                  member.linkedin && (
+                    <div className="flex items-center gap-2">
+                      <Linkedin className="h-5 w-5" style={{ color: '#8E8E8E' }} />
+                      <a href={member.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: '#0462CB' }} className="hover:underline">
+                        LinkedIn Profile
+                      </a>
+                    </div>
+                  )
                 )}
               </div>
 
-              {member.bio && (
+              {/* Bio */}
+              {isEditing ? (
                 <div className="mb-6">
-                  <h3 className="font-semibold mb-2" style={{ color: '#011328' }}>Bio</h3>
-                  <p style={{ color: '#3B3B3B' }}>{member.bio}</p>
+                  <Label htmlFor="bio">Bio</Label>
+                  <Textarea
+                    id="bio"
+                    value={editForm.bio}
+                    onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+                    placeholder="Tell us about yourself..."
+                    rows={4}
+                    className="mt-2"
+                  />
                 </div>
+              ) : (
+                member.bio && (
+                  <div className="mb-6">
+                    <h3 className="font-semibold mb-2" style={{ color: '#011328' }}>Bio</h3>
+                    <p style={{ color: '#3B3B3B' }}>{member.bio}</p>
+                  </div>
+                )
               )}
 
               {member.skills && member.skills.length > 0 && (
