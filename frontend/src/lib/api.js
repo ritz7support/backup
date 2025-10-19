@@ -87,7 +87,7 @@ export const featureRequestsAPI = {
 
 // Payments API
 export const paymentsAPI = {
-  createOrder: (plan, originUrl) => api.post('/payments/create-order', { origin_url: originUrl }, { params: { plan } }),
+  createOrder: (tierId, currency, originUrl) => api.post('/payments/create-order', { origin_url: originUrl }, { params: { tier_id: tierId, currency } }),
   checkStatus: (sessionId) => api.get(`/payments/status/${sessionId}`),
   verifyRazorpayPayment: (data) => api.post('/payments/razorpay/verify', data),
 };
