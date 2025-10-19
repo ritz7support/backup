@@ -883,6 +883,21 @@ backend:
         agent: "testing"
         comment: "✅ PASS - Notification system endpoints working correctly. GET /api/notifications returns proper structure with required fields (id, user_id, type, title, message, is_read, created_at). GET /api/notifications/unread-count returns correct count format. Authentication properly enforced (401/403 for unauthenticated requests). Notification creation verified - join requests properly trigger notifications for admins. Notifications collection exists and is accessible. All 6/6 notification tests passed successfully."
 
+  - task: "Platform Settings API Endpoints for Logo Upload"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Platform Settings API endpoints implemented: GET /api/platform-settings (public), PUT /api/admin/platform-settings (admin-only). PlatformSettings model includes logo field for Base64 encoded images. Settings stored in MongoDB with single document ID 'global_settings'. Upsert behavior creates default settings when needed."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Platform Settings API endpoints working correctly. GET /api/platform-settings returns proper structure with all required fields (requires_payment_to_join, community_name, primary_color, logo). PUT /api/admin/platform-settings accepts Base64 logo uploads and updates. Logo can be set with Base64 data and removed (set to null). Admin-only access properly enforced (403 Forbidden for non-admins). MongoDB _id field correctly excluded from responses. Upsert behavior creates default settings when needed. All 6/6 platform settings tests passed successfully."
+
 ## NOTIFICATION SYSTEM - BACKEND COMPLETE ✅
 
 **Status**: Backend notification system fully implemented and tested
