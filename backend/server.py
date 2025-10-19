@@ -2161,21 +2161,6 @@ async def send_dm(request: Request, user: User = Depends(require_auth)):
 
 # ==================== NOTIFICATION ENDPOINTS ====================
 
-@api_router.get("/notifications")
-async def get_notifications(user: User = Depends(require_auth)):
-    """Get user notifications"""
-    notifications = await db.notifications.find({"user_id": user.id}, {"_id": 0}).sort("created_at", -1).limit(50).to_list(50)
-    return notifications
-
-@api_router.put("/notifications/{notification_id}/read")
-async def mark_notification_read(notification_id: str, user: User = Depends(require_auth)):
-    """Mark notification as read"""
-    await db.notifications.update_one(
-        {"id": notification_id, "user_id": user.id},
-        {"$set": {"is_read": True}}
-    )
-    return {"message": "Marked as read"}
-
 # ==================== FEATURE REQUEST ENDPOINTS ====================
 
 @api_router.get("/feature-requests")
