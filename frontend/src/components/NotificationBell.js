@@ -44,9 +44,9 @@ export default function NotificationBell() {
 
     // Navigate to related content
     if (notification.related_entity_type === 'post') {
-      navigate(`/posts/${notification.related_entity_id}`);
+      navigate(`/space/${notification.related_entity_id}/post/${notification.related_entity_id}`);
     } else if (notification.related_entity_type === 'space') {
-      navigate(`/spaces/${notification.related_entity_id}`);
+      navigate(`/space/${notification.related_entity_id}`);
     }
 
     setShowPanel(false);
