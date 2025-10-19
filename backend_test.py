@@ -2369,6 +2369,63 @@ class Phase2EnhancedUserManagementTester:
             self.log(f"❌ Unexpected error in join requests test: {e}", "ERROR")
             return False
 
+    def run_platform_settings_tests_only(self):
+        """Run only the platform settings tests as requested"""
+        self.log("🚀 Starting Platform Settings API Tests")
+        self.log(f"Backend URL: {BACKEND_URL}")
+        
+        results = {}
+        
+        # Setup test users
+        if not self.setup_test_users():
+            self.log("❌ Failed to setup test users - aborting tests", "ERROR")
+            return False
+        
+        # Run platform settings tests
+        platform_tests = [
+            ('GET Platform Settings', self.test_get_platform_settings),
+            ('Update Platform Settings with Logo', self.test_update_platform_settings_with_logo),
+            ('Remove Platform Settings Logo', self.test_update_platform_settings_remove_logo),
+            ('Platform Settings Non-Admin (Should Fail)', self.test_update_platform_settings_non_admin),
+            ('Platform Settings Upsert Behavior', self.test_platform_settings_upsert_behavior),
+        ]
+        
+        for test_name, test_method in platform_tests:
+            try:
+                results[test_name] = test_method()
+            except Exception as e:
+                self.log(f"❌ Unexpected error in {test_name}: {e}", "ERROR")
+                results[test_name] = False
+        
+        # Summary
+        self.log("\n" + "="*80)
+        self.log("📊 PLATFORM SETTINGS API TEST RESULTS SUMMARY")
+        self.log("="*80)
+        
+        passed = 0
+        total = len(results)
+        
+        for test_name, result in results.items():
+            status = "✅ PASS" if result else "❌ FAIL"
+            self.log(f"{test_name}: {status}")
+            if result:
+                passed += 1
+        
+        self.log(f"\nOverall: {passed}/{total} platform settings tests passed")
+        
+        if passed == total:
+            self.log("🎉 All platform settings tests passed!")
+            self.log("\n✅ Platform Settings API is working correctly!")
+            self.log("- GET /api/platform-settings returns proper structure with logo field")
+            self.log("- PUT /api/admin/platform-settings accepts Base64 logo uploads")
+            self.log("- Logo can be set and removed (null)")
+            self.log("- Admin-only access properly enforced (403 for non-admins)")
+            self.log("- Upsert behavior creates default settings when needed")
+            return True
+        else:
+            self.log(f"⚠️ {total - passed} platform settings tests failed")
+            return False
+
 def main():
     """Main test runner"""
     tester = Phase2EnhancedUserManagementTester()
