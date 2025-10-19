@@ -112,16 +112,16 @@ export default function PricingPage() {
     ],
   };
 
-  const handleSubscribe = async (planId) => {
+  const handleSubscribe = async (tierId) => {
     if (!user) {
       navigate('/register');
       return;
     }
 
-    setLoading(planId);
+    setLoading(tierId);
     try {
       const originUrl = window.location.origin;
-      const { data } = await paymentsAPI.createOrder(planId, originUrl);
+      const { data } = await paymentsAPI.createOrder(tierId, currency, originUrl);
 
       if (data.url) {
         // Stripe checkout
