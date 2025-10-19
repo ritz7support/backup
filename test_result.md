@@ -205,6 +205,18 @@ backend:
         agent: "testing"
         comment: "✅ PASS - Access control working correctly. Blocked users are properly prevented from posting, commenting, and reacting (403 Forbidden). Non-members cannot engage in private spaces (401/403 responses). All engagement restrictions are enforced at the API level."
 
+  - task: "GET Join Requests Endpoint - Admin/Manager Access"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - GET /api/spaces/{space_id}/join-requests endpoint working correctly. Admin can successfully retrieve join requests (found 2 pending requests). Join requests include enriched user data with proper security (password_hash excluded). Non-admin access properly rejected with 403 Forbidden. All test scenarios completed successfully: create join request, admin retrieval with user data enrichment, and access control verification."
+
 frontend:
   - task: "SpaceFeed - Public Space Join Button"
     implemented: true
