@@ -777,12 +777,22 @@ async def get_user_leaderboard_stats(user_id: str):
 # ==================== AUTH ENDPOINTS ====================
 
 @api_router.post("/auth/register")
-async def register(user_data: UserCreate, response: Response, invite_token: Optional[str] = None):
-    """Register new user with email/password"""
+async def register(user_data: UserCreate, response: Response, invite_token: Optional[str] = None, ref: Optional[str] = None):
+    """Register new user with email/password and optional referral code"""
     # Check if user exists
     existing_user = await db.users.find_one({"email": user_data.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
+    
+    # Validate referral code if provided
+    referrer_id = None
+    if ref:
+        referrer = await db.users.find_one({"referral_code": ref})
+        if referrer:
+            referrer_id = referrer['id']
+        else:
+            # Don't fail registration if referral code is invalid, just ignore it
+            logger.warning(f"Invalid referral code used: {ref}")
     
     # Handle invite token if provided
     role = user_data.role
@@ -826,7 +836,8 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
         role=role,
         password_hash=password_hash,
         is_founding_member=is_founding,
-        badges=["🎉 Founding 100"] if is_founding else []
+        badges=["🎉 Founding 100"] if is_founding else [],
+        referred_by=referrer_id  # Store referrer ID
     )
     
     user_dict = user.model_dump()
