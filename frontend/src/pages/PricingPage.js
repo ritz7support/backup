@@ -13,6 +13,7 @@ export default function PricingPage() {
   const [tiers, setTiers] = useState([]);
   const [fetchingTiers, setFetchingTiers] = useState(true);
   const [currency, setCurrency] = useState(null); // Will be auto-detected
+  const [credits, setCredits] = useState({ inr: 0, usd: 0 });
 
   // Auto-detect user location and fetch tiers
   useEffect(() => {
@@ -27,6 +28,19 @@ export default function PricingPage() {
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const isIndian = timezone.includes('Asia/Kolkata') || timezone.includes('Asia/Calcutta');
         setCurrency(isIndian ? 'INR' : 'USD');
+        
+        // Fetch user credits if logged in
+        if (user) {
+          try {
+            const { data: statsData } = await referralAPI.getMyReferralStats();
+            setCredits({
+              inr: statsData.credits_inr || 0,
+              usd: statsData.credits_usd || 0
+            });
+          } catch (error) {
+            console.error('Failed to load credits:', error);
+          }
+        }
       } catch (error) {
         console.error('Error fetching tiers:', error);
         toast.error('Failed to load pricing plans');
@@ -37,7 +51,7 @@ export default function PricingPage() {
     };
 
     detectLocationAndFetchTiers();
-  }, []);
+  }, [user]);
 
   // Group tiers by currency
   const tiersByCurrency = {
