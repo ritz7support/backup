@@ -3370,6 +3370,19 @@ async def delete_subscription_tier(tier_id: str, user: User = Depends(require_au
     return {"message": "Subscription tier deleted successfully"}
 
 
+
+@api_router.delete("/notifications/{notification_id}")
+async def delete_notification(notification_id: str, user: User = Depends(require_auth)):
+    """Delete a notification"""
+    result = await db.notifications.delete_one({
+        "id": notification_id,
+        "user_id": user.id  # Only allow users to delete their own notifications
+    })
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return {"status": "success", "message": "Notification deleted"}
+
+
 # Platform Settings endpoints
 @api_router.get("/platform-settings")
 async def get_platform_settings_endpoint():
