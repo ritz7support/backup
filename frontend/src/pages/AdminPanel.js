@@ -382,58 +382,6 @@ export default function AdminPanel() {
     });
   };
 
-  // Join requests management
-  const handleViewJoinRequests = async (spaceId, spaceName) => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/spaces/${spaceId}/join-requests`, {
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to fetch join requests');
-      const data = await response.json();
-      setJoinRequestsDialog({ open: true, spaceId, spaceName, requests: data || [] });
-    } catch (error) {
-      toast.error('Failed to load join requests');
-    }
-  };
-
-  const handleApproveRequest = async (requestId, userName) => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/join-requests/${requestId}/approve`, {
-        method: 'PUT',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to approve request');
-      toast.success(`${userName} approved!`);
-      handleViewJoinRequests(joinRequestsDialog.spaceId, joinRequestsDialog.spaceName); // Reload
-    } catch (error) {
-      toast.error(error.message);
-    }
-  };
-
-  const handleRejectRequest = async (requestId, userName) => {
-    setConfirmDialog({
-      open: true,
-      title: 'Reject Join Request',
-      message: `Reject join request from ${userName}?`,
-      variant: 'warning',
-      onConfirm: async () => {
-        try {
-          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/api/join-requests/${requestId}/reject`, {
-            method: 'PUT',
-            credentials: 'include'
-          });
-          if (!response.ok) throw new Error('Failed to reject request');
-          toast.success('Request rejected');
-          handleViewJoinRequests(joinRequestsDialog.spaceId, joinRequestsDialog.spaceName); // Reload
-        } catch (error) {
-          toast.error(error.message);
-        }
-        setConfirmDialog({ ...confirmDialog, open: false });
-      }
-    });
-  };
-
-
   // Space invites management (for secret spaces)
   const handleViewInvites = async (spaceId, spaceName) => {
     try {
