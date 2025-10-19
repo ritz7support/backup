@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { spacesAPI, subscriptionStatusAPI } from '../lib/api';
-import { Button } from '../components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
-import NotificationBell from '../components/NotificationBell';
+import Header from '../components/Header';
 import {
   DropdownMenu,
   DropdownMenuContent,
