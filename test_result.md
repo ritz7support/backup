@@ -1245,6 +1245,7 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Platform Settings API Endpoints for Logo Upload"
     - "Razorpay SDK Loading"
     - "PricingPage - Payment Flow Handler"
     - "PaymentSuccess - Status Polling"
