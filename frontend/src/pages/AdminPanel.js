@@ -1603,6 +1603,100 @@ export default function AdminPanel() {
             </div>
           </div>
         )}
+
+
+        {/* Platform Settings Tab */}
+        {activeTab === 'platform-settings' && (
+          <div>
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold mb-2" style={{ color: '#011328' }}>Platform Settings</h2>
+              <p className="text-sm" style={{ color: '#8E8E8E' }}>Configure global settings for your community platform</p>
+            </div>
+
+            <div className="bg-white rounded-lg p-6 border" style={{ borderColor: '#E5E7EB' }}>
+              <div className="space-y-6">
+                {/* Payment Requirement Toggle */}
+                <div className="flex items-start justify-between pb-6 border-b" style={{ borderColor: '#E5E7EB' }}>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Lock className="h-5 w-5" style={{ color: '#0462CB' }} />
+                      <h3 className="font-semibold" style={{ color: '#011328' }}>Paid Community Access</h3>
+                    </div>
+                    <p className="text-sm" style={{ color: '#8E8E8E' }}>
+                      When enabled, users must have an active subscription to access the community. 
+                      Admins always have full access.
+                    </p>
+                    {platformSettings.requires_payment_to_join && (
+                      <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <p className="text-sm text-amber-800">
+                          ⚠️ <strong>Payment Required Mode Active:</strong> New users must subscribe to access the community.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="ml-6">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={platformSettings.requires_payment_to_join}
+                        onChange={(e) => {
+                          const newSettings = {
+                            ...platformSettings,
+                            requires_payment_to_join: e.target.checked
+                          };
+                          handleUpdatePlatformSettings(newSettings);
+                        }}
+                        className="sr-only peer"
+                        disabled={processing}
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Information Section */}
+                <div className="space-y-3">
+                  <h4 className="font-medium" style={{ color: '#011328' }}>How it works:</h4>
+                  <ul className="space-y-2 text-sm" style={{ color: '#3B3B3B' }}>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-500 mt-0.5">✓</span>
+                      <span>When disabled: Anyone can register and access the community for free</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-blue-500 mt-0.5">✓</span>
+                      <span>When enabled: Users must purchase a subscription to access community features</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-500 mt-0.5">✓</span>
+                      <span>After registration, users without subscription will be redirected to pricing page</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-amber-500 mt-0.5">✓</span>
+                      <span>Admins always have full access regardless of subscription status</span>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 gap-4 pt-6 border-t" style={{ borderColor: '#E5E7EB' }}>
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold" style={{ color: '#0462CB' }}>
+                      {subscriptionTiers.filter(t => t.is_active).length}
+                    </div>
+                    <div className="text-sm" style={{ color: '#8E8E8E' }}>Active Subscription Tiers</div>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <div className="text-2xl font-bold text-green-600">
+                      {platformSettings.requires_payment_to_join ? 'ON' : 'OFF'}
+                    </div>
+                    <div className="text-sm" style={{ color: '#8E8E8E' }}>Payment Requirement</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* Space Group Dialog */}
