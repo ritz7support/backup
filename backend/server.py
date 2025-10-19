@@ -3177,11 +3177,13 @@ async def update_platform_settings(request: Request, user: User = Depends(requir
         "updated_at": datetime.now(timezone.utc).isoformat()
     }
     
-    result = await db.platform_settings.update_one(
+    await db.platform_settings.update_one(
         {"id": "global_settings"},
         {"$set": update_data},
         upsert=True
     )
+    
+    return {"message": "Platform settings updated successfully", "settings": update_data}
 
 @api_router.get("/me/subscription-status")
 async def get_user_subscription_status(user: User = Depends(require_auth)):
