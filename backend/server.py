@@ -3451,12 +3451,15 @@ async def get_user_onboarding_progress(user: User = Depends(require_auth)):
     has_linkedin = bool(user.linkedin)
     profile_complete = has_bio and has_location and has_linkedin
     
-    # Check if user has joined any space
-    joined_space = await db.space_memberships.find_one({
-        "user_id": user.id,
-        "status": "member"
-    })
-    has_joined_space = bool(joined_space)
+    # Check if user has joined any space (admins auto-join all spaces)
+    if user.role == 'admin':
+        has_joined_space = True  # Admins are automatically added to all spaces
+    else:
+        joined_space = await db.space_memberships.find_one({
+            "user_id": user.id,
+            "status": "member"
+        })
+        has_joined_space = bool(joined_space)
     
     # Check if user has posted in Introduction space
     intro_space = await db.spaces.find_one({"name": "Introduction"})
