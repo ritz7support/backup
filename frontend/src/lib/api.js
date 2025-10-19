@@ -106,6 +106,11 @@ export const subscriptionStatusAPI = {
   getMyStatus: () => api.get('/me/subscription-status'),
 };
 
+// Onboarding API
+export const onboardingAPI = {
+  getMyProgress: () => api.get('/me/onboarding-progress'),
+};
+
 
 // Notifications API
 export const notificationsAPI = {
