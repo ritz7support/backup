@@ -1056,15 +1056,18 @@ test_plan:
 frontend:
   - task: "Logo Upload and Display System"
     implemented: true
-    working: "NA"
+    working: false
     file: "/app/frontend/src/pages/AdminPanel.js, /app/frontend/src/components/Header.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Logo upload functionality implemented in Admin Panel > Platform Settings tab. Backend API endpoints working. Header component loads logo from platform settings but needs to display it alongside or replace ABCD logo."
+      - working: false
+        agent: "testing"
+        comment: "✅ PARTIAL SUCCESS - Logo upload functionality working in Admin Panel (Platform Settings > Branding section). Logo preview displays correctly in admin panel. Logo removal functionality working. Success toasts appear. ❌ CRITICAL ISSUE: Uploaded logo does not display in Header component across pages. Header component loads logo from platform settings but doesn't render it. Fixed Header component to display community logo alongside ABCD logo, but logo still not visible in header during testing."
 
 agent_communication:
   - agent: "main"
