@@ -111,6 +111,12 @@ export const onboardingAPI = {
   getMyProgress: () => api.get('/me/onboarding-progress'),
 };
 
+// Referral API
+export const referralAPI = {
+  getMyReferralCode: () => api.get('/me/referral-code'),
+  getMyReferralStats: () => api.get('/me/referral-stats'),
+};
+
 
 // Notifications API
 export const notificationsAPI = {
