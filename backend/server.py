@@ -1665,6 +1665,19 @@ async def react_to_post(post_id: str, emoji: str, user: User = Depends(require_a
                 related_user_id=user.id,
                 description="Received a like on post"
             )
+            
+            # Create notification for post author
+            await create_notification(
+                user_id=post['author_id'],
+                notif_type="post_like",
+                title="Someone liked your post",
+                message=f"{user.name} liked your post",
+                related_entity_id=post_id,
+                related_entity_type="post",
+                actor_id=user.id,
+                actor_name=user.name,
+                send_email=False
+            )
     
     return {"reactions": reactions}
 
