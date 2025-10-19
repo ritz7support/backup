@@ -189,32 +189,44 @@ export default function NotificationBell() {
                 {notifications.map((notif) => (
                   <div
                     key={notif.id}
-                    onClick={() => handleNotificationClick(notif)}
-                    className={`p-3 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors ${
+                    className={`p-3 rounded-lg transition-colors relative group ${
                       !notif.is_read 
                         ? 'bg-blue-50 border-l-4 border-blue-500' 
                         : 'bg-white border border-gray-200'
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="text-2xl flex-shrink-0">
-                        {getNotificationIcon(notif.type)}
+                    <div 
+                      className="cursor-pointer"
+                      onClick={() => handleNotificationClick(notif)}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="text-2xl flex-shrink-0">
+                          {getNotificationIcon(notif.type)}
+                        </div>
+                        <div className="flex-1 min-w-0 pr-8">
+                          <p className={`font-semibold text-sm ${!notif.is_read ? 'text-blue-900' : 'text-gray-900'}`}>
+                            {notif.title}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {notif.message}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(notif.created_at).toLocaleString()}
+                          </p>
+                        </div>
+                        {!notif.is_read && (
+                          <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-2"></div>
+                        )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-semibold text-sm ${!notif.is_read ? 'text-blue-900' : 'text-gray-900'}`}>
-                          {notif.title}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                          {notif.message}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {new Date(notif.created_at).toLocaleString()}
-                        </p>
-                      </div>
-                      {!notif.is_read && (
-                        <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-2"></div>
-                      )}
                     </div>
+                    {/* Delete button - appears on hover */}
+                    <button
+                      onClick={(e) => handleDeleteNotification(notif.id, e)}
+                      className="absolute top-2 right-2 p-1 rounded hover:bg-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Delete notification"
+                    >
+                      <X className="h-4 w-4 text-gray-500" />
+                    </button>
                   </div>
                 ))}
               </div>
