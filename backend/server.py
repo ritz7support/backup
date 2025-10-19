@@ -3154,6 +3154,38 @@ async def delete_subscription_tier(tier_id: str, user: User = Depends(require_au
     
     return {"message": "Subscription tier deleted successfully"}
 
+
+# Platform Settings endpoints
+@api_router.get("/platform-settings")
+async def get_platform_settings_endpoint():
+    """Get platform settings (public)"""
+    settings = await get_platform_settings()
+    return settings
+
+@api_router.put("/admin/platform-settings")
+async def update_platform_settings(request: Request, user: User = Depends(require_auth)):
+    """Update platform settings (admin only)"""
+    if user.role != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    
+    # Update settings
+    update_data = {
+        "requires_payment_to_join": data.get('requires_payment_to_join', False),
+        "allowed_tier_ids": data.get('allowed_tier_ids', []),
+        "updated_at": datetime.now(timezone.utc).isoformat()
+    }
+    
+    result = await db.platform_settings.update_one(
+        {"id": "global_settings"},
+        {"$set": update_data},
+        upsert=True
+    )
+    
+    return {"message": "Platform settings updated successfully", "settings": update_data}
+
+
 # Include router
 app.include_router(api_router)
 
