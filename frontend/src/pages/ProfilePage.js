@@ -7,6 +7,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
+import ReferralSection from '../components/ReferralSection';
 import { ArrowLeft, Mail, MapPin, Linkedin, Crown, Archive, Trash2, ArchiveRestore, Loader2, Edit2, Save, X } from 'lucide-react';
 import { toast } from 'sonner';
 import {
