@@ -1313,6 +1313,34 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
     elif gateway == 'stripe':
         # Stripe checkout
         try:
+            # If final amount is 0 (fully covered by credits), skip payment
+            if final_amount <= 0:
+                # Deduct points and activate subscription immediately
+                await db.users.update_one(
+                    {"id": user.id},
+                    {"$inc": {"total_points": -points_to_deduct}}
+                )
+                
+                # Create subscription record
+                subscription = Subscription(
+                    user_id=user.id,
+                    tier_id=tier_id,
+                    status='active',
+                    start_date=datetime.now(timezone.utc),
+                    end_date=datetime.now(timezone.utc) + timedelta(days=tier.get('duration_days', 30))
+                )
+                sub_dict = subscription.model_dump()
+                sub_dict['start_date'] = sub_dict['start_date'].isoformat()
+                sub_dict['end_date'] = sub_dict['end_date'].isoformat()
+                await db.subscriptions.insert_one(sub_dict)
+                
+                return {
+                    "success": True,
+                    "message": "Subscription activated using credits",
+                    "credits_used": credits_to_apply,
+                    "amount_paid": 0
+                }
+            
             body = await request.json()
             origin_url = body.get('origin_url', str(request.base_url))
             
@@ -1326,20 +1354,36 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
             # Build checkout request based on payment type
             if tier['payment_type'] == 'one-time':
                 checkout_request = CheckoutSessionRequest(
-                    amount=amount,
+                    amount=final_amount,
                     currency=currency.lower(),
                     success_url=success_url,
                     cancel_url=cancel_url,
-                    metadata={"tier_id": tier_id, "user_id": user.id, "payment_type": "one-time"}
+                    metadata={
+                        "tier_id": tier_id,
+                        "user_id": user.id,
+                        "payment_type": "one-time",
+                        "original_amount": str(original_amount),
+                        "credits_applied": str(credits_to_apply),
+                        "points_to_deduct": str(points_to_deduct)
+                    }
                 )
             else:
-                # Recurring payment using Stripe Price ID
+                # Note: For recurring payments, credits can't be applied to subscription price
+                # We'll apply credits as a one-time discount instead
                 checkout_request = CheckoutSessionRequest(
-                    stripe_price_id=tier['stripe_price_id'],
-                    quantity=1,
+                    amount=final_amount if final_amount > 0 else original_amount,
+                    currency=currency.lower(),
                     success_url=success_url,
                     cancel_url=cancel_url,
-                    metadata={"tier_id": tier_id, "user_id": user.id, "payment_type": "recurring"}
+                    metadata={
+                        "tier_id": tier_id,
+                        "user_id": user.id,
+                        "payment_type": "recurring",
+                        "stripe_price_id": tier['stripe_price_id'],
+                        "original_amount": str(original_amount),
+                        "credits_applied": str(credits_to_apply),
+                        "points_to_deduct": str(points_to_deduct)
+                    }
                 )
             
             session = await stripe_checkout.create_checkout_session(checkout_request)
@@ -1347,12 +1391,18 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
             # Create transaction record
             transaction = PaymentTransaction(
                 user_id=user.id,
-                amount=amount,
+                amount=final_amount,
                 currency=currency,
                 payment_gateway='stripe',
                 session_id=session.session_id,
                 status='pending',
-                metadata={"tier_id": tier_id, "payment_type": tier['payment_type']}
+                metadata={
+                    "tier_id": tier_id,
+                    "payment_type": tier['payment_type'],
+                    "original_amount": original_amount,
+                    "credits_applied": credits_to_apply,
+                    "points_to_deduct": points_to_deduct
+                }
             )
             trans_dict = transaction.model_dump()
             trans_dict['created_at'] = trans_dict['created_at'].isoformat()
