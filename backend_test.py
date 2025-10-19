@@ -2287,7 +2287,8 @@ class Phase2EnhancedUserManagementTester:
             ('Payment Authentication Required', self.test_payment_authentication_required),
             
             # Platform Settings Tests (logo upload feature)
-            ('GET Platform Settings', self.test_get_platform_settings),
+            ('GET Platform Settings (Public)', self.test_get_platform_settings),
+            ('GET Admin Platform Settings', self.test_get_admin_platform_settings),
             ('Update Platform Settings with Logo', self.test_update_platform_settings_with_logo),
             ('Remove Platform Settings Logo', self.test_update_platform_settings_remove_logo),
             ('Platform Settings Non-Admin (Should Fail)', self.test_update_platform_settings_non_admin),
