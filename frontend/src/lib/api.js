@@ -12,7 +12,13 @@ export const api = axios.create({
 
 // Auth API
 export const authAPI = {
-  register: (data) => api.post('/auth/register', data),
+  register: (data) => {
+    const { ref, invite_token, ...userData } = data;
+    const params = {};
+    if (invite_token) params.invite_token = invite_token;
+    if (ref) params.ref = ref;
+    return api.post('/auth/register', userData, { params });
+  },
   login: (data) => api.post('/auth/login', data),
   googleAuth: (redirectUrl) => api.get('/auth/google', { params: { redirect_url: redirectUrl } }),
   processSession: (sessionId) => api.post('/auth/session', {}, { headers: { 'X-Session-ID': sessionId } }),
