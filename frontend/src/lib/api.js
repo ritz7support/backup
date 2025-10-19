@@ -101,6 +101,19 @@ export const subscriptionTiersAPI = {
 };
 
 
+// Platform Settings API
+export const platformSettingsAPI = {
+  getSettings: () => api.get('/platform-settings'),
+  updateSettings: (data) => api.put('/admin/platform-settings', data),
+};
+
+// Subscription Status API
+export const subscriptionStatusAPI = {
+  getMyStatus: () => api.get('/me/subscription-status'),
+};
+
+
+
 
 // Leaderboard & Levels API
 export const leaderboardAPI = {
