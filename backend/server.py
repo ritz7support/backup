@@ -139,6 +139,16 @@ class SubscriptionTier(BaseModel):
     is_active: bool = True
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
+class PlatformSettings(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = "global_settings"  # Single document ID
+    requires_payment_to_join: bool = False  # Global toggle for paid community
+    allowed_tier_ids: List[str] = []  # Empty = any active subscription is valid
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 class Space(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
