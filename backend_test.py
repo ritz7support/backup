@@ -2131,23 +2131,33 @@ def main():
     """Main test runner"""
     tester = Phase2EnhancedUserManagementTester()
     
-    # Check if we should run only join requests test
-    if len(sys.argv) > 1 and sys.argv[1] == "--join-requests-only":
-        success = tester.run_join_requests_test_only()
-        if success:
-            print("\n✅ Join requests functionality testing completed successfully")
-            sys.exit(0)
-        else:
-            print("\n❌ Join requests functionality testing completed with failures")
-            sys.exit(1)
+    # Check command line arguments
+    if len(sys.argv) > 1:
+        if sys.argv[1] == "--notifications-only":
+            success = tester.run_notification_tests_only()
+            if success:
+                print("\n✅ Notification system testing completed successfully")
+                sys.exit(0)
+            else:
+                print("\n❌ Notification system testing completed with failures")
+                sys.exit(1)
+        elif sys.argv[1] == "--join-requests-only":
+            success = tester.run_join_requests_test_only()
+            if success:
+                print("\n✅ Join requests functionality testing completed successfully")
+                sys.exit(0)
+            else:
+                print("\n❌ Join requests functionality testing completed with failures")
+                sys.exit(1)
+    
+    # Run all tests by default
+    success = tester.run_all_tests()
+    if success:
+        print("\n✅ Phase 2 & 3 enhanced user management and payment gateway testing completed successfully")
+        sys.exit(0)
     else:
-        success = tester.run_all_tests()
-        if success:
-            print("\n✅ Phase 2 & 3 enhanced user management and payment gateway testing completed successfully")
-            sys.exit(0)
-        else:
-            print("\n❌ Phase 2 & 3 enhanced user management and payment gateway testing completed with failures")
-            sys.exit(1)
+        print("\n❌ Phase 2 & 3 enhanced user management and payment gateway testing completed with failures")
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()
