@@ -962,10 +962,10 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
     if gateway == 'razorpay':
         # Razorpay order
         try:
-            amount_paise = int(plan_info['amount'] * 100)
+            amount_paise = int(amount * 100)
             order_data = {
                 "amount": amount_paise,
-                "currency": plan_info['currency'],
+                "currency": currency,
                 "payment_capture": 1
             }
             razor_order = razorpay_client.order.create(data=order_data)
@@ -973,12 +973,12 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
             # Create transaction record
             transaction = PaymentTransaction(
                 user_id=user.id,
-                amount=plan_info['amount'],
-                currency=plan_info['currency'],
+                amount=amount,
+                currency=currency,
                 payment_gateway='razorpay',
                 gateway_order_id=razor_order['id'],
                 status='pending',
-                metadata={"plan": plan}
+                metadata={"tier_id": tier_id, "payment_type": tier['payment_type']}
             )
             trans_dict = transaction.model_dump()
             trans_dict['created_at'] = trans_dict['created_at'].isoformat()
@@ -986,15 +986,15 @@ async def create_payment_order(request: Request, tier_id: str, currency: str, us
             
             return {
                 "order_id": razor_order['id'],
-                "amount": plan_info['amount'],
-                "currency": plan_info['currency'],
+                "amount": amount,
+                "currency": currency,
                 "key_id": os.environ.get('RAZORPAY_KEY_ID', 'test_key')
             }
         except Exception as e:
             logger.error(f"Razorpay error: {e}")
             raise HTTPException(status_code=500, detail="Payment gateway error")
     
-    elif plan_info['gateway'] == 'stripe':
+    elif gateway == 'stripe':
         # Stripe checkout
         try:
             body = await request.json()
