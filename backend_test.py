@@ -1938,6 +1938,241 @@ class Phase2EnhancedUserManagementTester:
             self.log(f"❌ Exception in payment authentication test: {e}", "ERROR")
             return False
     
+    # ==================== PLATFORM SETTINGS TESTS ====================
+    
+    def test_get_platform_settings(self):
+        """Test GET /api/platform-settings (public endpoint)"""
+        self.log("\n🧪 Testing GET /api/platform-settings")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/platform-settings")
+            
+            if response.status_code == 200:
+                settings = response.json()
+                self.log("✅ GET /api/platform-settings successful")
+                
+                # Verify response structure
+                required_fields = ['requires_payment_to_join', 'community_name', 'primary_color', 'logo']
+                missing_fields = [field for field in required_fields if field not in settings]
+                
+                if missing_fields:
+                    self.log(f"⚠️ Missing fields in platform settings response: {missing_fields}", "WARNING")
+                else:
+                    self.log("✅ Platform settings response structure is correct")
+                
+                # Check that _id is not included (MongoDB field should be excluded)
+                if '_id' in settings:
+                    self.log("⚠️ MongoDB _id field included in response", "WARNING")
+                else:
+                    self.log("✅ MongoDB _id field correctly excluded from response")
+                
+                # Verify logo field exists (can be null)
+                if 'logo' in settings:
+                    logo_value = settings.get('logo')
+                    if logo_value is None:
+                        self.log("✅ Logo field present and null (no logo set)")
+                    elif isinstance(logo_value, str) and logo_value.startswith('data:image'):
+                        self.log("✅ Logo field contains Base64 image data")
+                    else:
+                        self.log(f"⚠️ Logo field has unexpected format: {type(logo_value)}", "WARNING")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/platform-settings failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/platform-settings: {e}", "ERROR")
+            return False
+    
+    def test_update_platform_settings_with_logo(self):
+        """Test PUT /api/admin/platform-settings with logo upload"""
+        self.log("\n🧪 Testing PUT /api/admin/platform-settings (With Logo)")
+        
+        try:
+            # Test Base64 logo (1x1 pixel PNG)
+            test_logo = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+            
+            update_data = {
+                "requires_payment_to_join": False,
+                "community_name": "Test Community with Logo",
+                "primary_color": "#FF5722",
+                "logo": test_logo
+            }
+            
+            response = self.admin_session.put(f"{BACKEND_URL}/admin/platform-settings", json=update_data)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ Platform settings updated with logo successfully")
+                
+                # Verify response contains success message
+                if 'message' in result and 'settings' in result:
+                    self.log("✅ Update response structure is correct")
+                    
+                    # Verify the logo was set in the response
+                    updated_settings = result.get('settings', {})
+                    if updated_settings.get('logo') == test_logo:
+                        self.log("✅ Logo correctly set in update response")
+                    else:
+                        self.log("⚠️ Logo not reflected in update response", "WARNING")
+                    
+                    # Verify by getting settings again
+                    get_response = self.admin_session.get(f"{BACKEND_URL}/platform-settings")
+                    if get_response.status_code == 200:
+                        current_settings = get_response.json()
+                        if current_settings.get('logo') == test_logo:
+                            self.log("✅ Logo update verified via GET endpoint")
+                            return True
+                        else:
+                            self.log("❌ Logo update not persisted in database", "ERROR")
+                            return False
+                    else:
+                        self.log("⚠️ Could not verify logo update", "WARNING")
+                        return True
+                else:
+                    self.log("❌ Invalid update response structure", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Platform settings update failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in platform settings update with logo: {e}", "ERROR")
+            return False
+    
+    def test_update_platform_settings_remove_logo(self):
+        """Test PUT /api/admin/platform-settings to remove logo (set to null)"""
+        self.log("\n🧪 Testing PUT /api/admin/platform-settings (Remove Logo)")
+        
+        try:
+            update_data = {
+                "requires_payment_to_join": False,
+                "community_name": "Test Community No Logo",
+                "primary_color": "#2196F3",
+                "logo": None  # Remove logo
+            }
+            
+            response = self.admin_session.put(f"{BACKEND_URL}/admin/platform-settings", json=update_data)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ Platform settings updated to remove logo successfully")
+                
+                # Verify by getting settings again
+                get_response = self.admin_session.get(f"{BACKEND_URL}/platform-settings")
+                if get_response.status_code == 200:
+                    current_settings = get_response.json()
+                    if current_settings.get('logo') is None:
+                        self.log("✅ Logo removal verified via GET endpoint")
+                        return True
+                    else:
+                        self.log("❌ Logo removal not persisted in database", "ERROR")
+                        return False
+                else:
+                    self.log("⚠️ Could not verify logo removal", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ Platform settings logo removal failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in platform settings logo removal: {e}", "ERROR")
+            return False
+    
+    def test_update_platform_settings_non_admin(self):
+        """Test PUT /api/admin/platform-settings with non-admin user (should fail)"""
+        self.log("\n🧪 Testing PUT /api/admin/platform-settings (Non-Admin - Should Fail)")
+        
+        try:
+            # Create a fresh non-admin user for this test
+            fresh_session = requests.Session()
+            fresh_user_data = {
+                "email": "fresh_learner_platform@test.com",
+                "password": "fresh123",
+                "name": "Fresh Learner Platform User",
+                "role": "learner"
+            }
+            
+            register_response = fresh_session.post(f"{BACKEND_URL}/auth/register", json=fresh_user_data)
+            if register_response.status_code == 400:
+                # User exists, just login
+                login_response = fresh_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": fresh_user_data["email"],
+                    "password": fresh_user_data["password"]
+                })
+                if login_response.status_code != 200:
+                    self.log("❌ Failed to login fresh user", "ERROR")
+                    return False
+            
+            update_data = {
+                "requires_payment_to_join": True,
+                "community_name": "Unauthorized Update",
+                "primary_color": "#000000",
+                "logo": None
+            }
+            
+            response = fresh_session.put(f"{BACKEND_URL}/admin/platform-settings", json=update_data)
+            
+            if response.status_code == 403:
+                self.log("✅ Non-admin platform settings update correctly rejected (403 Forbidden)")
+                return True
+            elif response.status_code == 401:
+                self.log("✅ Non-admin platform settings update correctly rejected (401 Unauthorized)")
+                return True
+            else:
+                self.log(f"❌ Non-admin access should be rejected but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in non-admin platform settings test: {e}", "ERROR")
+            return False
+    
+    def test_platform_settings_upsert_behavior(self):
+        """Test that platform settings endpoint creates default settings if none exist"""
+        self.log("\n🧪 Testing Platform Settings Upsert Behavior")
+        
+        try:
+            # Get current settings (this should create default if none exist)
+            response = self.admin_session.get(f"{BACKEND_URL}/platform-settings")
+            
+            if response.status_code == 200:
+                settings = response.json()
+                self.log("✅ Platform settings retrieved (upsert behavior working)")
+                
+                # Verify default values are reasonable
+                expected_defaults = {
+                    'requires_payment_to_join': False,
+                    'community_name': 'Community',
+                    'primary_color': '#0462CB'
+                }
+                
+                all_defaults_correct = True
+                for key, expected_value in expected_defaults.items():
+                    if key in settings:
+                        actual_value = settings.get(key)
+                        if actual_value == expected_value:
+                            self.log(f"✅ Default {key} is correct: {actual_value}")
+                        else:
+                            self.log(f"ℹ️ {key} has been customized: {actual_value} (default: {expected_value})")
+                    else:
+                        self.log(f"⚠️ Missing default field: {key}", "WARNING")
+                        all_defaults_correct = False
+                
+                if all_defaults_correct or len([k for k in expected_defaults.keys() if k in settings]) >= 2:
+                    self.log("✅ Platform settings upsert behavior working correctly")
+                    return True
+                else:
+                    self.log("❌ Platform settings missing too many expected fields", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Platform settings retrieval failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in platform settings upsert test: {e}", "ERROR")
+            return False
+
     def run_all_tests(self):
         """Run all Phase 2 enhanced user management tests"""
         self.log("🚀 Starting Phase 2 Enhanced User Management API Tests")
