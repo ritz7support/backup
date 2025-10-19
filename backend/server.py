@@ -1063,28 +1063,52 @@ async def verify_razorpay_payment(request: Request, user: User = Depends(require
         
         razorpay_client.utility.verify_payment_signature(params_dict)
         
+        # Get transaction
+        transaction = await db.payment_transactions.find_one({
+            "gateway_order_id": data['razorpay_order_id'],
+            "user_id": user.id
+        })
+        
+        if not transaction:
+            raise HTTPException(status_code=404, detail="Transaction not found")
+        
         # Update transaction status
-        result = await db.payment_transactions.update_one(
-            {"gateway_order_id": data['razorpay_order_id'], "user_id": user.id},
+        await db.payment_transactions.update_one(
+            {"id": transaction['id']},
             {"$set": {
                 "status": "completed",
                 "gateway_payment_id": data['razorpay_payment_id']
             }}
         )
         
-        if result.matched_count == 0:
-            raise HTTPException(status_code=404, detail="Transaction not found")
-        
-        # Update user membership tier
-        transaction = await db.payment_transactions.find_one({
-            "gateway_order_id": data['razorpay_order_id']
-        })
-        
-        if transaction:
-            await db.users.update_one(
-                {"id": user.id},
-                {"$set": {"membership_tier": "paid"}}
-            )
+        # Create subscription
+        tier_id = transaction['metadata'].get('tier_id')
+        if tier_id:
+            tier = await db.subscription_tiers.find_one({"id": tier_id})
+            if tier:
+                payment_type = transaction['metadata'].get('payment_type', 'recurring')
+                duration_days = tier.get('duration_days', 30)
+                
+                subscription = Subscription(
+                    user_id=user.id,
+                    tier_id=tier_id,
+                    amount=transaction['amount'],
+                    currency=transaction['currency'],
+                    payment_gateway='razorpay',
+                    payment_type=payment_type,
+                    status='active',
+                    starts_at=datetime.now(timezone.utc),
+                    ends_at=datetime.now(timezone.utc) + timedelta(days=duration_days),
+                    auto_renew=(payment_type == 'recurring')
+                )
+                sub_dict = subscription.model_dump()
+                sub_dict['created_at'] = sub_dict['created_at'].isoformat()
+                sub_dict['starts_at'] = sub_dict['starts_at'].isoformat()
+                sub_dict['ends_at'] = sub_dict['ends_at'].isoformat()
+                await db.subscriptions.insert_one(sub_dict)
+                
+                # Update user membership
+                await db.users.update_one({"id": user.id}, {"$set": {"membership_tier": "paid"}})
         
         return {"status": "success", "message": "Payment verified successfully"}
         
