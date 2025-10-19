@@ -1787,6 +1787,42 @@ class Phase2EnhancedUserManagementTester:
         else:
             self.log(f"⚠️ {total - passed} tests failed")
             return False
+    
+    def run_join_requests_test_only(self):
+        """Run only the join requests functionality test as requested"""
+        self.log("🚀 Starting Join Requests Functionality Test")
+        self.log(f"Backend URL: {BACKEND_URL}")
+        
+        # Setup test users
+        if not self.setup_test_users():
+            self.log("❌ Failed to setup test users - aborting test", "ERROR")
+            return False
+        
+        # Run the specific test
+        try:
+            result = self.test_join_requests_functionality()
+            
+            # Summary
+            self.log("\n" + "="*60)
+            self.log("📊 JOIN REQUESTS FUNCTIONALITY TEST RESULT")
+            self.log("="*60)
+            
+            status = "✅ PASS" if result else "❌ FAIL"
+            self.log(f"Join Requests Functionality: {status}")
+            
+            if result:
+                self.log("\n✅ Join requests functionality is working correctly!")
+                self.log("- Admin can successfully retrieve join requests")
+                self.log("- Join requests include enriched user data")
+                self.log("- Non-admin access is properly rejected (403)")
+            else:
+                self.log("\n❌ Join requests functionality has issues that need attention")
+            
+            return result
+            
+        except Exception as e:
+            self.log(f"❌ Unexpected error in join requests test: {e}", "ERROR")
+            return False
 
 def main():
     """Main test runner"""
