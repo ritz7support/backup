@@ -153,7 +153,7 @@ export default function AdminPanel() {
     } catch (error) {
       console.error('Error loading platform settings:', error);
     }
-
+  };
 
   // Platform settings handler
   const handleUpdatePlatformSettings = async (newSettings) => {
