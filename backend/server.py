@@ -2492,6 +2492,20 @@ async def reject_join_request(request_id: str, user: User = Depends(require_auth
         }}
     )
     
+    # Notify requester that they were rejected
+    space = await db.spaces.find_one({"id": join_request['space_id']}, {"_id": 0})
+    await create_notification(
+        user_id=join_request['user_id'],
+        notif_type="join_rejected",
+        title="Join request declined",
+        message=f"Your request to join {space.get('name', 'the space') if space else 'the space'} was declined",
+        related_entity_id=join_request['space_id'],
+        related_entity_type="space",
+        actor_id=user.id,
+        actor_name=user.name,
+        send_email=False
+    )
+    
     return {"message": "Request rejected"}
 
 @api_router.delete("/join-requests/{request_id}")
