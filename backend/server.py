@@ -3700,15 +3700,17 @@ async def get_user_onboarding_progress(user: User = Depends(require_auth)):
     has_commented = bool(first_comment)
     
     # Check if user has reacted to any post
-    post_with_reaction = await db.posts.find_one({
-        f"reactions": {"$exists": True}
-    })
+    # Look for any post where the user's ID appears in the reactions
     has_reacted = False
-    if post_with_reaction:
-        for emoji, user_ids in post_with_reaction.get('reactions', {}).items():
+    posts_with_reactions = await db.posts.find({"reactions": {"$exists": True}}).to_list(1000)
+    for post in posts_with_reactions:
+        reactions = post.get('reactions', {})
+        for emoji, user_ids in reactions.items():
             if user.id in user_ids:
                 has_reacted = True
                 break
+        if has_reacted:
+            break
     
     steps = [
         {
