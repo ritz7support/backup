@@ -82,10 +82,51 @@ export default function MembersPage() {
   };
 
   const handleCopyInviteLink = () => {
-    navigator.clipboard.writeText(generatedInviteLink);
-    setLinkCopied(true);
-    toast.success('Link copied to clipboard!');
-    setTimeout(() => setLinkCopied(false), 2000);
+    // Try modern Clipboard API first
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(generatedInviteLink)
+        .then(() => {
+          setLinkCopied(true);
+          toast.success('Link copied to clipboard!');
+          setTimeout(() => setLinkCopied(false), 2000);
+        })
+        .catch(() => {
+          // Fallback to legacy method
+          fallbackCopyInviteLink();
+        });
+    } else {
+      // Use fallback method directly
+      fallbackCopyInviteLink();
+    }
+  };
+
+  const fallbackCopyInviteLink = () => {
+    try {
+      // Create temporary textarea
+      const textarea = document.createElement('textarea');
+      textarea.value = generatedInviteLink;
+      textarea.style.position = 'fixed';
+      textarea.style.left = '-999999px';
+      textarea.style.top = '-999999px';
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      
+      // Execute copy command
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textarea);
+      
+      if (successful) {
+        setLinkCopied(true);
+        toast.success('Link copied to clipboard!');
+        setTimeout(() => setLinkCopied(false), 2000);
+      } else {
+        toast.error('Failed to copy. Please copy manually.');
+      }
+    } catch (error) {
+      console.error('Fallback copy failed:', error);
+      toast.error('Failed to copy. Please copy manually.');
+    }
   };
 
   const handleInviteMethodChange = (method) => {
