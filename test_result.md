@@ -913,6 +913,21 @@ backend:
         agent: "testing"
         comment: "✅ PASS - Complete referral/affiliate program system working perfectly. GET /api/me/referral-code generates unique codes (format: ADM24880B). GET /api/me/referral-stats returns all required fields (total_referrals, points_earned_from_referrals, total_points, credits_inr, credits_usd, referred_users). Registration with referral code (?ref=CODE) successfully awards 50 points to referrer and 25 points to referee. Credit calculations correct: 1 point = ₹1, 1 point = $0.05. Payment integration automatically applies credits (tested ₹57 credits applied to ₹99 order, reducing to ₹42). Notifications created for both parties. All 8/8 referral system tests passed with 100% success rate."
 
+  - task: "Reaction Points System"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Reaction points system implemented in POST /api/posts/{post_id}/react and POST /api/comments/{comment_id}/react endpoints. Points are awarded when reacting (1 point to reactor, 1 point to author if not self-reaction) and deducted when unreacting. System prevents point farming through repeated reactions."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Reaction points system working perfectly. All test scenarios completed successfully: (1) Initial points recorded: 109, (2) Post creation awarded 3 points (total: 112), (3) Reaction awarded 1 point (total: 113), (4) Unreaction deducted 1 point (total: 112 - back to post level), (5) No point farming verified - repeated react/unreact cycles work correctly, (6) Comment reactions work identically to post reactions. Points are properly awarded (+1 for reacting) and deducted (-1 for unreacting). System prevents exploitation and maintains point integrity. All 8/8 reaction points tests passed with 100% success rate."
+
 ## NOTIFICATION SYSTEM - BACKEND COMPLETE ✅
 
 **Status**: Backend notification system fully implemented and tested
