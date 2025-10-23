@@ -1093,7 +1093,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Referral/Affiliate Program System"
+    - "Messaging System Frontend Implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
