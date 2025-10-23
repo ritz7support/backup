@@ -4090,7 +4090,7 @@ async def get_conversations(user: User = Depends(require_auth)):
         )
         if user_data:
             # Get last message
-            last_msg = await db.direct_messages.find_one(
+            last_msg_cursor = db.direct_messages.find(
                 {
                     "$or": [
                         {"sender_id": user.id, "receiver_id": user_id},
@@ -4098,7 +4098,9 @@ async def get_conversations(user: User = Depends(require_auth)):
                     ]
                 },
                 {"_id": 0}
-            ).sort("created_at", -1)
+            ).sort("created_at", -1).limit(1)
+            last_msg_list = await last_msg_cursor.to_list(1)
+            last_msg = last_msg_list[0] if last_msg_list else None
             
             # Count unread messages
             unread_count = await db.direct_messages.count_documents({
