@@ -1481,7 +1481,17 @@ class Phase2EnhancedUserManagementTester:
             return False
         
         try:
-            # First, try to send message to new user (should fail - receiver hasn't enabled messages)
+            # First, ensure the test user has messages disabled
+            disable_data = {"allow_messages": False}
+            disable_response = test_session.put(f"{BACKEND_URL}/me/messaging-preferences", json=disable_data)
+            
+            if disable_response.status_code != 200:
+                self.log("❌ Failed to disable messages for test user", "ERROR")
+                return False
+            
+            self.log("✅ Test user messages disabled for permission test")
+            
+            # Now try to send message to user (should fail - receiver hasn't enabled messages)
             message_data = {"content": "Test message"}
             response = self.admin_session.post(f"{BACKEND_URL}/messages/direct/{test_user_id}", json=message_data)
             
