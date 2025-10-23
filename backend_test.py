@@ -2883,6 +2883,64 @@ class Phase2EnhancedUserManagementTester:
             self.log(f"⚠️ {total - passed} tests failed")
             return False
     
+    def run_messaging_tests_only(self):
+        """Run only the messaging system tests as requested"""
+        self.log("🚀 Starting Messaging System Tests")
+        self.log(f"Backend URL: {BACKEND_URL}")
+        
+        results = {}
+        
+        # Setup test users
+        if not self.setup_test_users():
+            self.log("❌ Failed to setup test users - aborting tests", "ERROR")
+            return False
+        
+        # Run messaging tests in order
+        messaging_tests = [
+            ('GET Messaging Settings (Admin)', self.test_messaging_settings_get_admin),
+            ('UPDATE Messaging Settings (Admin)', self.test_messaging_settings_update_admin),
+            ('GET User Messaging Preferences', self.test_user_messaging_preferences_get),
+            ('UPDATE User Messaging Preferences', self.test_user_messaging_preferences_update),
+            ('Send Direct Message - Permission Check', self.test_send_direct_message_permission_check),
+            ('GET Conversations', self.test_get_conversations),
+            ('GET Direct Messages', self.test_get_direct_messages),
+            ('Create Message Group (Admin Only)', self.test_create_message_group_admin),
+            ('Send Group Message', self.test_send_group_message),
+            ('GET Group Messages', self.test_get_group_messages),
+            ('GET My Groups', self.test_get_my_groups),
+            ('GET Group Details (Admin Only)', self.test_get_group_details_admin),
+        ]
+        
+        for test_name, test_method in messaging_tests:
+            try:
+                results[test_name] = test_method()
+            except Exception as e:
+                self.log(f"❌ Unexpected error in {test_name}: {e}", "ERROR")
+                results[test_name] = False
+        
+        # Summary
+        self.log("\n" + "="*80)
+        self.log("📊 MESSAGING SYSTEM TEST RESULTS SUMMARY")
+        self.log("="*80)
+        
+        passed = 0
+        total = len(results)
+        
+        for test_name, result in results.items():
+            status = "✅ PASS" if result else "❌ FAIL"
+            self.log(f"{test_name}: {status}")
+            if result:
+                passed += 1
+        
+        self.log(f"\nOverall: {passed}/{total} messaging tests passed")
+        
+        if passed == total:
+            self.log("🎉 All messaging system tests passed!")
+            return True
+        else:
+            self.log(f"⚠️ {total - passed} messaging tests failed")
+            return False
+
     def run_notification_tests_only(self):
         """Run only the notification system tests as requested"""
         self.log("🚀 Starting Notification System Tests")
