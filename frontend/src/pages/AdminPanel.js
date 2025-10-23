@@ -1710,6 +1710,43 @@ export default function AdminPanel() {
                   </div>
                 </div>
 
+                {/* Messaging Settings */}
+                <div className="pb-6 border-b" style={{ borderColor: '#E5E7EB' }}>
+                  <div className="flex items-center gap-2 mb-4">
+                    <svg className="h-5 w-5" style={{ color: '#0462CB' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    <h3 className="font-semibold" style={{ color: '#011328' }}>Messaging Controls</h3>
+                  </div>
+                  
+                  <div>
+                    <Label>Who can initiate messages?</Label>
+                    <select
+                      value={messagingSettings.who_can_initiate}
+                      onChange={async (e) => {
+                        const newValue = e.target.value;
+                        setMessagingSettings({ ...messagingSettings, who_can_initiate: newValue });
+                        try {
+                          await messagingAPI.updateMessagingSettings({ who_can_initiate: newValue });
+                          toast.success('Messaging settings updated!');
+                        } catch (error) {
+                          toast.error('Failed to update messaging settings');
+                        }
+                      }}
+                      className="mt-2 w-full px-4 py-2 border rounded-lg"
+                      style={{ borderColor: '#D1D5DB' }}
+                    >
+                      <option value="all">All Members</option>
+                      <option value="paid">Paid Members Only</option>
+                      <option value="admins">Admins Only</option>
+                    </select>
+                    <p className="text-xs mt-2" style={{ color: '#8E8E8E' }}>
+                      Controls who can start new conversations. Users can always reply to messages they receive.
+                      Individual users can also disable receiving messages in their personal settings.
+                    </p>
+                  </div>
+                </div>
+
                 {/* Payment Requirement Toggle */}
                 <div className="flex items-start justify-between pb-6 border-b" style={{ borderColor: '#E5E7EB' }}>
                   <div className="flex-1">
