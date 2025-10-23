@@ -123,6 +123,29 @@ export const referralAPI = {
   getMyReferralStats: () => api.get('/me/referral-stats'),
 };
 
+// Messaging API
+export const messagingAPI = {
+  // Settings
+  getMessagingSettings: () => api.get('/admin/messaging-settings'),
+  updateMessagingSettings: (data) => api.put('/admin/messaging-settings', data),
+  getMyPreferences: () => api.get('/me/messaging-preferences'),
+  updateMyPreferences: (data) => api.put('/me/messaging-preferences', data),
+  
+  // Conversations
+  getConversations: () => api.get('/messages/conversations'),
+  getDirectMessages: (userId) => api.get(`/messages/direct/${userId}`),
+  sendDirectMessage: (userId, content) => api.post(`/messages/direct/${userId}`, { content }),
+  
+  // Groups
+  getMyGroups: () => api.get('/messages/my-groups'),
+  createGroup: (data) => api.post('/messages/groups', data),
+  getGroupMessages: (groupId) => api.get(`/messages/groups/${groupId}`),
+  sendGroupMessage: (groupId, content) => api.post(`/messages/groups/${groupId}`, { content }),
+  getGroupDetails: (groupId) => api.get(`/messages/groups/${groupId}/details`),
+  addGroupMember: (groupId, memberId) => api.post(`/messages/groups/${groupId}/members/${memberId}`),
+  removeGroupMember: (groupId, memberId) => api.delete(`/messages/groups/${groupId}/members/${memberId}`),
+};
+
 
 // Notifications API
 export const notificationsAPI = {
