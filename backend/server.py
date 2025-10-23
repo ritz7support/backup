@@ -334,6 +334,44 @@ class DirectMessage(BaseModel):
     is_read: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+
+# Group Message Models
+class MessageGroup(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: Optional[str] = None
+    created_by: str  # user_id of admin who created
+    member_ids: List[str] = []  # user_ids who are members
+    manager_ids: List[str] = []  # user_ids who can manage (add/remove members)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class GroupMessage(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    group_id: str
+    sender_id: str
+    content: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+# Message Settings Models
+class MessagingSettings(BaseModel):
+    """Platform-level messaging settings"""
+    model_config = ConfigDict(extra="ignore")
+    id: str = "messaging_settings"  # Fixed ID for singleton
+    who_can_initiate: str = "all"  # "all", "paid", "admins"
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class UserMessagingPreferences(BaseModel):
+    """User-level messaging preferences"""
+    model_config = ConfigDict(extra="ignore")
+    user_id: str
+    allow_messages: bool = False  # Default NO - users must opt-in
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 # Feature Request Models
 class FeatureRequest(BaseModel):
     model_config = ConfigDict(extra="ignore")
