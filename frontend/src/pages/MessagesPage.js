@@ -346,32 +346,6 @@ export default function MessagesPage() {
                   <SettingsIcon className="h-4 w-4" />
                 </Button>
               </div>
-                    <DialogHeader>
-                      <DialogTitle>Messaging Settings</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg" style={{ borderColor: '#D1D5DB' }}>
-                        <div>
-                          <p className="font-medium" style={{ color: '#011328' }}>Allow others to message you</p>
-                          <p className="text-sm" style={{ color: '#8E8E8E' }}>
-                            {messagingPreferences?.allow_messages ? 'You can receive messages' : 'Messages are disabled'}
-                          </p>
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={handleToggleMessaging}
-                          style={{
-                            backgroundColor: messagingPreferences?.allow_messages ? '#10B981' : '#6B7280',
-                            color: 'white'
-                          }}
-                        >
-                          {messagingPreferences?.allow_messages ? 'Enabled' : 'Disabled'}
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
             </div>
 
             {/* Search */}
