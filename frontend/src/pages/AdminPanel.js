@@ -1018,8 +1018,8 @@ export default function AdminPanel() {
         {/* Main Content Area */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-8">
-        {/* Ordering Guide */}
-        {activeTab === 'overview' && (
+            {/* Ordering Guide */}
+            {activeTab === 'overview' && (
           <div>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold" style={{ color: '#011328' }}>Sidebar Structure</h2>
