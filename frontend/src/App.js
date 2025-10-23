@@ -55,7 +55,7 @@ function App() {
             <Route path="/members" element={<PrivateRoute><MembersPage /></PrivateRoute>} />
             <Route path="/profile/:userId" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
             <Route path="/admin/spaces" element={<PrivateRoute><AdminPanel /></PrivateRoute>} />
-            <Route path="/dms" element={<PrivateRoute><DMsPage /></PrivateRoute>} />
+            <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
           </Routes>
           <Toaster />
         </div>
