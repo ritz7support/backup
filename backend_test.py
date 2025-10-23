@@ -2836,6 +2836,20 @@ class Phase2EnhancedUserManagementTester:
             ('Remove Platform Settings Logo', self.test_update_platform_settings_remove_logo),
             ('Platform Settings Non-Admin (Should Fail)', self.test_update_platform_settings_non_admin),
             ('Platform Settings Upsert Behavior', self.test_platform_settings_upsert_behavior),
+            
+            # Messaging System Tests (comprehensive messaging functionality)
+            ('GET Messaging Settings (Admin)', self.test_messaging_settings_get_admin),
+            ('UPDATE Messaging Settings (Admin)', self.test_messaging_settings_update_admin),
+            ('GET User Messaging Preferences', self.test_user_messaging_preferences_get),
+            ('UPDATE User Messaging Preferences', self.test_user_messaging_preferences_update),
+            ('Send Direct Message - Permission Check', self.test_send_direct_message_permission_check),
+            ('GET Conversations', self.test_get_conversations),
+            ('GET Direct Messages', self.test_get_direct_messages),
+            ('Create Message Group (Admin Only)', self.test_create_message_group_admin),
+            ('Send Group Message', self.test_send_group_message),
+            ('GET Group Messages', self.test_get_group_messages),
+            ('GET My Groups', self.test_get_my_groups),
+            ('GET Group Details (Admin Only)', self.test_get_group_details_admin),
         ]
         
         for test_name, test_method in test_methods:
