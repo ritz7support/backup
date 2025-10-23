@@ -14,7 +14,7 @@ import EventsPage from './pages/EventsPage';
 import MembersPage from './pages/MembersPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPanel from './pages/AdminPanel';
-import DMsPage from './pages/DMsPage';
+import MessagesPage from './pages/MessagesPage';
 import PricingPage from './pages/PricingPage';
 import PaymentSuccess from './pages/PaymentSuccess';
 import JoinViaInvite from './pages/JoinViaInvite';
