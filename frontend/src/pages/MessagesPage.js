@@ -450,6 +450,10 @@ export default function MessagesPage() {
           </div>
         </div>
 
+        {/* Settings Dialog */}
+        <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
+          <DialogContent>
+
         {/* Chat Area */}
         <div className="flex-1 flex flex-col bg-white">
           {!selectedConversation ? (
