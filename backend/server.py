@@ -4124,10 +4124,12 @@ async def get_conversations(user: User = Depends(require_auth)):
     
     for group in groups:
         # Get last message in group
-        last_msg = await db.group_messages.find_one(
+        last_msg_cursor = db.group_messages.find(
             {"group_id": group['id']},
             {"_id": 0}
-        ).sort("created_at", -1)
+        ).sort("created_at", -1).limit(1)
+        last_msg_list = await last_msg_cursor.to_list(1)
+        last_msg = last_msg_list[0] if last_msg_list else None
         
         # Get sender info if last message exists
         if last_msg:
