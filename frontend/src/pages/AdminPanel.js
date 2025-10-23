@@ -10,9 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Textarea } from '../components/ui/textarea';
 import { 
   Settings, Lock, Eye, EyeOff, DollarSign, Loader2, Plus, Pencil, Trash2, 
-  Folder, Grid, CreditCard, ArrowLeft, Users as UsersIcon, Shield, Sparkles 
+  Folder, Grid, CreditCard, ArrowLeft, Users as UsersIcon, Shield, Sparkles,
+  LayoutDashboard, MessageSquare, Award
 } from 'lucide-react';
 import { toast } from 'sonner';
+import Header from '../components/Header';
 
 export default function AdminPanel() {
   const { user } = useAuth();
