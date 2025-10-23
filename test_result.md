@@ -1391,11 +1391,7 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Platform Settings API Endpoints for Logo Upload"
-    - "Razorpay SDK Loading"
-    - "PricingPage - Payment Flow Handler"
-    - "PaymentSuccess - Status Polling"
-    - "Payment API Methods"
+    - "Messaging System Backend Implementation"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
