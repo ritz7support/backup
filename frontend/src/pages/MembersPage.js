@@ -83,6 +83,11 @@ export default function MembersPage() {
   };
 
   const handleCopyInviteLink = () => {
+    if (!generatedInviteLink) {
+      toast.error('Please generate a link first');
+      return;
+    }
+    
     // Try modern Clipboard API first
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(generatedInviteLink)
