@@ -3917,6 +3917,574 @@ async def get_my_referral_stats(user: User = Depends(require_auth)):
 
 
 
+# ==================== MESSAGING ENDPOINTS ====================
+
+# Helper function to check messaging permissions
+async def can_send_message(sender: User, receiver_id: str) -> tuple[bool, str]:
+    """Check if sender can message receiver based on platform and user settings"""
+    # Get platform settings
+    settings = await db.messaging_settings.find_one({"id": "messaging_settings"})
+    if not settings:
+        # Default settings if not configured
+        settings = {"who_can_initiate": "all"}
+    
+    who_can_initiate = settings.get("who_can_initiate", "all")
+    
+    # Check sender's permission based on platform settings
+    if who_can_initiate == "admins":
+        if sender.role != "admin":
+            return False, "Only admins can initiate messages"
+    elif who_can_initiate == "paid":
+        if sender.membership_tier != "paid" and sender.role != "admin":
+            return False, "Only paid members can initiate messages"
+    
+    # Check receiver's preferences
+    receiver_prefs = await db.user_messaging_preferences.find_one({"user_id": receiver_id})
+    if receiver_prefs and not receiver_prefs.get("allow_messages", False):
+        return False, "This user has disabled receiving messages"
+    elif not receiver_prefs:
+        # If no preferences set, default is NO (don't allow)
+        return False, "This user has not enabled receiving messages"
+    
+    return True, ""
+
+# WebSocket endpoint for real-time messaging
+@app.websocket("/ws/messages/{user_id}")
+async def websocket_endpoint(websocket: WebSocket, user_id: str):
+    """WebSocket endpoint for real-time messaging"""
+    await ws_manager.connect(user_id, websocket)
+    try:
+        while True:
+            # Keep connection alive and receive messages
+            data = await websocket.receive_json()
+            # Messages are sent via HTTP POST endpoints
+            # This just keeps the connection alive
+            logger.info(f"Received websocket data from {user_id}: {data}")
+    except WebSocketDisconnect:
+        ws_manager.disconnect(user_id)
+        logger.info(f"User {user_id} disconnected from websocket")
+    except Exception as e:
+        logger.error(f"WebSocket error for user {user_id}: {e}")
+        ws_manager.disconnect(user_id)
+
+# Get messaging settings (platform-level)
+@api_router.get("/admin/messaging-settings")
+async def get_messaging_settings(user: User = Depends(require_auth)):
+    """Get platform messaging settings (admin only)"""
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    settings = await db.messaging_settings.find_one({"id": "messaging_settings"}, {"_id": 0})
+    if not settings:
+        # Return default settings
+        return {
+            "who_can_initiate": "all",
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+    
+    # Convert datetime fields to ISO format
+    if 'created_at' in settings and isinstance(settings['created_at'], datetime):
+        settings['created_at'] = settings['created_at'].isoformat()
+    if 'updated_at' in settings and isinstance(settings['updated_at'], datetime):
+        settings['updated_at'] = settings['updated_at'].isoformat()
+    
+    return settings
+
+# Update messaging settings (platform-level)
+@api_router.put("/admin/messaging-settings")
+async def update_messaging_settings(request: Request, user: User = Depends(require_auth)):
+    """Update platform messaging settings (admin only)"""
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    
+    data = await request.json()
+    who_can_initiate = data.get("who_can_initiate", "all")
+    
+    if who_can_initiate not in ["all", "paid", "admins"]:
+        raise HTTPException(status_code=400, detail="Invalid who_can_initiate value")
+    
+    settings = {
+        "id": "messaging_settings",
+        "who_can_initiate": who_can_initiate,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.messaging_settings.update_one(
+        {"id": "messaging_settings"},
+        {"$set": settings},
+        upsert=True
+    )
+    
+    return {"status": "success", "settings": settings}
+
+# Get user's messaging preferences
+@api_router.get("/me/messaging-preferences")
+async def get_my_messaging_preferences(user: User = Depends(require_auth)):
+    """Get current user's messaging preferences"""
+    prefs = await db.user_messaging_preferences.find_one({"user_id": user.id}, {"_id": 0})
+    if not prefs:
+        # Return default
+        return {
+            "user_id": user.id,
+            "allow_messages": False,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            "updated_at": datetime.now(timezone.utc).isoformat()
+        }
+    
+    # Convert datetime fields
+    if 'created_at' in prefs and isinstance(prefs['created_at'], datetime):
+        prefs['created_at'] = prefs['created_at'].isoformat()
+    if 'updated_at' in prefs and isinstance(prefs['updated_at'], datetime):
+        prefs['updated_at'] = prefs['updated_at'].isoformat()
+    
+    return prefs
+
+# Update user's messaging preferences
+@api_router.put("/me/messaging-preferences")
+async def update_my_messaging_preferences(request: Request, user: User = Depends(require_auth)):
+    """Update current user's messaging preferences"""
+    data = await request.json()
+    allow_messages = data.get("allow_messages", False)
+    
+    prefs = {
+        "user_id": user.id,
+        "allow_messages": bool(allow_messages),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    await db.user_messaging_preferences.update_one(
+        {"user_id": user.id},
+        {"$set": prefs, "$setOnInsert": {"created_at": datetime.now(timezone.utc)}},
+        upsert=True
+    )
+    
+    return {"status": "success", "allow_messages": allow_messages}
+
+# Get conversations list
+@api_router.get("/messages/conversations")
+async def get_conversations(user: User = Depends(require_auth)):
+    """Get list of conversations for current user"""
+    # Get direct messages
+    direct_messages = await db.direct_messages.find({
+        "$or": [
+            {"sender_id": user.id},
+            {"receiver_id": user.id}
+        ]
+    }, {"_id": 0}).sort("created_at", -1).to_list(1000)
+    
+    # Get unique conversation partners
+    conversation_users = set()
+    for msg in direct_messages:
+        if msg['sender_id'] != user.id:
+            conversation_users.add(msg['sender_id'])
+        if msg['receiver_id'] != user.id:
+            conversation_users.add(msg['receiver_id'])
+    
+    # Get user details for conversations
+    conversations = []
+    for user_id in conversation_users:
+        user_data = await db.users.find_one(
+            {"id": user_id},
+            {"_id": 0, "id": 1, "name": 1, "picture": 1, "role": 1}
+        )
+        if user_data:
+            # Get last message
+            last_msg = await db.direct_messages.find_one(
+                {
+                    "$or": [
+                        {"sender_id": user.id, "receiver_id": user_id},
+                        {"sender_id": user_id, "receiver_id": user.id}
+                    ]
+                },
+                {"_id": 0}
+            ).sort("created_at", -1)
+            
+            # Count unread messages
+            unread_count = await db.direct_messages.count_documents({
+                "sender_id": user_id,
+                "receiver_id": user.id,
+                "is_read": False
+            })
+            
+            conversations.append({
+                "type": "direct",
+                "user": user_data,
+                "last_message": last_msg,
+                "unread_count": unread_count
+            })
+    
+    # Get group conversations
+    groups = await db.message_groups.find(
+        {"member_ids": user.id},
+        {"_id": 0}
+    ).to_list(100)
+    
+    for group in groups:
+        # Get last message in group
+        last_msg = await db.group_messages.find_one(
+            {"group_id": group['id']},
+            {"_id": 0}
+        ).sort("created_at", -1)
+        
+        # Get sender info if last message exists
+        if last_msg:
+            sender = await db.users.find_one(
+                {"id": last_msg['sender_id']},
+                {"_id": 0, "name": 1}
+            )
+            if sender:
+                last_msg['sender_name'] = sender['name']
+        
+        conversations.append({
+            "type": "group",
+            "group": group,
+            "last_message": last_msg,
+            "unread_count": 0  # TODO: Implement group unread tracking
+        })
+    
+    # Sort conversations by last message time
+    conversations.sort(
+        key=lambda x: x['last_message']['created_at'] if x['last_message'] else datetime.min.replace(tzinfo=timezone.utc),
+        reverse=True
+    )
+    
+    return conversations
+
+# Get messages in a conversation
+@api_router.get("/messages/direct/{other_user_id}")
+async def get_direct_messages(other_user_id: str, user: User = Depends(require_auth), limit: int = 50):
+    """Get direct messages with another user"""
+    messages = await db.direct_messages.find({
+        "$or": [
+            {"sender_id": user.id, "receiver_id": other_user_id},
+            {"sender_id": other_user_id, "receiver_id": user.id}
+        ]
+    }, {"_id": 0}).sort("created_at", 1).limit(limit).to_list(limit)
+    
+    # Mark messages as read
+    await db.direct_messages.update_many(
+        {"sender_id": other_user_id, "receiver_id": user.id, "is_read": False},
+        {"$set": {"is_read": True}}
+    )
+    
+    # Convert datetime to ISO string
+    for msg in messages:
+        if 'created_at' in msg and isinstance(msg['created_at'], datetime):
+            msg['created_at'] = msg['created_at'].isoformat()
+    
+    return messages
+
+# Send direct message
+@api_router.post("/messages/direct/{receiver_id}")
+async def send_direct_message(receiver_id: str, request: Request, user: User = Depends(require_auth)):
+    """Send a direct message to another user"""
+    data = await request.json()
+    content = data.get("content", "").strip()
+    
+    if not content:
+        raise HTTPException(status_code=400, detail="Message content cannot be empty")
+    
+    # Check permissions
+    can_send, error_msg = await can_send_message(user, receiver_id)
+    if not can_send:
+        raise HTTPException(status_code=403, detail=error_msg)
+    
+    # Check if receiver exists
+    receiver = await db.users.find_one({"id": receiver_id})
+    if not receiver:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Create message
+    message = DirectMessage(
+        sender_id=user.id,
+        receiver_id=receiver_id,
+        content=content
+    )
+    
+    msg_dict = message.model_dump()
+    msg_dict['created_at'] = msg_dict['created_at'].isoformat()
+    await db.direct_messages.insert_one(msg_dict)
+    
+    # Send real-time notification to receiver via WebSocket
+    await ws_manager.send_personal_message(receiver_id, {
+        "type": "new_message",
+        "message": {
+            "id": message.id,
+            "sender_id": user.id,
+            "sender_name": user.name,
+            "sender_picture": user.picture,
+            "receiver_id": receiver_id,
+            "content": content,
+            "created_at": msg_dict['created_at'],
+            "is_read": False
+        }
+    })
+    
+    # Create in-app notification
+    await create_notification(
+        user_id=receiver_id,
+        notif_type="new_message",
+        title="New Message",
+        message=f"{user.name} sent you a message",
+        related_entity_id=message.id,
+        related_entity_type="direct_message",
+        actor_id=user.id,
+        actor_name=user.name,
+        send_email=False
+    )
+    
+    return message
+
+# Create message group (admin only)
+@api_router.post("/messages/groups")
+async def create_message_group(request: Request, user: User = Depends(require_auth)):
+    """Create a new message group (admin only)"""
+    if user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can create message groups")
+    
+    data = await request.json()
+    name = data.get("name", "").strip()
+    description = data.get("description", "").strip()
+    member_ids = data.get("member_ids", [])
+    
+    if not name:
+        raise HTTPException(status_code=400, detail="Group name is required")
+    
+    if not member_ids or not isinstance(member_ids, list):
+        raise HTTPException(status_code=400, detail="At least one member is required")
+    
+    # Verify all members exist
+    for member_id in member_ids:
+        member = await db.users.find_one({"id": member_id})
+        if not member:
+            raise HTTPException(status_code=404, detail=f"User {member_id} not found")
+    
+    # Add creator to members and managers
+    if user.id not in member_ids:
+        member_ids.append(user.id)
+    
+    group = MessageGroup(
+        name=name,
+        description=description,
+        created_by=user.id,
+        member_ids=member_ids,
+        manager_ids=[user.id]  # Creator is automatically a manager
+    )
+    
+    group_dict = group.model_dump()
+    group_dict['created_at'] = group_dict['created_at'].isoformat()
+    await db.message_groups.insert_one(group_dict)
+    
+    # Notify all members
+    for member_id in member_ids:
+        if member_id != user.id:
+            await create_notification(
+                user_id=member_id,
+                notif_type="added_to_group",
+                title="Added to Message Group",
+                message=f"{user.name} added you to the group '{name}'",
+                related_entity_id=group.id,
+                related_entity_type="message_group",
+                actor_id=user.id,
+                actor_name=user.name,
+                send_email=False
+            )
+    
+    return group
+
+# Get group messages
+@api_router.get("/messages/groups/{group_id}")
+async def get_group_messages(group_id: str, user: User = Depends(require_auth), limit: int = 50):
+    """Get messages in a group"""
+    # Check if user is a member
+    group = await db.message_groups.find_one({"id": group_id})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    if user.id not in group['member_ids']:
+        raise HTTPException(status_code=403, detail="You are not a member of this group")
+    
+    messages = await db.group_messages.find(
+        {"group_id": group_id},
+        {"_id": 0}
+    ).sort("created_at", 1).limit(limit).to_list(limit)
+    
+    # Enrich with sender info
+    for msg in messages:
+        sender = await db.users.find_one(
+            {"id": msg['sender_id']},
+            {"_id": 0, "name": 1, "picture": 1}
+        )
+        if sender:
+            msg['sender_name'] = sender['name']
+            msg['sender_picture'] = sender.get('picture')
+        
+        # Convert datetime
+        if 'created_at' in msg and isinstance(msg['created_at'], datetime):
+            msg['created_at'] = msg['created_at'].isoformat()
+    
+    return messages
+
+# Send group message
+@api_router.post("/messages/groups/{group_id}")
+async def send_group_message(group_id: str, request: Request, user: User = Depends(require_auth)):
+    """Send a message to a group"""
+    data = await request.json()
+    content = data.get("content", "").strip()
+    
+    if not content:
+        raise HTTPException(status_code=400, detail="Message content cannot be empty")
+    
+    # Check if user is a member
+    group = await db.message_groups.find_one({"id": group_id})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    if user.id not in group['member_ids']:
+        raise HTTPException(status_code=403, detail="You are not a member of this group")
+    
+    # Create message
+    message = GroupMessage(
+        group_id=group_id,
+        sender_id=user.id,
+        content=content
+    )
+    
+    msg_dict = message.model_dump()
+    msg_dict['created_at'] = msg_dict['created_at'].isoformat()
+    await db.group_messages.insert_one(msg_dict)
+    
+    # Send real-time notification to all group members via WebSocket
+    for member_id in group['member_ids']:
+        if member_id != user.id:
+            await ws_manager.send_personal_message(member_id, {
+                "type": "new_group_message",
+                "message": {
+                    "id": message.id,
+                    "group_id": group_id,
+                    "group_name": group['name'],
+                    "sender_id": user.id,
+                    "sender_name": user.name,
+                    "sender_picture": user.picture,
+                    "content": content,
+                    "created_at": msg_dict['created_at']
+                }
+            })
+    
+    return message
+
+# Get user's groups
+@api_router.get("/messages/my-groups")
+async def get_my_groups(user: User = Depends(require_auth)):
+    """Get groups the user is a member of"""
+    groups = await db.message_groups.find(
+        {"member_ids": user.id},
+        {"_id": 0}
+    ).to_list(100)
+    
+    # Convert datetime fields
+    for group in groups:
+        if 'created_at' in group and isinstance(group['created_at'], datetime):
+            group['created_at'] = group['created_at'].isoformat()
+    
+    return groups
+
+# Get group details (for admins/managers)
+@api_router.get("/messages/groups/{group_id}/details")
+async def get_group_details(group_id: str, user: User = Depends(require_auth)):
+    """Get group details including member list (admin/manager only)"""
+    group = await db.message_groups.find_one({"id": group_id}, {"_id": 0})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    # Check if user is admin or manager
+    if user.role != "admin" and user.id not in group['manager_ids']:
+        raise HTTPException(status_code=403, detail="Only admins and managers can view group details")
+    
+    # Get member details
+    members = []
+    for member_id in group['member_ids']:
+        member = await db.users.find_one(
+            {"id": member_id},
+            {"_id": 0, "id": 1, "name": 1, "picture": 1, "role": 1}
+        )
+        if member:
+            members.append(member)
+    
+    group['members'] = members
+    
+    # Convert datetime
+    if 'created_at' in group and isinstance(group['created_at'], datetime):
+        group['created_at'] = group['created_at'].isoformat()
+    
+    return group
+
+# Add member to group (admin/manager only)
+@api_router.post("/messages/groups/{group_id}/members/{member_id}")
+async def add_group_member(group_id: str, member_id: str, user: User = Depends(require_auth)):
+    """Add a member to a group (admin/manager only)"""
+    group = await db.message_groups.find_one({"id": group_id})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    # Check if user is admin or manager
+    if user.role != "admin" and user.id not in group['manager_ids']:
+        raise HTTPException(status_code=403, detail="Only admins and managers can add members")
+    
+    # Check if member exists
+    member = await db.users.find_one({"id": member_id})
+    if not member:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Add member if not already in group
+    if member_id not in group['member_ids']:
+        await db.message_groups.update_one(
+            {"id": group_id},
+            {"$push": {"member_ids": member_id}}
+        )
+        
+        # Notify the new member
+        await create_notification(
+            user_id=member_id,
+            notif_type="added_to_group",
+            title="Added to Message Group",
+            message=f"{user.name} added you to the group '{group['name']}'",
+            related_entity_id=group_id,
+            related_entity_type="message_group",
+            actor_id=user.id,
+            actor_name=user.name,
+            send_email=False
+        )
+    
+    return {"status": "success", "message": "Member added to group"}
+
+# Remove member from group (admin/manager only)
+@api_router.delete("/messages/groups/{group_id}/members/{member_id}")
+async def remove_group_member(group_id: str, member_id: str, user: User = Depends(require_auth)):
+    """Remove a member from a group (admin/manager only)"""
+    group = await db.message_groups.find_one({"id": group_id})
+    if not group:
+        raise HTTPException(status_code=404, detail="Group not found")
+    
+    # Check if user is admin or manager
+    if user.role != "admin" and user.id not in group['manager_ids']:
+        raise HTTPException(status_code=403, detail="Only admins and managers can remove members")
+    
+    # Can't remove the creator
+    if member_id == group['created_by']:
+        raise HTTPException(status_code=400, detail="Cannot remove group creator")
+    
+    # Remove member
+    await db.message_groups.update_one(
+        {"id": group_id},
+        {"$pull": {"member_ids": member_id, "manager_ids": member_id}}
+    )
+    
+    return {"status": "success", "message": "Member removed from group"}
+
+
+
 # Include router
 
 
