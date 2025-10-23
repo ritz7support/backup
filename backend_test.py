@@ -3117,6 +3117,14 @@ def main():
             else:
                 print("\n❌ Platform settings API testing completed with failures")
                 sys.exit(1)
+        elif sys.argv[1] == "--messaging-only":
+            success = tester.run_messaging_tests_only()
+            if success:
+                print("\n✅ Messaging system testing completed successfully")
+                sys.exit(0)
+            else:
+                print("\n❌ Messaging system testing completed with failures")
+                sys.exit(1)
     
     # Run all tests by default
     success = tester.run_all_tests()
