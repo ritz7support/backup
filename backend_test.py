@@ -1277,6 +1277,544 @@ class Phase2EnhancedUserManagementTester:
             self.log(f"❌ Exception in non-admin process expired blocks test: {e}", "ERROR")
             return False
     
+    # ==================== MESSAGING SYSTEM TESTS ====================
+    
+    def test_messaging_settings_get_admin(self):
+        """Test GET /api/admin/messaging-settings (Admin Access)"""
+        self.log("\n🧪 Testing GET /api/admin/messaging-settings (Admin Access)")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/admin/messaging-settings")
+            
+            if response.status_code == 200:
+                settings = response.json()
+                self.log(f"✅ GET /api/admin/messaging-settings successful")
+                
+                # Verify default settings structure
+                required_fields = ['who_can_initiate']
+                missing_fields = [field for field in required_fields if field not in settings]
+                
+                if missing_fields:
+                    self.log(f"⚠️ Missing fields in settings response: {missing_fields}", "WARNING")
+                else:
+                    self.log("✅ Settings response structure is correct")
+                
+                # Check default value
+                if settings.get('who_can_initiate') == 'all':
+                    self.log("✅ Default who_can_initiate setting is 'all'")
+                else:
+                    self.log(f"ℹ️ Current who_can_initiate setting: {settings.get('who_can_initiate')}")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/admin/messaging-settings failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/admin/messaging-settings: {e}", "ERROR")
+            return False
+    
+    def test_messaging_settings_update_admin(self):
+        """Test PUT /api/admin/messaging-settings (Admin Access)"""
+        self.log("\n🧪 Testing PUT /api/admin/messaging-settings (Admin Access)")
+        
+        try:
+            # Update settings to 'paid'
+            update_data = {"who_can_initiate": "paid"}
+            response = self.admin_session.put(f"{BACKEND_URL}/admin/messaging-settings", json=update_data)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ PUT /api/admin/messaging-settings successful")
+                
+                if result.get('status') == 'success':
+                    self.log("✅ Settings update confirmed")
+                    
+                    # Verify the update by getting settings again
+                    get_response = self.admin_session.get(f"{BACKEND_URL}/admin/messaging-settings")
+                    if get_response.status_code == 200:
+                        settings = get_response.json()
+                        if settings.get('who_can_initiate') == 'paid':
+                            self.log("✅ Settings update verified - who_can_initiate is now 'paid'")
+                            return True
+                        else:
+                            self.log("❌ Settings update not reflected", "ERROR")
+                            return False
+                    else:
+                        self.log("⚠️ Could not verify settings update", "WARNING")
+                        return True
+                else:
+                    self.log("⚠️ Unexpected response format", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ PUT /api/admin/messaging-settings failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in PUT /api/admin/messaging-settings: {e}", "ERROR")
+            return False
+    
+    def test_user_messaging_preferences_get(self):
+        """Test GET /api/me/messaging-preferences"""
+        self.log("\n🧪 Testing GET /api/me/messaging-preferences")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/me/messaging-preferences")
+            
+            if response.status_code == 200:
+                prefs = response.json()
+                self.log("✅ GET /api/me/messaging-preferences successful")
+                
+                # Verify response structure
+                required_fields = ['user_id', 'allow_messages']
+                missing_fields = [field for field in required_fields if field not in prefs]
+                
+                if missing_fields:
+                    self.log(f"⚠️ Missing fields in preferences response: {missing_fields}", "WARNING")
+                else:
+                    self.log("✅ Preferences response structure is correct")
+                
+                # Check default value (should be False)
+                if prefs.get('allow_messages') == False:
+                    self.log("✅ Default allow_messages setting is False")
+                else:
+                    self.log(f"ℹ️ Current allow_messages setting: {prefs.get('allow_messages')}")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/me/messaging-preferences failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/me/messaging-preferences: {e}", "ERROR")
+            return False
+    
+    def test_user_messaging_preferences_update(self):
+        """Test PUT /api/me/messaging-preferences"""
+        self.log("\n🧪 Testing PUT /api/me/messaging-preferences")
+        
+        try:
+            # Enable messages
+            update_data = {"allow_messages": True}
+            response = self.admin_session.put(f"{BACKEND_URL}/me/messaging-preferences", json=update_data)
+            
+            if response.status_code == 200:
+                result = response.json()
+                self.log("✅ PUT /api/me/messaging-preferences successful")
+                
+                if result.get('status') == 'success' and result.get('allow_messages') == True:
+                    self.log("✅ Preferences update confirmed - messages enabled")
+                    
+                    # Verify the update by getting preferences again
+                    get_response = self.admin_session.get(f"{BACKEND_URL}/me/messaging-preferences")
+                    if get_response.status_code == 200:
+                        prefs = get_response.json()
+                        if prefs.get('allow_messages') == True:
+                            self.log("✅ Preferences update verified - allow_messages is now True")
+                            return True
+                        else:
+                            self.log("❌ Preferences update not reflected", "ERROR")
+                            return False
+                    else:
+                        self.log("⚠️ Could not verify preferences update", "WARNING")
+                        return True
+                else:
+                    self.log("⚠️ Unexpected response format", "WARNING")
+                    return True
+            else:
+                self.log(f"❌ PUT /api/me/messaging-preferences failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in PUT /api/me/messaging-preferences: {e}", "ERROR")
+            return False
+    
+    def setup_test_user_for_messaging(self):
+        """Setup a test user for messaging tests"""
+        self.log("🔧 Setting up test user for messaging...")
+        
+        test_user_data = {
+            "email": "referred2@test.com",
+            "password": "password123",
+            "name": "Test Messaging User",
+            "role": "learner"
+        }
+        
+        try:
+            test_session = requests.Session()
+            register_response = test_session.post(f"{BACKEND_URL}/auth/register", json=test_user_data)
+            
+            test_user_id = None
+            if register_response.status_code == 200:
+                user_data = register_response.json()
+                test_user_id = user_data.get('user', {}).get('id')
+                self.log(f"✅ Created test messaging user: {test_user_id}")
+            elif register_response.status_code == 400 and "already registered" in register_response.text:
+                # User exists, login to get ID
+                login_response = test_session.post(f"{BACKEND_URL}/auth/login", json={
+                    "email": test_user_data["email"],
+                    "password": test_user_data["password"]
+                })
+                if login_response.status_code == 200:
+                    user_data = login_response.json()
+                    test_user_id = user_data.get('user', {}).get('id')
+                    self.log(f"✅ Using existing test messaging user: {test_user_id}")
+            
+            if not test_user_id:
+                self.log("❌ Failed to get test messaging user ID", "ERROR")
+                return None, None
+            
+            return test_user_id, test_session
+            
+        except Exception as e:
+            self.log(f"❌ Exception setting up test messaging user: {e}", "ERROR")
+            return None, None
+    
+    def test_send_direct_message_permission_check(self):
+        """Test POST /api/messages/direct/{receiver_id} with permission checks"""
+        self.log("\n🧪 Testing POST /api/messages/direct/{receiver_id} (Permission Check)")
+        
+        # Setup test user
+        test_user_id, test_session = self.setup_test_user_for_messaging()
+        if not test_user_id or not test_session:
+            return False
+        
+        try:
+            # First, try to send message to new user (should fail - receiver hasn't enabled messages)
+            message_data = {"content": "Test message"}
+            response = self.admin_session.post(f"{BACKEND_URL}/messages/direct/{test_user_id}", json=message_data)
+            
+            if response.status_code == 403:
+                self.log("✅ Message sending correctly blocked - receiver hasn't enabled messages")
+                
+                # Now enable messages for the test user
+                enable_data = {"allow_messages": True}
+                prefs_response = test_session.put(f"{BACKEND_URL}/me/messaging-preferences", json=enable_data)
+                
+                if prefs_response.status_code == 200:
+                    self.log("✅ Test user enabled messages")
+                    
+                    # Try sending message again (should succeed now)
+                    response2 = self.admin_session.post(f"{BACKEND_URL}/messages/direct/{test_user_id}", json=message_data)
+                    
+                    if response2.status_code == 200:
+                        message = response2.json()
+                        self.log("✅ Message sent successfully after receiver enabled messages")
+                        
+                        # Verify message structure
+                        required_fields = ['id', 'sender_id', 'receiver_id', 'content', 'created_at']
+                        missing_fields = [field for field in required_fields if field not in message]
+                        
+                        if missing_fields:
+                            self.log(f"⚠️ Missing fields in message response: {missing_fields}", "WARNING")
+                        else:
+                            self.log("✅ Message response structure is correct")
+                        
+                        return True
+                    else:
+                        self.log(f"❌ Message sending failed after enabling: {response2.status_code} - {response2.text}", "ERROR")
+                        return False
+                else:
+                    self.log("❌ Failed to enable messages for test user", "ERROR")
+                    return False
+            else:
+                self.log(f"❌ Expected 403 for disabled messages but got: {response.status_code}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in direct message permission test: {e}", "ERROR")
+            return False
+    
+    def test_get_conversations(self):
+        """Test GET /api/messages/conversations"""
+        self.log("\n🧪 Testing GET /api/messages/conversations")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/messages/conversations")
+            
+            if response.status_code == 200:
+                conversations = response.json()
+                self.log(f"✅ GET /api/messages/conversations successful - Retrieved {len(conversations)} conversations")
+                
+                # Verify response structure if conversations exist
+                if conversations:
+                    conversation = conversations[0]
+                    required_fields = ['type', 'last_message', 'unread_count']
+                    missing_fields = [field for field in required_fields if field not in conversation]
+                    
+                    if missing_fields:
+                        self.log(f"⚠️ Missing fields in conversation response: {missing_fields}", "WARNING")
+                    else:
+                        self.log("✅ Conversation response structure is correct")
+                    
+                    # Check conversation type
+                    if conversation.get('type') in ['direct', 'group']:
+                        self.log(f"✅ Valid conversation type: {conversation.get('type')}")
+                    else:
+                        self.log(f"⚠️ Unknown conversation type: {conversation.get('type')}", "WARNING")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/messages/conversations failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/messages/conversations: {e}", "ERROR")
+            return False
+    
+    def test_get_direct_messages(self):
+        """Test GET /api/messages/direct/{other_user_id}"""
+        self.log("\n🧪 Testing GET /api/messages/direct/{other_user_id}")
+        
+        # Use the test user we created earlier
+        test_user_id, _ = self.setup_test_user_for_messaging()
+        if not test_user_id:
+            return False
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/messages/direct/{test_user_id}")
+            
+            if response.status_code == 200:
+                messages = response.json()
+                self.log(f"✅ GET /api/messages/direct/{test_user_id} successful - Retrieved {len(messages)} messages")
+                
+                # Verify message structure if messages exist
+                if messages:
+                    message = messages[0]
+                    required_fields = ['id', 'sender_id', 'receiver_id', 'content', 'created_at']
+                    missing_fields = [field for field in required_fields if field not in message]
+                    
+                    if missing_fields:
+                        self.log(f"⚠️ Missing fields in message response: {missing_fields}", "WARNING")
+                    else:
+                        self.log("✅ Message response structure is correct")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/messages/direct/{test_user_id} failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/messages/direct: {e}", "ERROR")
+            return False
+    
+    def test_create_message_group_admin(self):
+        """Test POST /api/messages/groups (Admin Only)"""
+        self.log("\n🧪 Testing POST /api/messages/groups (Admin Only)")
+        
+        # Get test user ID
+        test_user_id, _ = self.setup_test_user_for_messaging()
+        if not test_user_id:
+            return False
+        
+        try:
+            group_data = {
+                "name": "Test Group",
+                "description": "Test group description",
+                "member_ids": [test_user_id]
+            }
+            
+            response = self.admin_session.post(f"{BACKEND_URL}/messages/groups", json=group_data)
+            
+            if response.status_code == 200:
+                group = response.json()
+                self.log("✅ POST /api/messages/groups successful - Group created")
+                
+                # Verify group structure
+                required_fields = ['id', 'name', 'description', 'created_by', 'member_ids', 'manager_ids']
+                missing_fields = [field for field in required_fields if field not in group]
+                
+                if missing_fields:
+                    self.log(f"⚠️ Missing fields in group response: {missing_fields}", "WARNING")
+                else:
+                    self.log("✅ Group response structure is correct")
+                
+                # Verify admin is auto-added as member and manager
+                admin_me_response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+                if admin_me_response.status_code == 200:
+                    admin_user = admin_me_response.json()
+                    admin_id = admin_user.get('id')
+                    
+                    if admin_id in group.get('member_ids', []):
+                        self.log("✅ Admin auto-added as member")
+                    else:
+                        self.log("⚠️ Admin not auto-added as member", "WARNING")
+                    
+                    if admin_id in group.get('manager_ids', []):
+                        self.log("✅ Admin auto-added as manager")
+                    else:
+                        self.log("⚠️ Admin not auto-added as manager", "WARNING")
+                
+                # Store group ID for later tests
+                self.test_group_id = group.get('id')
+                return True
+            else:
+                self.log(f"❌ POST /api/messages/groups failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in POST /api/messages/groups: {e}", "ERROR")
+            return False
+    
+    def test_send_group_message(self):
+        """Test POST /api/messages/groups/{group_id}"""
+        self.log("\n🧪 Testing POST /api/messages/groups/{group_id}")
+        
+        if not hasattr(self, 'test_group_id') or not self.test_group_id:
+            self.log("❌ No test group ID available (need to run group creation test first)", "ERROR")
+            return False
+        
+        try:
+            message_data = {"content": "Hello group!"}
+            response = self.admin_session.post(f"{BACKEND_URL}/messages/groups/{self.test_group_id}", json=message_data)
+            
+            if response.status_code == 200:
+                message = response.json()
+                self.log("✅ POST /api/messages/groups/{group_id} successful - Group message sent")
+                
+                # Verify message structure
+                required_fields = ['id', 'group_id', 'sender_id', 'content', 'created_at']
+                missing_fields = [field for field in required_fields if field not in message]
+                
+                if missing_fields:
+                    self.log(f"⚠️ Missing fields in group message response: {missing_fields}", "WARNING")
+                else:
+                    self.log("✅ Group message response structure is correct")
+                
+                return True
+            else:
+                self.log(f"❌ POST /api/messages/groups/{self.test_group_id} failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in POST /api/messages/groups: {e}", "ERROR")
+            return False
+    
+    def test_get_group_messages(self):
+        """Test GET /api/messages/groups/{group_id}"""
+        self.log("\n🧪 Testing GET /api/messages/groups/{group_id}")
+        
+        if not hasattr(self, 'test_group_id') or not self.test_group_id:
+            self.log("❌ No test group ID available (need to run group creation test first)", "ERROR")
+            return False
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/messages/groups/{self.test_group_id}")
+            
+            if response.status_code == 200:
+                messages = response.json()
+                self.log(f"✅ GET /api/messages/groups/{self.test_group_id} successful - Retrieved {len(messages)} messages")
+                
+                # Verify message structure if messages exist
+                if messages:
+                    message = messages[0]
+                    required_fields = ['id', 'group_id', 'sender_id', 'content', 'created_at']
+                    missing_fields = [field for field in required_fields if field not in message]
+                    
+                    if missing_fields:
+                        self.log(f"⚠️ Missing fields in group message response: {missing_fields}", "WARNING")
+                    else:
+                        self.log("✅ Group message response structure is correct")
+                    
+                    # Check for enriched sender info
+                    if 'sender_name' in message:
+                        self.log("✅ Group message enriched with sender info")
+                    else:
+                        self.log("⚠️ Group message not enriched with sender info", "WARNING")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/messages/groups/{self.test_group_id} failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/messages/groups: {e}", "ERROR")
+            return False
+    
+    def test_get_my_groups(self):
+        """Test GET /api/messages/my-groups"""
+        self.log("\n🧪 Testing GET /api/messages/my-groups")
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/messages/my-groups")
+            
+            if response.status_code == 200:
+                groups = response.json()
+                self.log(f"✅ GET /api/messages/my-groups successful - Retrieved {len(groups)} groups")
+                
+                # Verify group structure if groups exist
+                if groups:
+                    group = groups[0]
+                    required_fields = ['id', 'name', 'created_by', 'member_ids', 'manager_ids']
+                    missing_fields = [field for field in required_fields if field not in group]
+                    
+                    if missing_fields:
+                        self.log(f"⚠️ Missing fields in group response: {missing_fields}", "WARNING")
+                    else:
+                        self.log("✅ Group response structure is correct")
+                    
+                    # Check if test group is in the list
+                    if hasattr(self, 'test_group_id') and self.test_group_id:
+                        test_group = next((g for g in groups if g.get('id') == self.test_group_id), None)
+                        if test_group:
+                            self.log("✅ Test group found in my groups list")
+                        else:
+                            self.log("⚠️ Test group not found in my groups list", "WARNING")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/messages/my-groups failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/messages/my-groups: {e}", "ERROR")
+            return False
+    
+    def test_get_group_details_admin(self):
+        """Test GET /api/messages/groups/{group_id}/details (Admin Only)"""
+        self.log("\n🧪 Testing GET /api/messages/groups/{group_id}/details (Admin Only)")
+        
+        if not hasattr(self, 'test_group_id') or not self.test_group_id:
+            self.log("❌ No test group ID available (need to run group creation test first)", "ERROR")
+            return False
+        
+        try:
+            response = self.admin_session.get(f"{BACKEND_URL}/messages/groups/{self.test_group_id}/details")
+            
+            if response.status_code == 200:
+                group_details = response.json()
+                self.log("✅ GET /api/messages/groups/{group_id}/details successful")
+                
+                # Verify group details structure
+                required_fields = ['id', 'name', 'created_by', 'member_ids', 'manager_ids', 'members']
+                missing_fields = [field for field in required_fields if field not in group_details]
+                
+                if missing_fields:
+                    self.log(f"⚠️ Missing fields in group details response: {missing_fields}", "WARNING")
+                else:
+                    self.log("✅ Group details response structure is correct")
+                
+                # Verify members list is enriched
+                members = group_details.get('members', [])
+                if members:
+                    member = members[0]
+                    member_fields = ['id', 'name', 'role']
+                    missing_member_fields = [field for field in member_fields if field not in member]
+                    
+                    if missing_member_fields:
+                        self.log(f"⚠️ Missing fields in member details: {missing_member_fields}", "WARNING")
+                    else:
+                        self.log("✅ Member details structure is correct")
+                
+                return True
+            else:
+                self.log(f"❌ GET /api/messages/groups/{self.test_group_id}/details failed: {response.status_code} - {response.text}", "ERROR")
+                return False
+                
+        except Exception as e:
+            self.log(f"❌ Exception in GET /api/messages/groups/details: {e}", "ERROR")
+            return False
+    
     # ==================== NOTIFICATION SYSTEM TESTS ====================
     
     def test_get_notifications_endpoint(self):
