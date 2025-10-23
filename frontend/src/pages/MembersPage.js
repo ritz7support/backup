@@ -290,6 +290,7 @@ export default function MembersPage() {
                                   type="button"
                                   size="icon"
                                   onClick={handleCopyInviteLink}
+                                  disabled={!generatedInviteLink}
                                   style={{ background: linkCopied ? '#10B981' : 'linear-gradient(135deg, #0462CB 0%, #034B9B 100%)', color: 'white' }}
                                 >
                                   {linkCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
