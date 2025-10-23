@@ -33,6 +33,9 @@ export default function AdminPanel() {
     primary_color: '#0462CB',
     logo: null
   });
+  const [messagingSettings, setMessagingSettings] = useState({
+    who_can_initiate: 'all'
+  });
   const [brandingSettings, setBrandingSettings] = useState({ logo: '', favicon: '', primary_color: '#0462CB', community_name: 'Community' });
   const [onboardingSteps, setOnboardingSteps] = useState([]);
   const [onboardingSettings, setOnboardingSettings] = useState({ completion_points: 5, enabled: true });
