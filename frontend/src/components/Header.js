@@ -60,7 +60,7 @@ export default function Header() {
             <Users className="h-5 w-5" />
             Members
           </Link>
-          <Link to="/dms" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors">
+          <Link to="/messages" className="text-gray-300 hover:text-white font-medium flex items-center gap-2 transition-colors">
             <MessageCircle className="h-5 w-5" />
             Messages
           </Link>
