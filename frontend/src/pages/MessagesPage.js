@@ -337,13 +337,15 @@ export default function MessagesPage() {
                     </DialogContent>
                   </Dialog>
                 )}
-                <Dialog open={showSettingsDialog} onOpenChange={setShowSettingsDialog}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">
-                      <SettingsIcon className="h-4 w-4" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => setShowSettingsDialog(true)}
+                  title="Messaging Settings"
+                >
+                  <SettingsIcon className="h-4 w-4" />
+                </Button>
+              </div>
                     <DialogHeader>
                       <DialogTitle>Messaging Settings</DialogTitle>
                     </DialogHeader>
