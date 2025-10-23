@@ -550,6 +550,44 @@ async def create_notification(
     return notification
 
 
+
+
+# ==================== WEBSOCKET CONNECTION MANAGER ====================
+
+class ConnectionManager:
+    """Manages WebSocket connections for real-time messaging"""
+    def __init__(self):
+        self.active_connections: dict[str, WebSocket] = {}  # user_id: websocket
+    
+    async def connect(self, user_id: str, websocket: WebSocket):
+        """Connect a user's websocket"""
+        await websocket.accept()
+        self.active_connections[user_id] = websocket
+        logger.info(f"User {user_id} connected. Total connections: {len(self.active_connections)}")
+    
+    def disconnect(self, user_id: str):
+        """Disconnect a user's websocket"""
+        if user_id in self.active_connections:
+            del self.active_connections[user_id]
+            logger.info(f"User {user_id} disconnected. Total connections: {len(self.active_connections)}")
+    
+    async def send_personal_message(self, user_id: str, message: dict):
+        """Send a message to a specific user"""
+        if user_id in self.active_connections:
+            try:
+                await self.active_connections[user_id].send_json(message)
+            except Exception as e:
+                logger.error(f"Error sending message to {user_id}: {e}")
+                self.disconnect(user_id)
+    
+    async def broadcast_to_group(self, user_ids: List[str], message: dict):
+        """Broadcast a message to multiple users"""
+        for user_id in user_ids:
+            await self.send_personal_message(user_id, message)
+
+# Initialize connection manager
+ws_manager = ConnectionManager()
+
 # ==================== REFERRAL HELPERS ====================
 
 def generate_referral_code(user_id: str, name: str) -> str:
