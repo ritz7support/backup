@@ -93,7 +93,8 @@ export default function AdminPanel() {
         loadSubscriptionTiers(),
         loadAllUsers(),
         loadLevels(),
-        loadPlatformSettings()
+        loadPlatformSettings(),
+        loadMessagingSettings()
       ]);
     } catch (error) {
       toast.error('Failed to load data');
