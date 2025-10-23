@@ -166,6 +166,15 @@ export default function AdminPanel() {
     }
   };
 
+  const loadMessagingSettings = async () => {
+    try {
+      const { data } = await messagingAPI.getMessagingSettings();
+      setMessagingSettings(data || { who_can_initiate: 'all' });
+    } catch (error) {
+      console.error('Error loading messaging settings:', error);
+    }
+  };
+
   // Platform settings handler
   const handleUpdatePlatformSettings = async (newSettings) => {
     setProcessing(true);
