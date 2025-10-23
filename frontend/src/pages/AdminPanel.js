@@ -913,33 +913,111 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#F3F4F6' }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: '#F3F4F6' }}>
       {/* Header */}
-      <div className="bg-white border-b" style={{ borderColor: '#E5E7EB' }}>
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/dashboard')}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Back
-              </Button>
-              <div>
-                <h1 className="text-2xl font-bold" style={{ color: '#011328' }}>Admin Settings</h1>
-                <p className="text-sm" style={{ color: '#8E8E8E' }}>Manage spaces, groups, and subscriptions</p>
-              </div>
-            </div>
-            <Shield className="h-8 w-8" style={{ color: '#0462CB' }} />
-          </div>
-        </div>
-      </div>
+      <Header />
 
-      {/* Tabs */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar Navigation */}
+        <div className="w-64 bg-white border-r flex flex-col" style={{ borderColor: '#E5E7EB' }}>
+          <div className="p-6 border-b" style={{ borderColor: '#E5E7EB' }}>
+            <h1 className="text-xl font-bold" style={{ color: '#011328' }}>Admin Panel</h1>
+            <p className="text-sm mt-1" style={{ color: '#8E8E8E' }}>Manage your platform</p>
+          </div>
+
+          <nav className="flex-1 overflow-y-auto p-4">
+            <div className="space-y-1">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  activeTab === 'overview' ? 'shadow-sm' : 'hover:bg-gray-50'
+                }`}
+                style={{
+                  backgroundColor: activeTab === 'overview' ? '#E6EFFA' : 'transparent',
+                  color: activeTab === 'overview' ? '#0462CB' : '#3B3B3B'
+                }}
+              >
+                <LayoutDashboard className="h-5 w-5" />
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-sm">Spaces & Groups</p>
+                  <p className="text-xs opacity-70">{spaceGroups.length + spaces.length} items</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('users')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  activeTab === 'users' ? 'shadow-sm' : 'hover:bg-gray-50'
+                }`}
+                style={{
+                  backgroundColor: activeTab === 'users' ? '#E6EFFA' : 'transparent',
+                  color: activeTab === 'users' ? '#0462CB' : '#3B3B3B'
+                }}
+              >
+                <UsersIcon className="h-5 w-5" />
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-sm">Users</p>
+                  <p className="text-xs opacity-70">{allUsers.length} members</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('levels')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  activeTab === 'levels' ? 'shadow-sm' : 'hover:bg-gray-50'
+                }`}
+                style={{
+                  backgroundColor: activeTab === 'levels' ? '#E6EFFA' : 'transparent',
+                  color: activeTab === 'levels' ? '#0462CB' : '#3B3B3B'
+                }}
+              >
+                <Award className="h-5 w-5" />
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-sm">Levels</p>
+                  <p className="text-xs opacity-70">{levels.length} levels</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('subscriptions')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  activeTab === 'subscriptions' ? 'shadow-sm' : 'hover:bg-gray-50'
+                }`}
+                style={{
+                  backgroundColor: activeTab === 'subscriptions' ? '#E6EFFA' : 'transparent',
+                  color: activeTab === 'subscriptions' ? '#0462CB' : '#3B3B3B'
+                }}
+              >
+                <CreditCard className="h-5 w-5" />
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-sm">Subscriptions</p>
+                  <p className="text-xs opacity-70">{subscriptionTiers.length} tiers</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('platform-settings')}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                  activeTab === 'platform-settings' ? 'shadow-sm' : 'hover:bg-gray-50'
+                }`}
+                style={{
+                  backgroundColor: activeTab === 'platform-settings' ? '#E6EFFA' : 'transparent',
+                  color: activeTab === 'platform-settings' ? '#0462CB' : '#3B3B3B'
+                }}
+              >
+                <Settings className="h-5 w-5" />
+                <div className="flex-1 text-left">
+                  <p className="font-medium text-sm">Platform Settings</p>
+                  <p className="text-xs opacity-70">Configure platform</p>
+                </div>
+              </button>
+            </div>
+          </nav>
+        </div>
+
+        {/* Main Content Area */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-8">
         {/* Ordering Guide */}
         <div className="mb-6 p-4 rounded-lg border-l-4" style={{ backgroundColor: '#EFF6FF', borderColor: '#3B82F6' }}>
           <h3 className="font-semibold mb-2 flex items-center gap-2" style={{ color: '#1E40AF' }}>
