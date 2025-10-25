@@ -2821,7 +2821,6 @@ export default function AdminPanel() {
         </DialogContent>
       </Dialog>
 
-
           </div>
         </div>
       </div>
