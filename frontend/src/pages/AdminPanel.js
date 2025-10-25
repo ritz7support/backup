@@ -2820,11 +2820,9 @@ export default function AdminPanel() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
           </div>
         </div>
       </div>
-
     </div>
   );
 }
