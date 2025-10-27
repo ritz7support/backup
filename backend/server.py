@@ -68,6 +68,7 @@ class User(BaseModel):
     last_activity_date: Optional[datetime] = None  # Last date user did any point-earning activity
     current_streak: int = 0  # Current consecutive days of activity
     longest_streak: int = 0  # Longest streak achieved
+    email_notifications_enabled: bool = True  # User preference for email notifications
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
