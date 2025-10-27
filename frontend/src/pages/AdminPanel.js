@@ -1312,29 +1312,18 @@ export default function AdminPanel() {
                           <div className="h-12 w-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-lg">
                             {u.name?.charAt(0) || '?'}
                           </div>
-                          {/* Team Badge - Quarter Circle like LinkedIn */}
+                          {/* Team Badge */}
                           {u.is_team_member && (
-                            <div 
-                              className="absolute -bottom-1 -right-1 flex items-center justify-center"
+                            <img 
+                              src="/team-badge.png" 
+                              alt="Team Badge"
+                              className="absolute -bottom-1 -right-1"
                               style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                background: 'linear-gradient(135deg, transparent 50%, #0462CB 50%)',
-                                transform: 'rotate(-45deg)'
+                                width: '34px',
+                                height: '34px',
+                                objectFit: 'contain'
                               }}
-                            >
-                              <span 
-                                className="text-white font-bold text-[7px] tracking-tight"
-                                style={{
-                                  transform: 'rotate(45deg) translateY(6px) translateX(6px)',
-                                  textTransform: 'uppercase',
-                                  letterSpacing: '0.5px'
-                                }}
-                              >
-                                Team
-                              </span>
-                            </div>
+                            />
                           )}
                         </div>
                         <div className="flex-1">
