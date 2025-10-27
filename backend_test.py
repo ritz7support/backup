@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Backend API Testing for Daily Activity Streak and Comment Reaction Points Features
-Tests activity streak tracking, comment reaction points system, and related functionality
+Backend API Testing for Email Notifications System
+Tests email preferences, welcome emails, join request approval emails, and email templates
 """
 
 import requests
@@ -10,6 +10,7 @@ from datetime import datetime, timezone, timedelta
 import sys
 import os
 import time
+import uuid
 
 # Configuration
 BACKEND_URL = "https://teamspace-app-1.preview.emergentagent.com/api"
