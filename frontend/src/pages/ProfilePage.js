@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { membersAPI, adminAPI, authAPI } from '../lib/api';
+import { membersAPI, adminAPI, authAPI, emailPreferencesAPI } from '../lib/api';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import ReferralSection from '../components/ReferralSection';
-import { ArrowLeft, Mail, MapPin, Linkedin, Crown, Archive, Trash2, ArchiveRestore, Loader2, Edit2, Save, X } from 'lucide-react';
+import { ArrowLeft, Mail, MapPin, Linkedin, Crown, Archive, Trash2, ArchiveRestore, Loader2, Edit2, Save, X, Bell, BellOff } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
