@@ -446,10 +446,12 @@ export default function MembersPage() {
                           <img 
                             src="/team-badge.png" 
                             alt="Team Badge"
-                            className="absolute -bottom-1 -right-1"
+                            className="absolute"
                             style={{
-                              width: '42px',
-                              height: '42px',
+                              bottom: '-3px',
+                              left: '-3px',
+                              width: '70px',
+                              height: '70px',
                               objectFit: 'contain'
                             }}
                           />
