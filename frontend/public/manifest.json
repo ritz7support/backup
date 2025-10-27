@@ -1,0 +1,26 @@
+{
+  "short_name": "ABCD",
+  "name": "ABCD – Anybody Can Design, Develop & Deploy",
+  "description": "India's most active NoCode community. Learn n8n, Bubble, Zapier, and AI automation.",
+  "icons": [
+    {
+      "src": "favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#0462CB",
+  "background_color": "#ffffff"
+}
