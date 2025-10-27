@@ -2084,6 +2084,9 @@ async def react_to_post(post_id: str, emoji: str, user: User = Depends(require_a
     
     # Award or deduct points based on action
     if is_adding:
+        # Track activity streak
+        await track_activity_streak(user.id)
+        
         # Award 1 point to the person liking
         await award_points(
             user_id=user.id,
