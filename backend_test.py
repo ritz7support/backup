@@ -2945,126 +2945,58 @@ class DailyActivityStreakTester:
             return False
 
     def run_all_tests(self):
-        """Run all Phase 2 enhanced user management tests"""
-        self.log("🚀 Starting Phase 2 Enhanced User Management API Tests")
+        """Run all Daily Activity Streak and Comment Reaction Points tests"""
+        self.log("🚀 Starting Daily Activity Streak and Comment Reaction Points Backend Testing")
         self.log(f"Backend URL: {BACKEND_URL}")
+        self.log("=" * 80)
         
-        results = {}
-        
-        # Setup test users
+        # Setup
         if not self.setup_test_users():
-            self.log("❌ Failed to setup test users - aborting tests", "ERROR")
+            self.log("❌ Test setup failed - aborting tests", "ERROR")
             return False
         
-        # Setup test space and user for blocking tests
         if not self.setup_test_space():
-            self.log("❌ Failed to setup test space - aborting tests", "ERROR")
+            self.log("❌ Test space setup failed - aborting tests", "ERROR")
             return False
         
-        if not self.setup_test_user_for_blocking():
-            self.log("❌ Failed to setup test user for blocking - aborting tests", "ERROR")
-            return False
+        # Test results tracking
+        test_results = []
         
-        # Run tests in order
-        test_methods = [
-            # Phase 1 Tests (existing)
-            ('GET All Users (Admin)', self.test_get_all_users_admin),
-            ('GET All Users (Non-Admin)', self.test_get_all_users_non_admin),
-            ('Promote User to Admin', self.test_promote_user_to_admin),
-            ('Promote Self (Should Fail)', self.test_promote_self_admin),
-            ('Promote Existing Admin (Should Fail)', self.test_promote_existing_admin),
-            ('Promote by Non-Admin (Should Fail)', self.test_promote_non_admin_user),
-            ('Demote Admin to Learner', self.test_demote_admin_to_learner),
-            ('Demote Self (Should Fail)', self.test_demote_self_admin),
-            ('Demote Non-Admin (Should Fail)', self.test_demote_non_admin),
-            ('Demote by Non-Admin (Should Fail)', self.test_demote_by_non_admin),
-            ('Role Change Persistence', self.test_role_persistence),
-            
-            # Phase 2 Tests (new)
-            ('Team Member Badge Grant', self.test_team_member_badge_grant),
-            ('Team Member Badge Remove', self.test_team_member_badge_remove),
-            ('Team Member Badge Non-Admin (Should Fail)', self.test_team_member_badge_non_admin),
-            ('Centralized User Management', self.test_centralized_user_management),
-            ('Centralized User Management Non-Admin (Should Fail)', self.test_centralized_user_management_non_admin),
-            ('Soft Block with Expiry', self.test_soft_block_with_expiry),
-            ('Hard Block No Expiry', self.test_hard_block_no_expiry),
-            ('Unblock User', self.test_unblock_user),
-            ('Soft Block Engagement Prevention', self.test_soft_block_engagement_prevention),
-            ('Auto-Expiry System', self.test_auto_expiry_system),
-            ('Process Expired Blocks', self.test_process_expired_blocks),
-            ('Process Expired Blocks Non-Admin (Should Fail)', self.test_process_expired_blocks_non_admin),
-            
-            # Notification System Tests (specific request)
-            ('GET Notifications Endpoint', self.test_get_notifications_endpoint),
-            ('GET Notifications Unauthenticated (Should Fail)', self.test_get_notifications_unauthenticated),
-            ('GET Unread Count Endpoint', self.test_get_unread_count_endpoint),
-            ('GET Unread Count Unauthenticated (Should Fail)', self.test_get_unread_count_unauthenticated),
-            ('Notification Creation via Join Request', self.test_notification_creation_via_join_request),
-            ('Notifications Collection Exists', self.test_notifications_collection_exists),
-            
-            # Join Requests Functionality Tests (specific request)
-            ('Join Requests Functionality', self.test_join_requests_functionality),
-            
-            # Phase 3 Payment Gateway Tests (new)
-            ('Razorpay Order Creation', self.test_razorpay_order_creation),
-            ('Razorpay Payment Verification', self.test_razorpay_payment_verification),
-            ('Stripe Checkout Session Creation', self.test_stripe_checkout_session_creation),
-            ('Stripe Payment Status Polling', self.test_stripe_payment_status_polling),
-            ('Payment Transaction Records', self.test_payment_transaction_records),
-            ('Invalid Payment Plan (Should Fail)', self.test_invalid_payment_plan),
-            ('Payment Authentication Required', self.test_payment_authentication_required),
-            
-            # Platform Settings Tests (logo upload feature)
-            ('GET Platform Settings (Public)', self.test_get_platform_settings),
-            ('GET Admin Platform Settings', self.test_get_admin_platform_settings),
-            ('Update Platform Settings with Logo', self.test_update_platform_settings_with_logo),
-            ('Remove Platform Settings Logo', self.test_update_platform_settings_remove_logo),
-            ('Platform Settings Non-Admin (Should Fail)', self.test_update_platform_settings_non_admin),
-            ('Platform Settings Upsert Behavior', self.test_platform_settings_upsert_behavior),
-            
-            # Messaging System Tests (comprehensive messaging functionality)
-            ('GET Messaging Settings (Admin)', self.test_messaging_settings_get_admin),
-            ('UPDATE Messaging Settings (Admin)', self.test_messaging_settings_update_admin),
-            ('GET User Messaging Preferences', self.test_user_messaging_preferences_get),
-            ('UPDATE User Messaging Preferences', self.test_user_messaging_preferences_update),
-            ('Send Direct Message - Permission Check', self.test_send_direct_message_permission_check),
-            ('GET Conversations', self.test_get_conversations),
-            ('GET Direct Messages', self.test_get_direct_messages),
-            ('Create Message Group (Admin Only)', self.test_create_message_group_admin),
-            ('Send Group Message', self.test_send_group_message),
-            ('GET Group Messages', self.test_get_group_messages),
-            ('GET My Groups', self.test_get_my_groups),
-            ('GET Group Details (Admin Only)', self.test_get_group_details_admin),
-        ]
+        # Daily Activity Streak Tests
+        self.log("\n" + "=" * 50)
+        self.log("DAILY ACTIVITY STREAK TESTS")
+        self.log("=" * 50)
         
-        for test_name, test_method in test_methods:
-            try:
-                results[test_name] = test_method()
-            except Exception as e:
-                self.log(f"❌ Unexpected error in {test_name}: {e}", "ERROR")
-                results[test_name] = False
+        test_results.append(("Initial Activity Streak Values", self.test_initial_activity_streak()))
+        test_results.append(("Post Creation Updates Streak", self.test_create_post_streak_update()))
+        test_results.append(("Streak Continuation Logic", self.test_streak_continuation_logic()))
         
-        # Summary
-        self.log("\n" + "="*80)
-        self.log("📊 PHASE 2 & 3 ENHANCED USER MANAGEMENT + PAYMENT GATEWAY TEST RESULTS SUMMARY")
-        self.log("="*80)
+        # Comment Reaction Points Tests
+        self.log("\n" + "=" * 50)
+        self.log("COMMENT REACTION POINTS TESTS")
+        self.log("=" * 50)
         
-        passed = 0
-        total = len(results)
+        test_results.append(("Comment Reaction Points System", self.test_comment_reaction_points()))
         
-        for test_name, result in results.items():
+        # Print summary
+        self.log("\n" + "=" * 80)
+        self.log("TEST SUMMARY")
+        self.log("=" * 80)
+        
+        passed = sum(1 for _, result in test_results if result)
+        total = len(test_results)
+        
+        for test_name, result in test_results:
             status = "✅ PASS" if result else "❌ FAIL"
-            self.log(f"{test_name}: {status}")
-            if result:
-                passed += 1
+            self.log(f"{status} - {test_name}")
         
-        self.log(f"\nOverall: {passed}/{total} tests passed")
+        self.log(f"\nOverall Result: {passed}/{total} tests passed")
         
         if passed == total:
-            self.log("🎉 All Phase 2 & 3 enhanced user management and payment gateway tests passed!")
+            self.log("🎉 ALL TESTS PASSED! Daily Activity Streak and Comment Reaction Points systems are fully functional.")
             return True
         else:
-            self.log(f"⚠️ {total - passed} tests failed")
+            self.log(f"⚠️ {total - passed} tests failed. Please review the failures above.")
             return False
     
     def run_messaging_tests_only(self):
