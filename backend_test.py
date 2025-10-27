@@ -425,8 +425,8 @@ class EmailNotificationsTester:
             return False
     
     def run_all_tests(self):
-        """Run all Daily Activity Streak and Comment Reaction Points tests"""
-        self.log("🚀 Starting Daily Activity Streak and Comment Reaction Points Backend Testing")
+        """Run all Email Notifications System tests"""
+        self.log("🚀 Starting Email Notifications System Backend Testing")
         self.log(f"Backend URL: {BACKEND_URL}")
         self.log("=" * 80)
         
@@ -442,21 +442,33 @@ class EmailNotificationsTester:
         # Test results tracking
         test_results = []
         
-        # Daily Activity Streak Tests
+        # Email Preferences API Tests
         self.log("\n" + "=" * 50)
-        self.log("DAILY ACTIVITY STREAK TESTS")
+        self.log("EMAIL PREFERENCES API TESTS")
         self.log("=" * 50)
         
-        test_results.append(("Initial Activity Streak Values", self.test_initial_activity_streak()))
-        test_results.append(("Post Creation Updates Streak", self.test_create_post_streak_update()))
-        test_results.append(("Streak Continuation Logic", self.test_streak_continuation_logic()))
+        test_results.append(("Email Preferences Endpoints", self.test_email_preferences_endpoints()))
         
-        # Comment Reaction Points Tests
+        # User Registration Email Tests
         self.log("\n" + "=" * 50)
-        self.log("COMMENT REACTION POINTS TESTS")
+        self.log("USER REGISTRATION EMAIL TESTS")
         self.log("=" * 50)
         
-        test_results.append(("Comment Reaction Points System", self.test_comment_reaction_points()))
+        test_results.append(("User Registration Welcome Email", self.test_user_registration_welcome_email()))
+        
+        # Email Template Tests
+        self.log("\n" + "=" * 50)
+        self.log("EMAIL TEMPLATE TESTS")
+        self.log("=" * 50)
+        
+        test_results.append(("Email Template Function", self.test_email_template_function()))
+        
+        # Join Request Email Tests
+        self.log("\n" + "=" * 50)
+        self.log("JOIN REQUEST EMAIL TESTS")
+        self.log("=" * 50)
+        
+        test_results.append(("Join Request Approval Email", self.test_join_request_approval_email()))
         
         # Print summary
         self.log("\n" + "=" * 80)
@@ -473,7 +485,7 @@ class EmailNotificationsTester:
         self.log(f"\nOverall Result: {passed}/{total} tests passed")
         
         if passed == total:
-            self.log("🎉 ALL TESTS PASSED! Daily Activity Streak and Comment Reaction Points systems are fully functional.")
+            self.log("🎉 ALL TESTS PASSED! Email Notifications System is fully functional.")
             return True
         else:
             self.log(f"⚠️ {total - passed} tests failed. Please review the failures above.")
