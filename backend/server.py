@@ -3282,7 +3282,7 @@ async def approve_join_request(request_id: str, user: User = Depends(require_aut
                 "join_approved",
                 user_name=requester.get('name', 'there'),
                 space_name=space.get('name', 'the space') if space else 'the space',
-                space_url=f"https://teamspace-app-1.preview.emergentagent.com/space/{join_request['space_id']}"
+                space_url=f"{os.environ.get('FRONTEND_URL', '')}/space/{join_request['space_id']}"
             )
             await send_email(
                 to_email=requester.get('email'),
