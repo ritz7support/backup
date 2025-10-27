@@ -1175,7 +1175,7 @@ async def track_activity_streak(user_id: str):
                     email_template = get_email_template(
                         email_template_type,
                         user_name=user.get('name', 'there'),
-                        profile_url="https://teamspace-app-1.preview.emergentagent.com/profile"
+                        profile_url=f"{os.environ.get('FRONTEND_URL', '')}/profile"
                     )
                     await send_email(
                         to_email=user.get('email'),
