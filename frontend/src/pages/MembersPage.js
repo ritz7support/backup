@@ -517,15 +517,36 @@ export default function MembersPage() {
             <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6' : 'space-y-4'}>
               {filteredMembers.map((member) => {
                 const avatarColor = getColorForMember(member.id);
+                const isSelected = selectedMembers.has(member.id);
                 
                 return viewMode === 'grid' ? (
                   <div
                     key={member.id}
-                    className="bg-white rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
-                    style={{ borderColor: '#D1D5DB' }}
-                    onClick={() => navigate(`/profile/${member.id}`)}
+                    className="bg-white rounded-xl p-6 shadow-sm border hover:shadow-md transition-shadow cursor-pointer relative"
+                    style={{ 
+                      borderColor: isSelected ? '#0462CB' : '#D1D5DB',
+                      backgroundColor: isSelected ? '#F0F7FF' : 'white'
+                    }}
+                    onClick={() => {
+                      if (selectionMode) {
+                        toggleMemberSelection(member.id);
+                      } else {
+                        navigate(`/profile/${member.id}`);
+                      }
+                    }}
                     data-testid={`member-card-${member.id}`}
                   >
+                    {/* Selection Checkbox */}
+                    {selectionMode && (
+                      <div className="absolute top-3 right-3 z-10">
+                        {isSelected ? (
+                          <CheckSquare className="h-6 w-6" style={{ color: '#0462CB' }} />
+                        ) : (
+                          <Square className="h-6 w-6" style={{ color: '#8E8E8E' }} />
+                        )}
+                      </div>
+                    )}
+                    
                     <div className="flex flex-col items-center text-center">
                       {/* Avatar with Team Badge */}
                       <div className="relative mb-4">
