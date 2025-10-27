@@ -367,15 +367,42 @@ export default function MembersPage() {
                     data-testid={`member-card-${member.id}`}
                   >
                     <div className="flex flex-col items-center text-center">
-                      <Avatar className="h-24 w-24 mb-4">
-                        {member.picture ? (
-                          <AvatarImage src={member.picture} />
-                        ) : (
-                          <AvatarFallback style={{ backgroundColor: avatarColor, color: 'white', fontSize: '2rem' }}>
-                            {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                          </AvatarFallback>
+                      {/* Avatar with Team Badge */}
+                      <div className="relative mb-4">
+                        <Avatar className="h-24 w-24">
+                          {member.picture ? (
+                            <AvatarImage src={member.picture} />
+                          ) : (
+                            <AvatarFallback style={{ backgroundColor: avatarColor, color: 'white', fontSize: '2rem' }}>
+                              {member.name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        {/* Team Badge - Quarter Circle like LinkedIn */}
+                        {member.is_team_member && (
+                          <div 
+                            className="absolute -bottom-2 -right-2 flex items-center justify-center"
+                            style={{
+                              width: '48px',
+                              height: '48px',
+                              borderRadius: '50%',
+                              background: 'linear-gradient(135deg, transparent 50%, #0462CB 50%)',
+                              transform: 'rotate(-45deg)'
+                            }}
+                          >
+                            <span 
+                              className="text-white font-bold text-[9px] tracking-tight"
+                              style={{
+                                transform: 'rotate(45deg) translateY(8px) translateX(8px)',
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.5px'
+                              }}
+                            >
+                              Team
+                            </span>
+                          </div>
                         )}
-                      </Avatar>
+                      </div>
                       <h3 className="font-semibold text-lg mb-1" style={{ color: '#011328' }}>{member.name}</h3>
                       {member.role && (
                         <p className="text-sm mb-2 capitalize" style={{ color: '#8E8E8E' }}>
