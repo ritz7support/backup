@@ -1,5 +1,4 @@
-<!-- Simple placeholder social preview image -->
-<!-- This is an SVG that will serve as the social media preview -->
+<!-- ABCD NoCode Community Social Preview Image -->
 <svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
   <!-- Background gradient -->
   <defs>
@@ -13,15 +12,23 @@
   <rect width="1200" height="630" fill="url(#grad1)"/>
   
   <!-- Content -->
-  <text x="600" y="280" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white" text-anchor="middle">
-    ABCD Community
+  <text x="600" y="220" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle">
+    ABCD
   </text>
   
-  <text x="600" y="360" font-family="Arial, sans-serif" font-size="36" fill="rgba(255,255,255,0.9)" text-anchor="middle">
-    Connect, Learn & Grow Together
+  <text x="600" y="280" font-family="Arial, sans-serif" font-size="32" fill="rgba(255,255,255,0.95)" text-anchor="middle">
+    Anybody Can Design, Develop &amp; Deploy
   </text>
   
-  <text x="600" y="480" font-family="Arial, sans-serif" font-size="28" fill="rgba(255,255,255,0.8)" text-anchor="middle">
-    Join our vibrant community of learners and mentors
+  <text x="600" y="360" font-family="Arial, sans-serif" font-size="36" font-weight="600" fill="white" text-anchor="middle">
+    India's Most Active NoCode Community
+  </text>
+  
+  <text x="600" y="440" font-family="Arial, sans-serif" font-size="28" fill="rgba(255,255,255,0.9)" text-anchor="middle">
+    Learn n8n • Bubble • Zapier • AI Automation
+  </text>
+  
+  <text x="600" y="510" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#FFD700" text-anchor="middle">
+    Join 1000+ Makers
   </text>
 </svg>
