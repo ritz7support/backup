@@ -3335,6 +3335,26 @@ async def reject_join_request(request_id: str, user: User = Depends(require_auth
         send_email=False
     )
     
+    # Send rejection email
+    try:
+        requester = await db.users.find_one({"id": join_request['user_id']}, {"_id": 0})
+        if requester:
+            email_template = get_email_template(
+                "join_rejected",
+                user_name=requester.get('name', 'there'),
+                space_name=space.get('name', 'the space') if space else 'the space',
+                spaces_url="https://teamspace-app-1.preview.emergentagent.com/dashboard"
+            )
+            await send_email(
+                to_email=requester.get('email'),
+                subject=email_template["subject"],
+                html_content=email_template["html"],
+                user_id=join_request['user_id'],
+                check_preferences=True
+            )
+    except Exception as e:
+        logger.error(f"Failed to send join rejection email: {e}")
+    
     return {"message": "Request rejected"}
 
 @api_router.delete("/join-requests/{request_id}")
