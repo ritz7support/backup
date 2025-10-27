@@ -154,45 +154,80 @@ class DailyActivityStreakTester:
             self.log(f"❌ Exception in initial streak test: {e}", "ERROR")
             return False
     
-    def test_get_all_users_non_admin(self):
-        """Test GET /api/users/all with non-admin user (should fail)"""
-        self.log("\n🧪 Testing GET /api/users/all (Non-Admin Access - Should Fail)")
+    def test_create_post_streak_update(self):
+        """Test that creating a post updates activity streak"""
+        self.log("\n🧪 Testing Post Creation Updates Activity Streak")
         
-        # Create a fresh non-admin user for this test
         try:
-            fresh_session = requests.Session()
-            fresh_user_data = {
-                "email": "fresh_learner@test.com",
-                "password": "fresh123",
-                "name": "Fresh Learner User",
-                "role": "learner"
+            # Get initial streak values
+            initial_response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+            if initial_response.status_code != 200:
+                self.log("❌ Failed to get initial user data", "ERROR")
+                return False
+            
+            initial_user = initial_response.json()
+            initial_streak = initial_user.get('current_streak', 0)
+            initial_points = initial_user.get('total_points', 0)
+            
+            self.log(f"ℹ️ Before post - Streak: {initial_streak}, Points: {initial_points}")
+            
+            # Create a post to trigger activity tracking
+            post_data = {
+                "space_id": self.test_space_id,
+                "content": "Test post for activity streak tracking",
+                "title": "Activity Streak Test Post"
             }
             
-            register_response = fresh_session.post(f"{BACKEND_URL}/auth/register", json=fresh_user_data)
-            if register_response.status_code == 400:
-                # User exists, just login
-                login_response = fresh_session.post(f"{BACKEND_URL}/auth/login", json={
-                    "email": fresh_user_data["email"],
-                    "password": fresh_user_data["password"]
-                })
-                if login_response.status_code != 200:
-                    self.log("❌ Failed to login fresh user", "ERROR")
+            post_response = self.admin_session.post(f"{BACKEND_URL}/posts", json=post_data)
+            
+            if post_response.status_code == 200:
+                post = post_response.json()
+                self.test_post_id = post.get('id')
+                self.log("✅ Post created successfully")
+                
+                # Get updated user data
+                updated_response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+                if updated_response.status_code == 200:
+                    updated_user = updated_response.json()
+                    new_streak = updated_user.get('current_streak', 0)
+                    new_points = updated_user.get('total_points', 0)
+                    last_activity = updated_user.get('last_activity_date')
+                    
+                    self.log(f"ℹ️ After post - Streak: {new_streak}, Points: {new_points}, Last Activity: {last_activity}")
+                    
+                    # Verify streak was updated (should be at least 1)
+                    if new_streak >= 1:
+                        self.log("✅ Activity streak updated correctly after post creation")
+                    else:
+                        self.log("❌ Activity streak not updated after post creation", "ERROR")
+                        return False
+                    
+                    # Verify points were awarded (3 points for post creation)
+                    if new_points >= initial_points + 3:
+                        self.log("✅ Points awarded correctly for post creation")
+                    else:
+                        self.log(f"⚠️ Expected at least 3 points increase, got {new_points - initial_points}", "WARNING")
+                    
+                    # Verify last_activity_date is set to today
+                    if last_activity:
+                        from datetime import datetime, timezone
+                        today = datetime.now(timezone.utc).date().isoformat()
+                        activity_date = last_activity[:10]  # Extract date part
+                        if activity_date == today:
+                            self.log("✅ Last activity date set to today")
+                        else:
+                            self.log(f"⚠️ Last activity date mismatch - Expected: {today}, Got: {activity_date}", "WARNING")
+                    
+                    return True
+                else:
+                    self.log("❌ Failed to get updated user data", "ERROR")
                     return False
-            
-            response = fresh_session.get(f"{BACKEND_URL}/users/all")
-            
-            if response.status_code == 403:
-                self.log("✅ Non-admin access correctly rejected (403 Forbidden)")
-                return True
-            elif response.status_code == 401:
-                self.log("✅ Non-admin access correctly rejected (401 Unauthorized)")
-                return True
             else:
-                self.log(f"❌ Non-admin access should be rejected but got: {response.status_code}", "ERROR")
+                self.log(f"❌ Post creation failed: {post_response.status_code} - {post_response.text}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Exception in non-admin GET /api/users/all: {e}", "ERROR")
+            self.log(f"❌ Exception in post creation streak test: {e}", "ERROR")
             return False
     
     def test_promote_user_to_admin(self):
