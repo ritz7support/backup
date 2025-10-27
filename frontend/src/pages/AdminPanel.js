@@ -1016,7 +1016,7 @@ export default function AdminPanel() {
         </div>
 
         {/* Main Content Area */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto ml-64">
           <div className="p-8">
             {/* Ordering Guide */}
             {activeTab === 'overview' && (
