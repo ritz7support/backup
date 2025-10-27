@@ -1331,8 +1331,13 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
         # Use role from invite token
         role = invite_obj.role
     
-    # Check founding member status (first 100 users)
+    # Check if this is the first user - automatically make them admin
     user_count = await db.users.count_documents({})
+    if user_count == 0:
+        role = "admin"
+        logger.info(f"First user registration detected - automatically assigning admin role to {user_data.email}")
+    
+    # Check founding member status (first 100 users)
     is_founding = user_count < 100
     
     # Hash password
