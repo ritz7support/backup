@@ -1904,10 +1904,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "User Model - Activity Streak Fields"
-    - "Activity Streak Tracking Function"
-    - "Streak Tracking Integration in Endpoints"
-    - "Comment Reaction Points Update"
     - "Profile Page - Activity Streak Display"
   stuck_tasks: []
   test_all: false
