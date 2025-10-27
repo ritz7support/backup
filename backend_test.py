@@ -116,41 +116,42 @@ class DailyActivityStreakTester:
         self.log(f"✅ Test users setup complete. Learner ID: {self.test_learner_id}")
         return True
     
-    def test_get_all_users_admin(self):
-        """Test GET /api/users/all with admin user"""
-        self.log("\n🧪 Testing GET /api/users/all (Admin Access)")
+    def test_initial_activity_streak(self):
+        """Test initial activity streak values and first activity"""
+        self.log("\n🧪 Testing Initial Activity Streak Values")
         
         try:
-            response = self.admin_session.get(f"{BACKEND_URL}/users/all")
+            # Get current user info to check initial streak values
+            response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
             
             if response.status_code == 200:
-                users = response.json()
-                self.log(f"✅ GET /api/users/all successful - Retrieved {len(users)} users")
+                user = response.json()
+                self.log("✅ GET /api/auth/me successful")
                 
-                # Verify response structure
-                if users:
-                    user = users[0]
-                    required_fields = ['id', 'email', 'name', 'role']
-                    missing_fields = [field for field in required_fields if field not in user]
-                    
-                    if missing_fields:
-                        self.log(f"⚠️ Missing fields in user response: {missing_fields}", "WARNING")
-                    else:
-                        self.log("✅ User response structure is correct")
-                    
-                    # Check that password_hash is not included
-                    if 'password_hash' in user:
-                        self.log("⚠️ Security issue: password_hash included in response", "WARNING")
-                    else:
-                        self.log("✅ Security check passed: password_hash not in response")
+                # Check if streak fields are present
+                streak_fields = ['last_activity_date', 'current_streak', 'longest_streak']
+                missing_fields = [field for field in streak_fields if field not in user]
+                
+                if missing_fields:
+                    self.log(f"❌ Missing streak fields in user response: {missing_fields}", "ERROR")
+                    return False
+                else:
+                    self.log("✅ All streak fields present in user response")
+                
+                # Log initial values
+                current_streak = user.get('current_streak', 0)
+                longest_streak = user.get('longest_streak', 0)
+                last_activity = user.get('last_activity_date')
+                
+                self.log(f"ℹ️ Initial streak values - Current: {current_streak}, Longest: {longest_streak}, Last Activity: {last_activity}")
                 
                 return True
             else:
-                self.log(f"❌ GET /api/users/all failed: {response.status_code} - {response.text}", "ERROR")
+                self.log(f"❌ GET /api/auth/me failed: {response.status_code} - {response.text}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Exception in GET /api/users/all: {e}", "ERROR")
+            self.log(f"❌ Exception in initial streak test: {e}", "ERROR")
             return False
     
     def test_get_all_users_non_admin(self):
