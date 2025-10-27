@@ -230,56 +230,127 @@ class DailyActivityStreakTester:
             self.log(f"❌ Exception in post creation streak test: {e}", "ERROR")
             return False
     
-    def test_promote_user_to_admin(self):
-        """Test PUT /api/users/{user_id}/promote-to-admin"""
-        self.log("\n🧪 Testing PUT /api/users/{user_id}/promote-to-admin")
+    def test_comment_reaction_points(self):
+        """Test comment reaction points system - 0.5 points to both reactor and author"""
+        self.log("\n🧪 Testing Comment Reaction Points System")
         
-        if not self.test_learner_id:
-            self.log("❌ No test learner ID available", "ERROR")
+        if not self.test_post_id:
+            self.log("❌ No test post available for comment testing", "ERROR")
             return False
         
         try:
-            # First check if user is already admin
-            users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
-            if users_response.status_code == 200:
-                users = users_response.json()
-                test_user = next((u for u in users if u['id'] == self.test_learner_id), None)
-                
-                if test_user and test_user.get('role') == 'admin':
-                    self.log("ℹ️ Test user is already admin - demoting first")
-                    # Demote to learner first
-                    demote_response = self.admin_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/demote-from-admin")
-                    if demote_response.status_code != 200:
-                        self.log("❌ Failed to demote user before promotion test", "ERROR")
-                        return False
+            # Get initial points for admin user
+            admin_initial_response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+            if admin_initial_response.status_code != 200:
+                self.log("❌ Failed to get admin initial points", "ERROR")
+                return False
             
-            response = self.admin_session.put(f"{BACKEND_URL}/users/{self.test_learner_id}/promote-to-admin")
+            admin_initial_points = admin_initial_response.json().get('total_points', 0)
             
-            if response.status_code == 200:
-                self.log("✅ User promoted to admin successfully")
+            # Get initial points for learner user
+            learner_initial_response = self.learner_session.get(f"{BACKEND_URL}/auth/me")
+            if learner_initial_response.status_code != 200:
+                self.log("❌ Failed to get learner initial points", "ERROR")
+                return False
+            
+            learner_initial_points = learner_initial_response.json().get('total_points', 0)
+            
+            self.log(f"ℹ️ Initial points - Admin: {admin_initial_points}, Learner: {learner_initial_points}")
+            
+            # Create a comment as learner user
+            comment_data = {
+                "content": "Test comment for reaction points testing"
+            }
+            
+            comment_response = self.learner_session.post(f"{BACKEND_URL}/posts/{self.test_post_id}/comments", json=comment_data)
+            
+            if comment_response.status_code == 200:
+                comment = comment_response.json()
+                self.test_comment_id = comment.get('id')
+                self.log("✅ Comment created successfully")
                 
-                # Verify the promotion by checking user role
-                users_response = self.admin_session.get(f"{BACKEND_URL}/users/all")
-                if users_response.status_code == 200:
-                    users = users_response.json()
-                    promoted_user = next((u for u in users if u['id'] == self.test_learner_id), None)
+                # React to the comment with admin user (❤️ emoji)
+                react_response = self.admin_session.post(f"{BACKEND_URL}/comments/{self.test_comment_id}/react?emoji=❤️")
+                
+                if react_response.status_code == 200:
+                    self.log("✅ Comment reaction added successfully")
                     
-                    if promoted_user and promoted_user.get('role') == 'admin':
-                        self.log("✅ User promotion verified - role updated to admin")
-                        self.test_admin_id = self.test_learner_id  # Store for demotion test
-                        return True
+                    # Check points after reaction
+                    admin_after_reaction = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+                    learner_after_reaction = self.learner_session.get(f"{BACKEND_URL}/auth/me")
+                    
+                    if admin_after_reaction.status_code == 200 and learner_after_reaction.status_code == 200:
+                        admin_new_points = admin_after_reaction.json().get('total_points', 0)
+                        learner_new_points = learner_after_reaction.json().get('total_points', 0)
+                        
+                        self.log(f"ℹ️ After reaction - Admin: {admin_new_points}, Learner: {learner_new_points}")
+                        
+                        # Verify 0.5 points awarded to reactor (admin)
+                        admin_points_gained = admin_new_points - admin_initial_points
+                        if admin_points_gained >= 0.5:
+                            self.log("✅ Reactor (admin) received 0.5 points for reacting")
+                        else:
+                            self.log(f"❌ Reactor should receive 0.5 points, got {admin_points_gained}", "ERROR")
+                            return False
+                        
+                        # Verify 0.5 points awarded to comment author (learner)
+                        # Note: learner also got 2 points for creating the comment
+                        learner_points_gained = learner_new_points - learner_initial_points
+                        if learner_points_gained >= 2.5:  # 2 for comment + 0.5 for receiving reaction
+                            self.log("✅ Comment author (learner) received 0.5 points for receiving reaction")
+                        else:
+                            self.log(f"❌ Comment author should receive at least 2.5 points (2 for comment + 0.5 for reaction), got {learner_points_gained}", "ERROR")
+                            return False
+                        
+                        # Test unreaction - remove the reaction
+                        unreact_response = self.admin_session.post(f"{BACKEND_URL}/comments/{self.test_comment_id}/react?emoji=❤️")
+                        
+                        if unreact_response.status_code == 200:
+                            self.log("✅ Comment unreaction successful")
+                            
+                            # Check points after unreaction
+                            admin_after_unreaction = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+                            learner_after_unreaction = self.learner_session.get(f"{BACKEND_URL}/auth/me")
+                            
+                            if admin_after_unreaction.status_code == 200 and learner_after_unreaction.status_code == 200:
+                                admin_final_points = admin_after_unreaction.json().get('total_points', 0)
+                                learner_final_points = learner_after_unreaction.json().get('total_points', 0)
+                                
+                                self.log(f"ℹ️ After unreaction - Admin: {admin_final_points}, Learner: {learner_final_points}")
+                                
+                                # Verify 0.5 points deducted from both parties
+                                if admin_final_points == admin_new_points - 0.5:
+                                    self.log("✅ Reactor (admin) lost 0.5 points on unreaction")
+                                else:
+                                    self.log(f"❌ Reactor should lose 0.5 points on unreaction", "ERROR")
+                                    return False
+                                
+                                if learner_final_points == learner_new_points - 0.5:
+                                    self.log("✅ Comment author (learner) lost 0.5 points on unreaction")
+                                else:
+                                    self.log(f"❌ Comment author should lose 0.5 points on unreaction", "ERROR")
+                                    return False
+                                
+                                self.log("✅ Comment reaction points system working correctly")
+                                return True
+                            else:
+                                self.log("❌ Failed to get points after unreaction", "ERROR")
+                                return False
+                        else:
+                            self.log(f"❌ Comment unreaction failed: {unreact_response.status_code}", "ERROR")
+                            return False
                     else:
-                        self.log("⚠️ User promotion not reflected in database", "WARNING")
+                        self.log("❌ Failed to get points after reaction", "ERROR")
                         return False
                 else:
-                    self.log("⚠️ Could not verify promotion", "WARNING")
-                    return True
+                    self.log(f"❌ Comment reaction failed: {react_response.status_code} - {react_response.text}", "ERROR")
+                    return False
             else:
-                self.log(f"❌ User promotion failed: {response.status_code} - {response.text}", "ERROR")
+                self.log(f"❌ Comment creation failed: {comment_response.status_code} - {comment_response.text}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Exception in promote user: {e}", "ERROR")
+            self.log(f"❌ Exception in comment reaction points test: {e}", "ERROR")
             return False
     
     def test_promote_self_admin(self):
