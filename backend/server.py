@@ -2288,10 +2288,13 @@ async def react_to_comment(comment_id: str, emoji: str, user: User = Depends(req
     
     # Award or deduct points based on action
     if is_adding:
-        # Award 1 point to the person reacting
+        # Track activity streak
+        await track_activity_streak(user.id)
+        
+        # Award 0.5 points to the person reacting
         await award_points(
             user_id=user.id,
-            points=1,
+            points=0.5,
             action_type="like_comment",
             related_entity_type="comment",
             related_entity_id=comment_id,
@@ -2299,11 +2302,11 @@ async def react_to_comment(comment_id: str, emoji: str, user: User = Depends(req
             description="Reacted to a comment"
         )
         
-        # Award 1 point to the comment author (if not self-reaction)
+        # Award 0.5 points to the comment author (if not self-reaction)
         if user.id != comment['author_id']:
             await award_points(
                 user_id=comment['author_id'],
-                points=1,
+                points=0.5,
                 action_type="receive_like_comment",
                 related_entity_type="comment",
                 related_entity_id=comment_id,
@@ -2312,17 +2315,17 @@ async def react_to_comment(comment_id: str, emoji: str, user: User = Depends(req
             )
     else:
         # Removing reaction - deduct points
-        # Deduct 1 point from the person who is unreacting
+        # Deduct 0.5 points from the person who is unreacting
         await db.users.update_one(
             {"id": user.id},
-            {"$inc": {"total_points": -1}}
+            {"$inc": {"total_points": -0.5}}
         )
         
-        # Deduct 1 point from comment author (if not self-reaction)
+        # Deduct 0.5 points from comment author (if not self-reaction)
         if user.id != comment['author_id']:
             await db.users.update_one(
                 {"id": comment['author_id']},
-                {"$inc": {"total_points": -1}}
+                {"$inc": {"total_points": -0.5}}
             )
     
     return {"reactions": reactions}
