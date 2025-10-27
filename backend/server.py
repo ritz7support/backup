@@ -2032,6 +2032,7 @@ async def create_post(request: Request, user: User = Depends(require_auth)):
     await db.posts.insert_one(post_dict)
     
     # Award points for creating a post (3 points)
+    await track_activity_streak(user.id)
     await award_points(
         user_id=user.id,
         points=3,
