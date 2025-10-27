@@ -41,7 +41,34 @@ export default function ProfilePage() {
 
   useEffect(() => {
     loadMember();
+    // Load email preferences if viewing own profile
+    if (isOwnProfile) {
+      loadEmailPreferences();
+    }
   }, [userId]);
+
+  const loadEmailPreferences = async () => {
+    try {
+      const { data } = await emailPreferencesAPI.getPreferences();
+      setEmailNotifications(data.email_notifications_enabled);
+    } catch (error) {
+      console.error('Failed to load email preferences:', error);
+    }
+  };
+
+  const toggleEmailNotifications = async () => {
+    setEmailLoading(true);
+    try {
+      const newValue = !emailNotifications;
+      await emailPreferencesAPI.updatePreferences(newValue);
+      setEmailNotifications(newValue);
+      toast.success(newValue ? 'Email notifications enabled' : 'Email notifications disabled');
+    } catch (error) {
+      toast.error('Failed to update email preferences');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
 
   const loadMember = async () => {
     try {
