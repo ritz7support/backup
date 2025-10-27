@@ -547,6 +547,266 @@ async def send_email_notification(to_email: str, subject: str, html_content: str
     """Legacy function - redirects to send_email()"""
     return await send_email(to_email, subject, html_content, check_preferences=False)
 
+
+# ==================== EMAIL TEMPLATES ====================
+
+def get_email_template(template_type: str, **kwargs) -> dict:
+    """
+    Get email subject and HTML content for different email types.
+    Centralized template management for easy updates.
+    
+    Args:
+        template_type: Type of email (welcome, join_approved, join_rejected, streak_7, streak_30, announcement)
+        **kwargs: Template-specific variables
+    
+    Returns:
+        dict: {"subject": str, "html": str}
+    """
+    
+    base_style = """
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #0462CB; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; padding: 12px 24px; background-color: #0462CB; color: white; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+        .footer { text-align: center; color: #8E8E8E; font-size: 12px; margin-top: 20px; }
+    </style>
+    """
+    
+    templates = {
+        "welcome": {
+            "subject": "Welcome to ABCD Community! 🎉",
+            "html": f"""
+            <!DOCTYPE html>
+            <html>
+            <head>{base_style}</head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>Welcome to ABCD!</h1>
+                    </div>
+                    <div class="content">
+                        <h2>Hi {kwargs.get('user_name', 'there')}! 👋</h2>
+                        <p>We're thrilled to have you join the ABCD community. You're now part of a vibrant network of learners, mentors, and innovators.</p>
+                        
+                        <p><strong>Here's what you can do:</strong></p>
+                        <ul>
+                            <li>🎯 Join spaces that interest you</li>
+                            <li>💬 Engage with posts and comments</li>
+                            <li>🔥 Build your activity streak</li>
+                            <li>🏆 Earn points and level up</li>
+                        </ul>
+                        
+                        <p style="text-align: center;">
+                            <a href="{kwargs.get('dashboard_url', '#')}" class="button">Go to Dashboard</a>
+                        </p>
+                        
+                        <p>If you have any questions, feel free to reply to this email.</p>
+                        
+                        <p>Happy learning!<br>
+                        The ABCD Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 ABCD by Ritz7. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+        },
+        
+        "join_approved": {
+            "subject": f"Your request to join {kwargs.get('space_name', 'a space')} was approved! ✅",
+            "html": f"""
+            <!DOCTYPE html>
+            <html>
+            <head>{base_style}</head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>Request Approved!</h1>
+                    </div>
+                    <div class="content">
+                        <h2>Great news, {kwargs.get('user_name', 'there')}! 🎉</h2>
+                        <p>Your request to join <strong>{kwargs.get('space_name', 'the space')}</strong> has been approved.</p>
+                        
+                        <p>You can now:</p>
+                        <ul>
+                            <li>📝 Create posts</li>
+                            <li>💬 Comment on discussions</li>
+                            <li>❤️ React to content</li>
+                            <li>🤝 Connect with members</li>
+                        </ul>
+                        
+                        <p style="text-align: center;">
+                            <a href="{kwargs.get('space_url', '#')}" class="button">Visit Space</a>
+                        </p>
+                        
+                        <p>Welcome aboard!<br>
+                        The ABCD Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 ABCD by Ritz7. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+        },
+        
+        "join_rejected": {
+            "subject": f"Update on your request to join {kwargs.get('space_name', 'a space')}",
+            "html": f"""
+            <!DOCTYPE html>
+            <html>
+            <head>{base_style}</head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>Join Request Update</h1>
+                    </div>
+                    <div class="content">
+                        <h2>Hi {kwargs.get('user_name', 'there')},</h2>
+                        <p>We wanted to let you know that your request to join <strong>{kwargs.get('space_name', 'the space')}</strong> was not approved at this time.</p>
+                        
+                        <p>Don't worry! There are many other amazing spaces in the ABCD community where you can contribute and learn.</p>
+                        
+                        <p style="text-align: center;">
+                            <a href="{kwargs.get('spaces_url', '#')}" class="button">Explore Other Spaces</a>
+                        </p>
+                        
+                        <p>Best regards,<br>
+                        The ABCD Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 ABCD by Ritz7. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+        },
+        
+        "streak_7": {
+            "subject": "🔥 7-Day Activity Streak! You earned bonus points!",
+            "html": f"""
+            <!DOCTYPE html>
+            <html>
+            <head>{base_style}</head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🔥 7-Day Streak!</h1>
+                    </div>
+                    <div class="content">
+                        <h2>Congratulations, {kwargs.get('user_name', 'there')}! 🎉</h2>
+                        <p style="font-size: 18px; text-align: center; background-color: #FEF3C7; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            You've maintained a <strong>7-day activity streak</strong>!<br>
+                            <span style="font-size: 32px; color: #F59E0B;">🔥</span><br>
+                            <strong style="color: #0462CB; font-size: 24px;">+7 Bonus Points</strong>
+                        </p>
+                        
+                        <p>Your consistency is paying off! Keep engaging with the community to maintain your streak and unlock more rewards.</p>
+                        
+                        <p><strong>Next milestone:</strong> 30-day streak = 50 bonus points! 🎯</p>
+                        
+                        <p style="text-align: center;">
+                            <a href="{kwargs.get('profile_url', '#')}" class="button">View Your Profile</a>
+                        </p>
+                        
+                        <p>Keep up the amazing work!<br>
+                        The ABCD Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 ABCD by Ritz7. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+        },
+        
+        "streak_30": {
+            "subject": "🏆 30-Day Activity Streak! Epic achievement!",
+            "html": f"""
+            <!DOCTYPE html>
+            <html>
+            <head>{base_style}</head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>🏆 30-Day Streak!</h1>
+                    </div>
+                    <div class="content">
+                        <h2>INCREDIBLE, {kwargs.get('user_name', 'there')}! 🎊</h2>
+                        <p style="font-size: 18px; text-align: center; background-color: #FEF3C7; padding: 30px; border-radius: 8px; margin: 20px 0;">
+                            You've achieved a <strong>30-day activity streak</strong>!<br>
+                            <span style="font-size: 48px; color: #F59E0B;">🔥🔥🔥</span><br>
+                            <strong style="color: #0462CB; font-size: 28px;">+50 Bonus Points</strong>
+                        </p>
+                        
+                        <p>Your dedication to the ABCD community is outstanding! This is a remarkable achievement that few reach.</p>
+                        
+                        <p><strong>You're an inspiration to the community!</strong> 💪</p>
+                        
+                        <p style="text-align: center;">
+                            <a href="{kwargs.get('profile_url', '#')}" class="button">View Your Profile</a>
+                        </p>
+                        
+                        <p>Phenomenal work!<br>
+                        The ABCD Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 ABCD by Ritz7. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+        },
+        
+        "announcement": {
+            "subject": kwargs.get('announcement_title', 'Important Announcement from ABCD'),
+            "html": f"""
+            <!DOCTYPE html>
+            <html>
+            <head>{base_style}</head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1>📢 Announcement</h1>
+                    </div>
+                    <div class="content">
+                        <h2>{kwargs.get('announcement_title', 'Community Update')}</h2>
+                        <div style="background-color: white; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            {kwargs.get('announcement_content', '')}
+                        </div>
+                        
+                        <p style="text-align: center;">
+                            <a href="{kwargs.get('announcement_url', '#')}" class="button">Learn More</a>
+                        </p>
+                        
+                        <p>Best regards,<br>
+                        The ABCD Team</p>
+                    </div>
+                    <div class="footer">
+                        <p>© 2025 ABCD by Ritz7. All rights reserved.</p>
+                        <p><a href="{kwargs.get('unsubscribe_url', '#')}" style="color: #8E8E8E;">Manage Email Preferences</a></p>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+        }
+    }
+    
+    return templates.get(template_type, {
+        "subject": "Notification from ABCD",
+        "html": f"<p>{kwargs.get('message', 'You have a new notification.')}</p>"
+    })
+
+
 # Notification creation helper
 async def create_notification(
     user_id: str,
