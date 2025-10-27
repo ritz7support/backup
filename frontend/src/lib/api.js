@@ -28,6 +28,12 @@ export const authAPI = {
   removeProfilePicture: () => api.delete('/users/profile-picture'),
 };
 
+// Email Preferences API
+export const emailPreferencesAPI = {
+  getPreferences: () => api.get('/me/email-preferences'),
+  updatePreferences: (enabled) => api.put('/me/email-preferences', { email_notifications_enabled: enabled }),
+};
+
 // Spaces API
 export const spacesAPI = {
   getSpaceGroups: () => api.get('/space-groups'),
