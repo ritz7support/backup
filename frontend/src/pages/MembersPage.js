@@ -148,6 +148,108 @@ export default function MembersPage() {
     setLinkCopied(false);
   };
 
+
+  // Bulk selection handlers
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode);
+    setSelectedMembers(new Set());
+  };
+
+  const toggleMemberSelection = (memberId) => {
+    const newSelection = new Set(selectedMembers);
+    if (newSelection.has(memberId)) {
+      newSelection.delete(memberId);
+    } else {
+      newSelection.add(memberId);
+    }
+    setSelectedMembers(newSelection);
+  };
+
+  const selectAllMembers = () => {
+    if (selectedMembers.size === filteredMembers.length) {
+      setSelectedMembers(new Set());
+    } else {
+      setSelectedMembers(new Set(filteredMembers.map(m => m.id)));
+    }
+  };
+
+  const handleBulkArchive = async () => {
+    if (selectedMembers.size === 0) {
+      toast.error('No members selected');
+      return;
+    }
+
+    if (!window.confirm(`Archive ${selectedMembers.size} member(s)?`)) {
+      return;
+    }
+
+    setBulkActionLoading(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const memberId of selectedMembers) {
+      try {
+        await membersAPI.archiveMember(memberId);
+        successCount++;
+      } catch (error) {
+        failCount++;
+        console.error(`Failed to archive member ${memberId}:`, error);
+      }
+    }
+
+    setBulkActionLoading(false);
+    
+    if (successCount > 0) {
+      toast.success(`Archived ${successCount} member(s)`);
+      loadMembers();
+    }
+    if (failCount > 0) {
+      toast.error(`Failed to archive ${failCount} member(s)`);
+    }
+
+    setSelectedMembers(new Set());
+    setSelectionMode(false);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedMembers.size === 0) {
+      toast.error('No members selected');
+      return;
+    }
+
+    if (!window.confirm(`⚠️ PERMANENTLY DELETE ${selectedMembers.size} member(s)? This cannot be undone!`)) {
+      return;
+    }
+
+    setBulkActionLoading(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const memberId of selectedMembers) {
+      try {
+        await membersAPI.deleteMember(memberId);
+        successCount++;
+      } catch (error) {
+        failCount++;
+        console.error(`Failed to delete member ${memberId}:`, error);
+      }
+    }
+
+    setBulkActionLoading(false);
+    
+    if (successCount > 0) {
+      toast.success(`Deleted ${successCount} member(s)`);
+      loadMembers();
+    }
+    if (failCount > 0) {
+      toast.error(`Failed to delete ${failCount} member(s)`);
+    }
+
+    setSelectedMembers(new Set());
+    setSelectionMode(false);
+  };
+
+
   const filteredMembers = members.filter(member =>
     member.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     member.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
