@@ -351,89 +351,77 @@ class EmailNotificationsTester:
             self.log(f"❌ Exception in email template test: {e}", "ERROR")
             return False
     
-    def test_streak_continuation_logic(self):
-        """Test streak continuation and data storage"""
-        self.log("\n🧪 Testing Streak Continuation Logic and Data Storage")
+    def test_join_request_approval_email(self):
+        """Test join request approval triggers email"""
+        self.log("\n🧪 Testing Join Request Approval Email Trigger")
         
         try:
-            # Get current user data to verify streak fields are properly stored
-            response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+            # First, create a private space if needed
+            if not self.test_space_id:
+                if not self.setup_test_space():
+                    self.log("❌ Failed to setup test space", "ERROR")
+                    return False
             
-            if response.status_code == 200:
-                user = response.json()
+            # Make the space private to require join requests
+            space_update_data = {
+                "name": "Private Test Space",
+                "description": "Private space for join request testing",
+                "visibility": "private"
+            }
+            
+            update_response = self.admin_session.put(f"{BACKEND_URL}/admin/spaces/{self.test_space_id}", json=space_update_data)
+            if update_response.status_code == 200:
+                self.log("✅ Space updated to private visibility")
+            else:
+                self.log(f"⚠️ Failed to update space visibility: {update_response.status_code}", "WARNING")
+            
+            # Submit a join request as the test user
+            if not self.test_user_id:
+                self.log("❌ No test user available for join request", "ERROR")
+                return False
+            
+            join_request_data = {
+                "message": "Please let me join this private space"
+            }
+            
+            join_response = self.test_user_session.post(f"{BACKEND_URL}/spaces/{self.test_space_id}/join-request", json=join_request_data)
+            
+            if join_response.status_code == 200:
+                join_request = join_response.json()
+                self.test_join_request_id = join_request.get('id')
+                self.log("✅ Join request submitted successfully")
+                self.log(f"ℹ️ Join request ID: {self.test_join_request_id}")
                 
-                # Verify all streak fields are present and have valid values
-                last_activity = user.get('last_activity_date')
-                current_streak = user.get('current_streak', 0)
-                longest_streak = user.get('longest_streak', 0)
+                # Approve the join request as admin
+                approve_response = self.admin_session.put(f"{BACKEND_URL}/join-requests/{self.test_join_request_id}/approve")
                 
-                self.log(f"ℹ️ Current streak data - Last Activity: {last_activity}, Current: {current_streak}, Longest: {longest_streak}")
-                
-                # Verify last_activity_date is properly stored (should be today after previous tests)
-                if last_activity:
-                    self.log("✅ Last activity date is properly stored")
-                else:
-                    self.log("⚠️ Last activity date is null - may be expected if no activity yet", "WARNING")
-                
-                # Verify current_streak is a valid number
-                if isinstance(current_streak, (int, float)) and current_streak >= 0:
-                    self.log("✅ Current streak is properly stored as valid number")
-                else:
-                    self.log("❌ Current streak is not a valid number", "ERROR")
-                    return False
-                
-                # Verify longest_streak is a valid number and >= current_streak
-                if isinstance(longest_streak, (int, float)) and longest_streak >= current_streak:
-                    self.log("✅ Longest streak is properly stored and >= current streak")
-                else:
-                    self.log("❌ Longest streak is invalid or less than current streak", "ERROR")
-                    return False
-                
-                # Test that streak increments correctly by creating another activity
-                # (This simulates continuing the streak)
-                comment_data = {
-                    "content": "Another test comment to continue streak"
-                }
-                
-                if self.test_post_id:
-                    comment_response = self.admin_session.post(f"{BACKEND_URL}/posts/{self.test_post_id}/comments", json=comment_data)
+                if approve_response.status_code == 200:
+                    self.log("✅ Join request approved successfully")
+                    self.log("ℹ️ Join approval email should have been triggered (check backend logs for 'Email sent' message)")
                     
-                    if comment_response.status_code == 200:
-                        self.log("✅ Additional activity created successfully")
-                        
-                        # Get updated streak data
-                        updated_response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
-                        if updated_response.status_code == 200:
-                            updated_user = updated_response.json()
-                            new_current_streak = updated_user.get('current_streak', 0)
-                            new_longest_streak = updated_user.get('longest_streak', 0)
-                            
-                            self.log(f"ℹ️ Updated streak data - Current: {new_current_streak}, Longest: {new_longest_streak}")
-                            
-                            # Since we're doing activities on the same day, streak should remain the same
-                            # (streak only increments on different days)
-                            if new_current_streak == current_streak:
-                                self.log("✅ Streak correctly maintained for same-day activities")
-                            else:
-                                self.log("⚠️ Streak changed unexpectedly for same-day activity", "WARNING")
-                            
+                    # Verify the user is now a member of the space
+                    members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
+                    if members_response.status_code == 200:
+                        members = members_response.json()
+                        user_is_member = any(member.get('user_id') == self.test_user_id for member in members)
+                        if user_is_member:
+                            self.log("✅ User successfully added to space after approval")
                             return True
                         else:
-                            self.log("❌ Failed to get updated user data", "ERROR")
+                            self.log("❌ User not found in space members after approval", "ERROR")
                             return False
                     else:
-                        self.log(f"⚠️ Additional activity creation failed: {comment_response.status_code}", "WARNING")
-                        return True  # Still pass the main test
+                        self.log("⚠️ Could not verify space membership, but approval succeeded", "WARNING")
+                        return True
                 else:
-                    self.log("⚠️ No test post available for additional activity", "WARNING")
-                    return True  # Still pass the main test
-                
+                    self.log(f"❌ Join request approval failed: {approve_response.status_code} - {approve_response.text}", "ERROR")
+                    return False
             else:
-                self.log(f"❌ Failed to get user data: {response.status_code} - {response.text}", "ERROR")
+                self.log(f"❌ Join request submission failed: {join_response.status_code} - {join_response.text}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Exception in streak continuation test: {e}", "ERROR")
+            self.log(f"❌ Exception in join request approval test: {e}", "ERROR")
             return False
     
     def run_all_tests(self):
