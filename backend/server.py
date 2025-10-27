@@ -4559,6 +4559,27 @@ async def update_my_messaging_preferences(request: Request, user: User = Depends
     
     return {"status": "success", "allow_messages": allow_messages}
 
+
+@api_router.put("/me/email-preferences")
+async def update_email_preferences(request: Request, user: User = Depends(require_auth)):
+    """Update current user's email notification preferences"""
+    data = await request.json()
+    email_notifications_enabled = data.get("email_notifications_enabled", True)
+    
+    await db.users.update_one(
+        {"id": user.id},
+        {"$set": {"email_notifications_enabled": bool(email_notifications_enabled)}}
+    )
+    
+    return {"status": "success", "email_notifications_enabled": email_notifications_enabled}
+
+@api_router.get("/me/email-preferences")
+async def get_email_preferences(user: User = Depends(require_auth)):
+    """Get current user's email notification preferences"""
+    user_data = await db.users.find_one({"id": user.id}, {"_id": 0, "email_notifications_enabled": 1})
+    return {"email_notifications_enabled": user_data.get("email_notifications_enabled", True)}
+
+
 # Get conversations list
 @api_router.get("/messages/conversations")
 async def get_conversations(user: User = Depends(require_auth)):
