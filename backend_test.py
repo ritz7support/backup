@@ -157,42 +157,79 @@ class EmailNotificationsTester:
             self.log(f"❌ Exception setting up test space: {e}", "ERROR")
             return False
     
-    def test_initial_activity_streak(self):
-        """Test initial activity streak values and first activity"""
-        self.log("\n🧪 Testing Initial Activity Streak Values")
+    def test_email_preferences_endpoints(self):
+        """Test email preferences GET and PUT endpoints"""
+        self.log("\n🧪 Testing Email Preferences API Endpoints")
         
         try:
-            # Get current user info to check initial streak values
-            response = self.admin_session.get(f"{BACKEND_URL}/auth/me")
+            # Test GET /api/me/email-preferences
+            response = self.admin_session.get(f"{BACKEND_URL}/me/email-preferences")
             
             if response.status_code == 200:
-                user = response.json()
-                self.log("✅ GET /api/auth/me successful")
+                preferences = response.json()
+                self.log("✅ GET /api/me/email-preferences successful")
                 
-                # Check if streak fields are present
-                streak_fields = ['last_activity_date', 'current_streak', 'longest_streak']
-                missing_fields = [field for field in streak_fields if field not in user]
-                
-                if missing_fields:
-                    self.log(f"❌ Missing streak fields in user response: {missing_fields}", "ERROR")
-                    return False
+                # Check if email_notifications_enabled field is present
+                if 'email_notifications_enabled' in preferences:
+                    initial_status = preferences['email_notifications_enabled']
+                    self.log(f"ℹ️ Initial email notifications status: {initial_status}")
                 else:
-                    self.log("✅ All streak fields present in user response")
+                    self.log("❌ Missing email_notifications_enabled field in response", "ERROR")
+                    return False
                 
-                # Log initial values
-                current_streak = user.get('current_streak', 0)
-                longest_streak = user.get('longest_streak', 0)
-                last_activity = user.get('last_activity_date')
+                # Test PUT /api/me/email-preferences - disable notifications
+                disable_data = {"email_notifications_enabled": False}
+                put_response = self.admin_session.put(f"{BACKEND_URL}/me/email-preferences", json=disable_data)
                 
-                self.log(f"ℹ️ Initial streak values - Current: {current_streak}, Longest: {longest_streak}, Last Activity: {last_activity}")
+                if put_response.status_code == 200:
+                    self.log("✅ PUT /api/me/email-preferences (disable) successful")
+                    
+                    # Verify the change
+                    verify_response = self.admin_session.get(f"{BACKEND_URL}/me/email-preferences")
+                    if verify_response.status_code == 200:
+                        updated_preferences = verify_response.json()
+                        if updated_preferences.get('email_notifications_enabled') == False:
+                            self.log("✅ Email notifications successfully disabled")
+                        else:
+                            self.log("❌ Email notifications not properly disabled", "ERROR")
+                            return False
+                    else:
+                        self.log("❌ Failed to verify email preferences update", "ERROR")
+                        return False
+                else:
+                    self.log(f"❌ PUT /api/me/email-preferences (disable) failed: {put_response.status_code} - {put_response.text}", "ERROR")
+                    return False
                 
-                return True
+                # Test PUT /api/me/email-preferences - enable notifications
+                enable_data = {"email_notifications_enabled": True}
+                put_response2 = self.admin_session.put(f"{BACKEND_URL}/me/email-preferences", json=enable_data)
+                
+                if put_response2.status_code == 200:
+                    self.log("✅ PUT /api/me/email-preferences (enable) successful")
+                    
+                    # Verify the change
+                    verify_response2 = self.admin_session.get(f"{BACKEND_URL}/me/email-preferences")
+                    if verify_response2.status_code == 200:
+                        final_preferences = verify_response2.json()
+                        if final_preferences.get('email_notifications_enabled') == True:
+                            self.log("✅ Email notifications successfully re-enabled")
+                            return True
+                        else:
+                            self.log("❌ Email notifications not properly re-enabled", "ERROR")
+                            return False
+                    else:
+                        self.log("❌ Failed to verify final email preferences update", "ERROR")
+                        return False
+                else:
+                    self.log(f"❌ PUT /api/me/email-preferences (enable) failed: {put_response2.status_code} - {put_response2.text}", "ERROR")
+                    return False
+                
             else:
-                self.log(f"❌ GET /api/auth/me failed: {response.status_code} - {response.text}", "ERROR")
+                self.log(f"❌ GET /api/me/email-preferences failed: {response.status_code} - {response.text}", "ERROR")
                 return False
                 
         except Exception as e:
-            self.log(f"❌ Exception in initial streak test: {e}", "ERROR")
+            self.log(f"❌ Exception in email preferences test: {e}", "ERROR")
             return False
     
     def test_create_post_streak_update(self):
