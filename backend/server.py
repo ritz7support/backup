@@ -3004,6 +3004,61 @@ async def cleanup_all_users(request: Request):
         }
         
     except HTTPException:
+
+
+@api_router.post("/admin/promote-user-to-admin")
+async def promote_user_to_admin(request: Request):
+    """
+    ONE-TIME ENDPOINT: Promote a specific user to admin
+    Use this when you need to manually create the first admin
+    """
+    try:
+        data = await request.json()
+        email = data.get('email')
+        confirmation = data.get('confirmation')
+        
+        if not email:
+            raise HTTPException(status_code=400, detail="Email is required")
+        
+        if confirmation != "MAKE_ME_ADMIN":
+            raise HTTPException(status_code=400, detail="Invalid confirmation. Required: 'MAKE_ME_ADMIN'")
+        
+        # Find user by email
+        user = await db.users.find_one({"email": email})
+        if not user:
+            raise HTTPException(status_code=404, detail=f"User with email {email} not found")
+        
+        # Check current role
+        current_role = user.get('role', 'learner')
+        if current_role == 'admin':
+            return {
+                "message": f"User {user.get('name')} is already an admin",
+                "email": email,
+                "role": "admin"
+            }
+        
+        # Update to admin
+        await db.users.update_one(
+            {"email": email},
+            {"$set": {"role": "admin"}}
+        )
+        
+        logger.info(f"🔑 User {email} promoted to admin")
+        
+        return {
+            "message": f"✅ User {user.get('name')} promoted to admin successfully",
+            "email": email,
+            "previous_role": current_role,
+            "new_role": "admin",
+            "note": "Please log out and log back in for changes to take effect"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ Error promoting user: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Promotion failed: {str(e)}")
+
         raise
     except Exception as e:
         logger.error(f"❌ CLEANUP: Error during cleanup: {str(e)}")
