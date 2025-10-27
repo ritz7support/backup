@@ -23,11 +23,13 @@ class EmailNotificationsTester:
     def __init__(self):
         self.admin_session = requests.Session()
         self.learner_session = requests.Session()
+        self.test_user_session = requests.Session()
         self.test_learner_id = None
         self.test_admin_id = None
+        self.test_user_id = None
         self.test_space_id = None
-        self.test_post_id = None
-        self.test_comment_id = None
+        self.test_join_request_id = None
+        self.test_user_email = None
         
     def log(self, message, level="INFO"):
         """Log test messages"""
