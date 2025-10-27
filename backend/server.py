@@ -795,6 +795,105 @@ async def award_points(user_id: str, points: int, action_type: str, related_enti
     # Check and update level
     await update_user_level(user_id)
 
+
+async def track_activity_streak(user_id: str):
+    """Track user's daily activity streak and award milestone bonuses"""
+    user = await db.users.find_one({"id": user_id})
+    if not user:
+        return
+    
+    today = datetime.now(timezone.utc).date()
+    last_activity = user.get('last_activity_date')
+    current_streak = user.get('current_streak', 0)
+    longest_streak = user.get('longest_streak', 0)
+    
+    # Convert last_activity to date if it exists
+    if last_activity:
+        if isinstance(last_activity, datetime):
+            last_activity_date = last_activity.date()
+        else:
+            # If stored as string, parse it
+            last_activity_date = datetime.fromisoformat(last_activity.replace('Z', '+00:00')).date()
+    else:
+        last_activity_date = None
+    
+    # If activity already tracked today, do nothing
+    if last_activity_date == today:
+        return
+    
+    # Check if streak continues (yesterday) or breaks
+    if last_activity_date:
+        days_diff = (today - last_activity_date).days
+        
+        if days_diff == 1:
+            # Streak continues
+            new_streak = current_streak + 1
+            
+            # Check for milestone bonuses
+            bonus_points = 0
+            if new_streak == 7:
+                bonus_points = 7
+                await create_notification(
+                    user_id=user_id,
+                    notification_type="streak_milestone",
+                    title="🔥 7-Day Streak!",
+                    message=f"You've earned 7 bonus points for a 7-day activity streak!"
+                )
+            elif new_streak == 30:
+                bonus_points = 50
+                await create_notification(
+                    user_id=user_id,
+                    notification_type="streak_milestone",
+                    title="🔥 30-Day Streak!",
+                    message=f"Amazing! You've earned 50 bonus points for a 30-day activity streak!"
+                )
+            
+            # Award bonus points if milestone reached
+            if bonus_points > 0:
+                await db.users.update_one(
+                    {"id": user_id},
+                    {"$inc": {"total_points": bonus_points}}
+                )
+                await update_user_level(user_id)
+            
+            # Update longest streak if needed
+            new_longest = max(longest_streak, new_streak)
+            
+            await db.users.update_one(
+                {"id": user_id},
+                {
+                    "$set": {
+                        "last_activity_date": today.isoformat(),
+                        "current_streak": new_streak,
+                        "longest_streak": new_longest
+                    }
+                }
+            )
+        else:
+            # Streak broken, reset to 1
+            await db.users.update_one(
+                {"id": user_id},
+                {
+                    "$set": {
+                        "last_activity_date": today.isoformat(),
+                        "current_streak": 1
+                    }
+                }
+            )
+    else:
+        # First activity ever
+        await db.users.update_one(
+            {"id": user_id},
+            {
+                "$set": {
+                    "last_activity_date": today.isoformat(),
+                    "current_streak": 1,
+                    "longest_streak": 1
+                }
+            }
+        )
+
+
 async def update_user_level(user_id: str):
     """Update user's level based on their total points"""
     user = await db.users.find_one({"id": user_id})
