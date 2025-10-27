@@ -1137,8 +1137,13 @@ async def track_activity_streak(user_id: str):
             
             # Check for milestone bonuses
             bonus_points = 0
+            send_milestone_email = False
+            email_template_type = None
+            
             if new_streak == 7:
                 bonus_points = 7
+                send_milestone_email = True
+                email_template_type = "streak_7"
                 await create_notification(
                     user_id=user_id,
                     notification_type="streak_milestone",
@@ -1147,6 +1152,8 @@ async def track_activity_streak(user_id: str):
                 )
             elif new_streak == 30:
                 bonus_points = 50
+                send_milestone_email = True
+                email_template_type = "streak_30"
                 await create_notification(
                     user_id=user_id,
                     notification_type="streak_milestone",
@@ -1161,6 +1168,24 @@ async def track_activity_streak(user_id: str):
                     {"$inc": {"total_points": bonus_points}}
                 )
                 await update_user_level(user_id)
+            
+            # Send email for milestone
+            if send_milestone_email and email_template_type:
+                try:
+                    email_template = get_email_template(
+                        email_template_type,
+                        user_name=user.get('name', 'there'),
+                        profile_url="https://teamspace-app-1.preview.emergentagent.com/profile"
+                    )
+                    await send_email(
+                        to_email=user.get('email'),
+                        subject=email_template["subject"],
+                        html_content=email_template["html"],
+                        user_id=user_id,
+                        check_preferences=True
+                    )
+                except Exception as e:
+                    logger.error(f"Failed to send streak milestone email: {e}")
             
             # Update longest streak if needed
             new_longest = max(longest_streak, new_streak)
