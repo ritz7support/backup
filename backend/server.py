@@ -1407,7 +1407,7 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
         email_template = get_email_template(
             "welcome",
             user_name=user.name,
-            dashboard_url="https://teamspace-app-1.preview.emergentagent.com/dashboard"
+            dashboard_url=f"{os.environ.get('FRONTEND_URL', '')}/dashboard"
         )
         await send_email(
             to_email=user.email,
