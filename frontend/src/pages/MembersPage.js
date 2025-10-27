@@ -8,7 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import Header from '../components/Header';
-import { Search, Grid, List, Loader2, UserPlus, Link2, Copy, Check } from 'lucide-react';
+import { Search, Grid, List, Loader2, UserPlus, Link2, Copy, Check, CheckSquare, Square, Trash2, Archive } from 'lucide-react';
 import { toast } from 'sonner';
 import { Link, useNavigate } from 'react-router-dom';
 import {
