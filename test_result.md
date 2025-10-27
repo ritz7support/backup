@@ -1870,15 +1870,18 @@ backend:
 
   - task: "Comment Reaction Points Update"
     implemented: true
-    working: "NA"
+    working: true
     file: "/app/backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
         comment: "Updated react_to_comment endpoint to award 0.5 points to reactor and 0.5 points to comment author (if not self-reaction). Unreaction deducts 0.5 points from both parties."
+      - working: true
+        agent: "testing"
+        comment: "✅ PASS - Comment Reaction Points Update working perfectly. POST /api/comments/{comment_id}/react correctly awards 0.5 points to both reactor and comment author. Unreaction properly deducts 0.5 points from both parties. Points calculations are accurate and persistent. Fixed PointTransaction model to support float values for fractional points. All reaction/unreaction scenarios tested successfully."
 
 frontend:
   - task: "Profile Page - Activity Streak Display"
