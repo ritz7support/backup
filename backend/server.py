@@ -768,7 +768,7 @@ async def get_effective_block_status(user_id: str, space_id: str) -> dict:
 
 # ==================== POINTS & LEADERBOARD HELPERS ====================
 
-async def award_points(user_id: str, points: int, action_type: str, related_entity_type: str = None, 
+async def award_points(user_id: str, points: float, action_type: str, related_entity_type: str = None, 
                        related_entity_id: str = None, related_user_id: str = None, description: str = None):
     """Award points to a user and create a transaction record"""
     # Create point transaction
