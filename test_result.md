@@ -1815,3 +1815,137 @@ agent_communication:
       ✅ Same behavior for posts and comments: PASS (identical functionality)
       
       **OVERALL RESULT: REACTION POINTS SYSTEM IS FULLY FUNCTIONAL ✅**
+
+user_problem_statement: |
+  Phase 5: Daily Activity Streak & Comment Reaction Points
+  1. Daily Activity Streak - Track user activity streaks, award 7 bonus points for 7 consecutive days, 50 bonus points for 30 consecutive days
+  2. Comment Reaction Points - Award 0.5 points to both reactor and comment author, deduct on unreaction
+  3. Display streak count on user profile
+
+backend:
+  - task: "User Model - Activity Streak Fields"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added last_activity_date, current_streak, longest_streak fields to User model"
+
+  - task: "Activity Streak Tracking Function"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Created track_activity_streak() function that checks daily activity, awards milestone bonuses (7 days = 7 points, 30 days = 50 points), creates notifications for milestones, handles streak continuation and reset logic"
+
+  - task: "Streak Tracking Integration in Endpoints"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Integrated track_activity_streak() calls in create_post, react_to_post, add_comment, react_to_comment endpoints"
+
+  - task: "Comment Reaction Points Update"
+    implemented: true
+    working: "NA"
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Updated react_to_comment endpoint to award 0.5 points to reactor and 0.5 points to comment author (if not self-reaction). Unreaction deducts 0.5 points from both parties."
+
+frontend:
+  - task: "Profile Page - Activity Streak Display"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/ProfilePage.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added Activity Streak section to ProfilePage showing current_streak and longest_streak with visual styling. Displays congratulatory message for streaks >= 7 days."
+
+metadata:
+  created_by: "main_agent"
+  version: "5.0"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "User Model - Activity Streak Fields"
+    - "Activity Streak Tracking Function"
+    - "Streak Tracking Integration in Endpoints"
+    - "Comment Reaction Points Update"
+    - "Profile Page - Activity Streak Display"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: |
+      **Phase 5 Implementation Complete - Daily Activity Streak & Comment Reaction Points:**
+      
+      **Backend Changes:**
+      ✅ User Model Enhanced:
+        - Added last_activity_date (datetime) - tracks last activity
+        - Added current_streak (int) - current consecutive days
+        - Added longest_streak (int) - record streak
+      
+      ✅ Activity Streak Tracking:
+        - Created track_activity_streak() helper function
+        - Detects consecutive daily activity (any point-earning action)
+        - Awards 7 bonus points at 7-day milestone
+        - Awards 50 bonus points at 30-day milestone
+        - Creates notifications for milestone achievements
+        - Resets streak if broken (no activity yesterday)
+      
+      ✅ Streak Integration:
+        - Added to create_post endpoint
+        - Added to react_to_post endpoint
+        - Added to add_comment endpoint
+        - Added to react_to_comment endpoint
+      
+      ✅ Comment Reaction Points:
+        - Changed from 1 point to 0.5 points for reactor
+        - Changed from 1 point to 0.5 points for comment author
+        - Unreaction deducts 0.5 points from both parties
+        - Maintains same behavior pattern as post reactions
+      
+      **Frontend Changes:**
+      ✅ Profile Page - Streak Display:
+        - Added Activity Streak section
+        - Shows current streak and longest streak
+        - Visual styling with fire emoji
+        - Congratulatory message for 7+ day streaks
+        - Only displays if user has streak data
+      
+      **Ready for comprehensive backend testing:**
+      1. Test streak tracking on first activity
+      2. Test streak continuation (consecutive days)
+      3. Test 7-day milestone bonus
+      4. Test 30-day milestone bonus
+      5. Test streak reset on missed day
+      6. Test comment reaction 0.5 point awards
+      7. Test profile streak display
+
