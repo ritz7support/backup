@@ -1317,10 +1317,12 @@ export default function AdminPanel() {
                             <img 
                               src="/team-badge.png" 
                               alt="Team Badge"
-                              className="absolute -bottom-1 -right-1"
+                              className="absolute"
                               style={{
-                                width: '34px',
-                                height: '34px',
+                                bottom: '-2px',
+                                left: '-2px',
+                                width: '55px',
+                                height: '55px',
                                 objectFit: 'contain'
                               }}
                             />
