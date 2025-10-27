@@ -356,35 +356,53 @@ class EmailNotificationsTester:
         self.log("\n🧪 Testing Join Request Approval Email Trigger")
         
         try:
-            # First, create a private space if needed
-            if not self.test_space_id:
-                if not self.setup_test_space():
-                    self.log("❌ Failed to setup test space", "ERROR")
-                    return False
+            # Create a new user specifically for join request testing
+            join_user_session = requests.Session()
+            unique_id = str(uuid.uuid4())[:8]
+            join_user_email = f"jointest{unique_id}@example.com"
             
-            # Make the space private to require join requests
-            space_update_data = {
-                "name": "Private Test Space",
-                "description": "Private space for join request testing",
-                "visibility": "private"
+            join_user_data = {
+                "email": join_user_email,
+                "password": "jointest123",
+                "name": "Join Test User",
+                "role": "learner"
             }
             
-            update_response = self.admin_session.put(f"{BACKEND_URL}/admin/spaces/{self.test_space_id}", json=space_update_data)
-            if update_response.status_code == 200:
-                self.log("✅ Space updated to private visibility")
-            else:
-                self.log(f"⚠️ Failed to update space visibility: {update_response.status_code}", "WARNING")
+            self.log(f"ℹ️ Creating new user for join request: {join_user_email}")
             
-            # Submit a join request as the test user
-            if not self.test_user_id:
-                self.log("❌ No test user available for join request", "ERROR")
+            register_response = join_user_session.post(f"{BACKEND_URL}/auth/register", json=join_user_data)
+            if register_response.status_code != 200:
+                self.log(f"❌ Failed to create join test user: {register_response.status_code} - {register_response.text}", "ERROR")
                 return False
             
-            join_request_data = {
-                "message": "Please let me join this private space"
+            join_user_info = register_response.json()
+            join_user_id = join_user_info.get('user', {}).get('id')
+            self.log(f"✅ Join test user created: {join_user_id}")
+            
+            # Create a new private space for this test
+            private_space_data = {
+                "name": "Private Join Test Space",
+                "description": "Private space for join request email testing",
+                "visibility": "private",
+                "space_type": "post",
+                "allow_member_posts": True
             }
             
-            join_response = self.test_user_session.post(f"{BACKEND_URL}/spaces/{self.test_space_id}/join-request", json=join_request_data)
+            space_response = self.admin_session.post(f"{BACKEND_URL}/admin/spaces", json=private_space_data)
+            if space_response.status_code == 200:
+                private_space = space_response.json()
+                private_space_id = private_space.get('id')
+                self.log(f"✅ Private space created: {private_space_id}")
+            else:
+                self.log(f"❌ Failed to create private space: {space_response.status_code} - {space_response.text}", "ERROR")
+                return False
+            
+            # Submit a join request as the new user
+            join_request_data = {
+                "message": "Please let me join this private space for testing"
+            }
+            
+            join_response = join_user_session.post(f"{BACKEND_URL}/spaces/{private_space_id}/join-request", json=join_request_data)
             
             if join_response.status_code == 200:
                 join_request = join_response.json()
@@ -400,10 +418,10 @@ class EmailNotificationsTester:
                     self.log("ℹ️ Join approval email should have been triggered (check backend logs for 'Email sent' message)")
                     
                     # Verify the user is now a member of the space
-                    members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{self.test_space_id}/members-detailed")
+                    members_response = self.admin_session.get(f"{BACKEND_URL}/spaces/{private_space_id}/members-detailed")
                     if members_response.status_code == 200:
                         members = members_response.json()
-                        user_is_member = any(member.get('user_id') == self.test_user_id for member in members)
+                        user_is_member = any(member.get('user_id') == join_user_id for member in members)
                         if user_is_member:
                             self.log("✅ User successfully added to space after approval")
                             return True
