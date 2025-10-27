@@ -493,15 +493,15 @@ class EmailNotificationsTester:
 
 def main():
     """Main test runner"""
-    tester = DailyActivityStreakTester()
+    tester = EmailNotificationsTester()
     
     # Run all tests by default
     success = tester.run_all_tests()
     if success:
-        print("\n✅ Daily Activity Streak and Comment Reaction Points testing completed successfully")
+        print("\n✅ Email Notifications System testing completed successfully")
         sys.exit(0)
     else:
-        print("\n❌ Daily Activity Streak and Comment Reaction Points testing completed with failures")
+        print("\n❌ Email Notifications System testing completed with failures")
         sys.exit(1)
 
 if __name__ == "__main__":
