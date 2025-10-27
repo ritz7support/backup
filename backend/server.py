@@ -65,6 +65,9 @@ class User(BaseModel):
     current_level: int = 1  # Leaderboard: Current level number
     referral_code: Optional[str] = None  # Unique referral code for this user
     referred_by: Optional[str] = None  # User ID of referrer
+    last_activity_date: Optional[datetime] = None  # Last date user did any point-earning activity
+    current_streak: int = 0  # Current consecutive days of activity
+    longest_streak: int = 0  # Longest streak achieved
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
