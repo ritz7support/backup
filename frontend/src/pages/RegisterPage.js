@@ -185,22 +185,6 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {!inviteToken && (
-              <div>
-                <Label htmlFor="role">I am a...</Label>
-                <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                  <SelectTrigger data-testid="role-select">
-                    <SelectValue placeholder="Select your role" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" sideOffset={5}>
-                    <SelectItem value="learner">Learner</SelectItem>
-                    <SelectItem value="mentor">Mentor</SelectItem>
-                    <SelectItem value="business_owner">Business Owner</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            )}
-
             <Button
               type="submit"
               className="w-full"
