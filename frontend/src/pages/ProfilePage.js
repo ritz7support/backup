@@ -36,6 +36,8 @@ export default function ProfilePage() {
     location: '',
     linkedin: ''
   });
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [emailLoading, setEmailLoading] = useState(false);
 
   useEffect(() => {
     loadMember();
