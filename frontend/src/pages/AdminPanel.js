@@ -917,9 +917,9 @@ export default function AdminPanel() {
       {/* Header */}
       <Header />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Left Sidebar Navigation - Fixed */}
-        <div className="w-64 bg-white border-r flex flex-col h-[calc(100vh-64px)] sticky top-0" style={{ borderColor: '#E5E7EB' }}>
+      <div className="flex" style={{ height: 'calc(100vh - 64px)' }}>
+        {/* Left Sidebar Navigation - Fixed/Floating */}
+        <div className="w-64 bg-white border-r flex flex-col fixed left-0 top-16 bottom-0" style={{ borderColor: '#E5E7EB', height: 'calc(100vh - 64px)' }}>
           <div className="p-6 border-b flex-shrink-0" style={{ borderColor: '#E5E7EB' }}>
             <h1 className="text-xl font-bold" style={{ color: '#011328' }}>Admin Panel</h1>
             <p className="text-sm mt-1" style={{ color: '#8E8E8E' }}>Manage your platform</p>
