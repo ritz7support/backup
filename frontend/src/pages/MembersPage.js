@@ -44,7 +44,9 @@ export default function MembersPage() {
   const loadMembers = async () => {
     try {
       const { data } = await membersAPI.getMembers();
-      setMembers(data);
+      // Sort members alphabetically by name
+      const sortedMembers = data.sort((a, b) => a.name.localeCompare(b.name));
+      setMembers(sortedMembers);
     } catch (error) {
       toast.error('Failed to load members');
     } finally {
