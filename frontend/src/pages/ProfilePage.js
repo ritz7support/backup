@@ -389,6 +389,34 @@ export default function ProfilePage() {
                 )
               )}
 
+              {/* Activity Streak */}
+              {(member.current_streak > 0 || member.longest_streak > 0) && (
+                <div className="mb-6 p-4 rounded-lg border" style={{ borderColor: '#E5E7EB', backgroundColor: '#F9FAFB' }}>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2" style={{ color: '#011328' }}>
+                    🔥 Activity Streak
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm" style={{ color: '#8E8E8E' }}>Current Streak</p>
+                      <p className="text-2xl font-bold" style={{ color: '#0462CB' }}>
+                        {member.current_streak || 0} {member.current_streak === 1 ? 'day' : 'days'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm" style={{ color: '#8E8E8E' }}>Longest Streak</p>
+                      <p className="text-2xl font-bold" style={{ color: '#F59E0B' }}>
+                        {member.longest_streak || 0} {member.longest_streak === 1 ? 'day' : 'days'}
+                      </p>
+                    </div>
+                  </div>
+                  {member.current_streak >= 7 && (
+                    <div className="mt-3 text-sm" style={{ color: '#059669' }}>
+                      🎉 Great job! Keep the streak going!
+                    </div>
+                  )}
+                </div>
+              )}
+
               {member.skills && member.skills.length > 0 && (
                 <div className="mb-6">
                   <h3 className="font-semibold mb-3" style={{ color: '#011328' }}>Skills</h3>
