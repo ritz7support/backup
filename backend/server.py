@@ -61,7 +61,7 @@ class User(BaseModel):
     badges: List[str] = []
     membership_tier: str = "free"  # free, paid
     archived: bool = False
-    total_points: int = 0  # Leaderboard: Total points earned
+    total_points: float = 0  # Leaderboard: Total points earned (supports fractional points)
     current_level: int = 1  # Leaderboard: Current level number
     referral_code: Optional[str] = None  # Unique referral code for this user
     referred_by: Optional[str] = None  # User ID of referrer
