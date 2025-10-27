@@ -268,7 +268,7 @@ class PointTransaction(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     user_id: str
-    points: int  # Points awarded (can be negative for penalties)
+    points: float  # Points awarded (can be negative for penalties, supports fractional points)
     action_type: str  # "like", "comment", "post", "receive_like", "receive_comment", "admin_award"
     related_entity_type: Optional[str] = None  # "post", "comment"
     related_entity_id: Optional[str] = None  # ID of the post/comment
