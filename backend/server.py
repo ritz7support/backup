@@ -2181,6 +2181,7 @@ async def add_comment(post_id: str, request: Request, user: User = Depends(requi
     await db.posts.update_one({"id": post_id}, {"$inc": {"comment_count": 1}})
     
     # Award points for commenting (2 points to commenter)
+    await track_activity_streak(user.id)
     await award_points(
         user_id=user.id,
         points=2,
