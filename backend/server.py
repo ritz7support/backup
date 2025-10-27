@@ -484,23 +484,68 @@ async def check_payment_requirement(user: User) -> None:
 
 
 
-# Email notification helper
-async def send_email_notification(to_email: str, subject: str, html_content: str):
-    """Send email via SendGrid"""
+# Email notification helper - Provider-agnostic interface
+async def send_email(
+    to_email: str,
+    subject: str,
+    html_content: str,
+    user_id: Optional[str] = None,
+    check_preferences: bool = True
+):
+    """
+    Generic email sending function - provider-agnostic interface.
+    Change email provider by modifying only this function.
+    
+    Args:
+        to_email: Recipient email address
+        subject: Email subject
+        html_content: HTML content of email
+        user_id: Optional user ID to check email preferences
+        check_preferences: Whether to check user's email notification preferences
+    
+    Returns:
+        bool: True if email sent successfully, False otherwise
+    """
     try:
-        sender_email = os.environ.get('SENDER_EMAIL', 'noreply@yourdomain.com')
+        # Check user preferences if user_id provided
+        if check_preferences and user_id:
+            user = await db.users.find_one({"id": user_id}, {"_id": 0, "email_notifications_enabled": 1})
+            if user and not user.get('email_notifications_enabled', True):
+                logger.info(f"Email not sent to {to_email}: User has disabled email notifications")
+                return False
+        
+        # === SENDGRID IMPLEMENTATION (Change this section to switch providers) ===
+        from_email = os.environ.get('EMAIL_FROM', 'notify@abcd.ritz7.com')
+        from_name = os.environ.get('EMAIL_FROM_NAME', 'ABCD-by-Ritz7')
+        reply_to = os.environ.get('EMAIL_REPLY_TO', 'abcd@ritz7.com')
+        
         message = Mail(
-            from_email=sender_email,
+            from_email=(from_email, from_name),
             to_emails=to_email,
             subject=subject,
             html_content=html_content
         )
+        message.reply_to = reply_to
+        
         response = sendgrid_client.send(message)
-        logger.info(f"Email sent to {to_email}: {response.status_code}")
-        return response.status_code == 202
+        success = response.status_code == 202
+        # === END SENDGRID IMPLEMENTATION ===
+        
+        if success:
+            logger.info(f"✅ Email sent to {to_email}: {subject}")
+        else:
+            logger.warning(f"⚠️ Email send failed to {to_email}: Status {response.status_code}")
+        
+        return success
+        
     except Exception as e:
-        logger.error(f"Failed to send email to {to_email}: {str(e)}")
+        logger.error(f"❌ Failed to send email to {to_email}: {str(e)}")
         return False
+
+# Legacy function name for backward compatibility
+async def send_email_notification(to_email: str, subject: str, html_content: str):
+    """Legacy function - redirects to send_email()"""
+    return await send_email(to_email, subject, html_content, check_preferences=False)
 
 # Notification creation helper
 async def create_notification(
