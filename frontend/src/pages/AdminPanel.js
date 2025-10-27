@@ -1377,7 +1377,7 @@ export default function AdminPanel() {
                             onClick={() => handleSetTeamMember(u.id, u.name, u.is_team_member)}
                             className={u.is_team_member ? "border-orange-400 text-orange-600 hover:bg-orange-50" : "border-blue-400 text-blue-600 hover:bg-blue-50"}
                           >
-                            {u.is_team_member ? '🎩 Remove Badge' : '🎩 Grant Badge'}
+                            {u.is_team_member ? 'Remove Team Badge' : 'Grant Team Badge'}
                           </Button>
                         )}
                       </div>
