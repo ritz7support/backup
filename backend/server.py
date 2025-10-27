@@ -3004,7 +3004,10 @@ async def cleanup_all_users(request: Request):
         }
         
     except HTTPException:
-
+        raise
+    except Exception as e:
+        logger.error(f"❌ CLEANUP: Error during cleanup: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Cleanup failed: {str(e)}")
 
 @api_router.post("/admin/promote-user-to-admin")
 async def promote_user_to_admin(request: Request):
