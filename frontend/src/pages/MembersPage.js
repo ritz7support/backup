@@ -421,6 +421,59 @@ export default function MembersPage() {
                   </DialogContent>
                 </Dialog>
               )}
+              
+              {/* Bulk Actions (Admin only) */}
+              {user?.role === 'admin' && (
+                <div className="flex gap-2">
+                  {!selectionMode ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={toggleSelectionMode}
+                    >
+                      <CheckSquare className="h-4 w-4 mr-2" />
+                      Select Multiple
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={selectAllMembers}
+                      >
+                        {selectedMembers.size === filteredMembers.length ? 'Deselect All' : 'Select All'}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleBulkArchive}
+                        disabled={selectedMembers.size === 0 || bulkActionLoading}
+                      >
+                        {bulkActionLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Archive className="h-4 w-4 mr-2" />}
+                        Archive ({selectedMembers.size})
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleBulkDelete}
+                        disabled={selectedMembers.size === 0 || bulkActionLoading}
+                        style={{ borderColor: '#EF4444', color: '#EF4444' }}
+                      >
+                        {bulkActionLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                        Delete ({selectedMembers.size})
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={toggleSelectionMode}
+                      >
+                        Cancel
+                      </Button>
+                    </>
+                  )}
+                </div>
+              )}
+              
               <div className="flex gap-2">
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'outline'}
