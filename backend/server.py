@@ -2911,6 +2911,105 @@ async def delete_member(user_id: str, user: User = Depends(require_auth)):
     
     return {"message": f"Member {member.get('name')} permanently deleted"}
 
+
+@api_router.post("/admin/cleanup-all-users")
+async def cleanup_all_users(request: Request):
+    """
+    ONE-TIME CLEANUP ENDPOINT: Delete all users and user-related data
+    Keeps: Spaces, Space Groups, Subscription Tiers, Platform Settings, Levels
+    
+    This endpoint should be called ONCE to clean up test data.
+    Requires a secret confirmation token for safety.
+    """
+    try:
+        data = await request.json()
+        confirmation = data.get('confirmation')
+        
+        # Safety check - require exact confirmation phrase
+        if confirmation != "DELETE_ALL_USERS_PERMANENTLY":
+            raise HTTPException(
+                status_code=400, 
+                detail="Invalid confirmation. Required: 'DELETE_ALL_USERS_PERMANENTLY'"
+            )
+        
+        # Get counts before deletion
+        users_count = await db.users.count_documents({})
+        
+        if users_count == 0:
+            return {
+                "message": "No users to delete",
+                "deleted_counts": {
+                    "users": 0,
+                    "sessions": 0,
+                    "posts": 0,
+                    "comments": 0,
+                    "memberships": 0,
+                    "messages": 0,
+                    "notifications": 0,
+                    "point_transactions": 0,
+                    "join_requests": 0,
+                    "invite_tokens": 0
+                }
+            }
+        
+        logger.info(f"🧹 CLEANUP: Starting deletion of {users_count} users and related data")
+        
+        # Delete all user-related data
+        result_users = await db.users.delete_many({})
+        result_sessions = await db.user_sessions.delete_many({})
+        result_posts = await db.posts.delete_many({})
+        result_comments = await db.comments.delete_many({})
+        result_memberships = await db.space_memberships.delete_many({})
+        result_messages = await db.direct_messages.delete_many({})
+        result_notifications = await db.notifications.delete_many({})
+        result_transactions = await db.point_transactions.delete_many({})
+        result_join_requests = await db.join_requests.delete_many({})
+        result_invites = await db.invite_tokens.delete_many({})
+        result_groups = await db.groups.delete_many({})
+        result_group_messages = await db.group_messages.delete_many({})
+        result_prefs = await db.user_messaging_preferences.delete_many({})
+        
+        # Reset space member counts to 0
+        await db.spaces.update_many({}, {"$set": {"member_count": 0}})
+        
+        deleted_counts = {
+            "users": result_users.deleted_count,
+            "sessions": result_sessions.deleted_count,
+            "posts": result_posts.deleted_count,
+            "comments": result_comments.deleted_count,
+            "memberships": result_memberships.deleted_count,
+            "messages": result_messages.deleted_count,
+            "notifications": result_notifications.deleted_count,
+            "point_transactions": result_transactions.deleted_count,
+            "join_requests": result_join_requests.deleted_count,
+            "invite_tokens": result_invites.deleted_count,
+            "groups": result_groups.deleted_count,
+            "group_messages": result_group_messages.deleted_count,
+            "user_preferences": result_prefs.deleted_count
+        }
+        
+        logger.info(f"✅ CLEANUP: Successfully deleted all user data. Details: {deleted_counts}")
+        
+        return {
+            "message": "✅ All users and user-related data deleted successfully",
+            "deleted_counts": deleted_counts,
+            "preserved": [
+                "Spaces",
+                "Space Groups",
+                "Subscription Tiers",
+                "Platform Settings",
+                "Levels"
+            ],
+            "note": "The next user to register will automatically become admin"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"❌ CLEANUP: Error during cleanup: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Cleanup failed: {str(e)}")
+
+
 # ==================== DM ENDPOINTS ====================
 
 @api_router.get("/dms")
