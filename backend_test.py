@@ -18,17 +18,15 @@ ADMIN_PASSWORD = "admin123"
 LEARNER_EMAIL = "learner@test.com"
 LEARNER_PASSWORD = "learner123"
 
-class Phase2EnhancedUserManagementTester:
+class DailyActivityStreakTester:
     def __init__(self):
         self.admin_session = requests.Session()
         self.learner_session = requests.Session()
         self.test_learner_id = None
         self.test_admin_id = None
         self.test_space_id = None
-        self.test_user_for_blocking_id = None
-        self.test_group_id = None
-        self.razorpay_order_id = None
-        self.stripe_session_id = None
+        self.test_post_id = None
+        self.test_comment_id = None
         
     def log(self, message, level="INFO"):
         """Log test messages"""
