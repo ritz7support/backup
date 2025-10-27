@@ -515,6 +515,45 @@ export default function ProfilePage() {
             <ReferralSection />
           </div>
         )}
+
+        {/* Email Preferences Section (only for own profile) */}
+        {isOwnProfile && !isArchived && (
+          <div className="mt-6 p-6 rounded-lg border" style={{ borderColor: '#E5E7EB', backgroundColor: 'white' }}>
+            <h3 className="font-semibold mb-4 flex items-center gap-2" style={{ color: '#011328' }}>
+              {emailNotifications ? <Bell size={20} /> : <BellOff size={20} />}
+              Email Notifications
+            </h3>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium" style={{ color: '#011328' }}>
+                  Receive email notifications
+                </p>
+                <p className="text-sm mt-1" style={{ color: '#8E8E8E' }}>
+                  Get notified via email for join requests, streaks, and important updates
+                </p>
+              </div>
+              <Button
+                onClick={toggleEmailNotifications}
+                disabled={emailLoading}
+                variant="outline"
+                className="ml-4"
+                style={{
+                  borderColor: emailNotifications ? '#10B981' : '#E5E7EB',
+                  backgroundColor: emailNotifications ? '#D1FAE5' : 'white',
+                  color: emailNotifications ? '#047857' : '#6B7280'
+                }}
+              >
+                {emailLoading ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : emailNotifications ? (
+                  'Enabled'
+                ) : (
+                  'Disabled'
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Archive Confirmation Dialog */}
