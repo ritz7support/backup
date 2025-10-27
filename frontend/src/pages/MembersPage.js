@@ -36,6 +36,11 @@ export default function MembersPage() {
   const [inviteMethod, setInviteMethod] = useState('email'); // 'email' or 'link'
   const [generatedInviteLink, setGeneratedInviteLink] = useState('');
   const [linkCopied, setLinkCopied] = useState(false);
+  
+  // Bulk selection states
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedMembers, setSelectedMembers] = useState(new Set());
+  const [bulkActionLoading, setBulkActionLoading] = useState(false);
 
   useEffect(() => {
     loadMembers();
