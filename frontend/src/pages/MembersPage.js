@@ -378,29 +378,18 @@ export default function MembersPage() {
                             </AvatarFallback>
                           )}
                         </Avatar>
-                        {/* Team Badge - Quarter Circle like LinkedIn */}
+                        {/* Team Badge */}
                         {member.is_team_member && (
-                          <div 
-                            className="absolute -bottom-2 -right-2 flex items-center justify-center"
+                          <img 
+                            src="/team-badge.png" 
+                            alt="Team Badge"
+                            className="absolute -bottom-2 -right-2"
                             style={{
-                              width: '48px',
-                              height: '48px',
-                              borderRadius: '50%',
-                              background: 'linear-gradient(135deg, transparent 50%, #0462CB 50%)',
-                              transform: 'rotate(-45deg)'
+                              width: '50px',
+                              height: '50px',
+                              objectFit: 'contain'
                             }}
-                          >
-                            <span 
-                              className="text-white font-bold text-[9px] tracking-tight"
-                              style={{
-                                transform: 'rotate(45deg) translateY(8px) translateX(8px)',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.5px'
-                              }}
-                            >
-                              Team
-                            </span>
-                          </div>
+                          />
                         )}
                       </div>
                       <h3 className="font-semibold text-lg mb-1" style={{ color: '#011328' }}>{member.name}</h3>
