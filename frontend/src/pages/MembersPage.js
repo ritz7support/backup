@@ -605,12 +605,32 @@ export default function MembersPage() {
                 ) : (
                   <div
                     key={member.id}
-                    className="bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow cursor-pointer"
-                    style={{ borderColor: '#D1D5DB' }}
-                    onClick={() => navigate(`/profile/${member.id}`)}
+                    className="bg-white rounded-xl p-4 shadow-sm border hover:shadow-md transition-shadow cursor-pointer relative"
+                    style={{ 
+                      borderColor: isSelected ? '#0462CB' : '#D1D5DB',
+                      backgroundColor: isSelected ? '#F0F7FF' : 'white'
+                    }}
+                    onClick={() => {
+                      if (selectionMode) {
+                        toggleMemberSelection(member.id);
+                      } else {
+                        navigate(`/profile/${member.id}`);
+                      }
+                    }}
                     data-testid={`member-card-${member.id}`}
                   >
                     <div className="flex items-center gap-4">
+                      {/* Selection Checkbox */}
+                      {selectionMode && (
+                        <div className="flex-shrink-0">
+                          {isSelected ? (
+                            <CheckSquare className="h-6 w-6" style={{ color: '#0462CB' }} />
+                          ) : (
+                            <Square className="h-6 w-6" style={{ color: '#8E8E8E' }} />
+                          )}
+                        </div>
+                      )}
+                      
                       {/* Avatar with Team Badge */}
                       <div className="relative">
                         <Avatar className="h-16 w-16">
