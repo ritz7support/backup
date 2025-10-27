@@ -13,7 +13,7 @@ import os
 import time
 
 # Configuration
-BACKEND_URL = "https://engage-central-2.preview.emergentagent.com/api"
+BACKEND_URL = "https://teamspace-app-1.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@test.com"
 ADMIN_PASSWORD = "admin123"
 LEARNER_EMAIL = "learner@test.com"

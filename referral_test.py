@@ -18,7 +18,7 @@ import os
 import time
 
 # Configuration
-BACKEND_URL = "https://engage-central-2.preview.emergentagent.com/api"
+BACKEND_URL = "https://teamspace-app-1.preview.emergentagent.com/api"
 ADMIN_EMAIL = "admin@test.com"
 ADMIN_PASSWORD = "admin123"
 
@@ -327,7 +327,7 @@ class ReferralProgramTester:
             self.log("Testing INR payment order creation...")
             inr_response = self.admin_session.post(
                 f"{BACKEND_URL}/payments/create-order?tier_id={self.tier_id}&currency=INR",
-                json={"origin_url": "https://engage-central-2.preview.emergentagent.com/"}
+                json={"origin_url": "https://teamspace-app-1.preview.emergentagent.com/"}
             )
             
             if inr_response.status_code == 200:
@@ -361,7 +361,7 @@ class ReferralProgramTester:
             self.log("Testing USD payment order creation...")
             usd_response = self.admin_session.post(
                 f"{BACKEND_URL}/payments/create-order?tier_id={self.tier_id}&currency=USD",
-                json={"origin_url": "https://engage-central-2.preview.emergentagent.com/"}
+                json={"origin_url": "https://teamspace-app-1.preview.emergentagent.com/"}
             )
             
             if usd_response.status_code == 200:
