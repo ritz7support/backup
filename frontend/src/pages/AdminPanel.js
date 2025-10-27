@@ -1307,8 +1307,35 @@ export default function AdminPanel() {
                     {/* User Header */}
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3 flex-1">
-                        <div className="h-12 w-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-lg">
-                          {u.name?.charAt(0) || '?'}
+                        {/* Avatar with Team Badge */}
+                        <div className="relative">
+                          <div className="h-12 w-12 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-lg">
+                            {u.name?.charAt(0) || '?'}
+                          </div>
+                          {/* Team Badge - Quarter Circle like LinkedIn */}
+                          {u.is_team_member && (
+                            <div 
+                              className="absolute -bottom-1 -right-1 flex items-center justify-center"
+                              style={{
+                                width: '32px',
+                                height: '32px',
+                                borderRadius: '50%',
+                                background: 'linear-gradient(135deg, transparent 50%, #0462CB 50%)',
+                                transform: 'rotate(-45deg)'
+                              }}
+                            >
+                              <span 
+                                className="text-white font-bold text-[7px] tracking-tight"
+                                style={{
+                                  transform: 'rotate(45deg) translateY(6px) translateX(6px)',
+                                  textTransform: 'uppercase',
+                                  letterSpacing: '0.5px'
+                                }}
+                              >
+                                Team
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
