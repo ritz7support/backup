@@ -3274,6 +3274,26 @@ async def approve_join_request(request_id: str, user: User = Depends(require_aut
         send_email=False
     )
     
+    # Send approval email
+    try:
+        requester = await db.users.find_one({"id": join_request['user_id']}, {"_id": 0})
+        if requester:
+            email_template = get_email_template(
+                "join_approved",
+                user_name=requester.get('name', 'there'),
+                space_name=space.get('name', 'the space') if space else 'the space',
+                space_url=f"https://teamspace-app-1.preview.emergentagent.com/space/{join_request['space_id']}"
+            )
+            await send_email(
+                to_email=requester.get('email'),
+                subject=email_template["subject"],
+                html_content=email_template["html"],
+                user_id=join_request['user_id'],
+                check_preferences=True
+            )
+    except Exception as e:
+        logger.error(f"Failed to send join approval email: {e}")
+    
     return {"message": "Request approved"}
 
 @api_router.put("/join-requests/{request_id}/reject")
