@@ -3343,7 +3343,7 @@ async def reject_join_request(request_id: str, user: User = Depends(require_auth
                 "join_rejected",
                 user_name=requester.get('name', 'there'),
                 space_name=space.get('name', 'the space') if space else 'the space',
-                spaces_url="https://teamspace-app-1.preview.emergentagent.com/dashboard"
+                spaces_url=f"{os.environ.get('FRONTEND_URL', '')}/dashboard"
             )
             await send_email(
                 to_email=requester.get('email'),
