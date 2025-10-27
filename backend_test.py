@@ -19,7 +19,7 @@ ADMIN_PASSWORD = "admin123"
 LEARNER_EMAIL = "learner@test.com"
 LEARNER_PASSWORD = "learner123"
 
-class DailyActivityStreakTester:
+class EmailNotificationsTester:
     def __init__(self):
         self.admin_session = requests.Session()
         self.learner_session = requests.Session()
