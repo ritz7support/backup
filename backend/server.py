@@ -1377,6 +1377,23 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
         path="/"
     )
     
+    # Send welcome email
+    try:
+        email_template = get_email_template(
+            "welcome",
+            user_name=user.name,
+            dashboard_url="https://teamspace-app-1.preview.emergentagent.com/dashboard"
+        )
+        await send_email(
+            to_email=user.email,
+            subject=email_template["subject"],
+            html_content=email_template["html"],
+            user_id=user.id,
+            check_preferences=False  # Always send welcome email
+        )
+    except Exception as e:
+        logger.error(f"Failed to send welcome email to {user.email}: {e}")
+    
     return {"user": user, "session_token": session_token}
 
 @api_router.post("/auth/login")
