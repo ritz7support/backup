@@ -39,6 +39,9 @@ export default function ProfilePage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [emailLoading, setEmailLoading] = useState(false);
 
+  // Compute derived values
+  const isOwnProfile = currentUser?.id === userId;
+
   useEffect(() => {
     loadMember();
     // Load email preferences if viewing own profile
