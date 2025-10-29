@@ -2504,6 +2504,74 @@ async def react_to_post(post_id: str, emoji: str, user: User = Depends(require_a
     
     return {"reactions": reactions}
 
+
+
+@api_router.put("/spaces/{space_id}/posts/{post_id}/pin")
+async def pin_post(space_id: str, post_id: str, user: User = Depends(require_auth)):
+    """Pin a post in a space (Admin/Manager only). Only one post can be pinned per space."""
+    # Check if user is admin or space manager
+    is_authorized = await is_space_manager_or_admin(user, space_id)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Only admins and space managers can pin posts")
+    
+    # Verify post exists and belongs to this space
+    post = await db.posts.find_one({"id": post_id, "space_id": space_id}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found in this space")
+    
+    # Unpin any currently pinned post in this space
+    await db.posts.update_many(
+        {"space_id": space_id, "is_pinned": True},
+        {"$set": {"is_pinned": False}}
+    )
+    
+    # Pin this post
+    await db.posts.update_one(
+        {"id": post_id},
+        {"$set": {"is_pinned": True}}
+    )
+    
+    # Update space's pinned_post_id
+    await db.spaces.update_one(
+        {"id": space_id},
+        {"$set": {"pinned_post_id": post_id}}
+    )
+    
+    logger.info(f"Post {post_id} pinned in space {space_id} by {user.name}")
+    
+    return {"message": "Post pinned successfully", "post_id": post_id}
+
+@api_router.delete("/spaces/{space_id}/posts/{post_id}/pin")
+async def unpin_post(space_id: str, post_id: str, user: User = Depends(require_auth)):
+    """Unpin a post in a space (Admin/Manager only)"""
+    # Check if user is admin or space manager
+    is_authorized = await is_space_manager_or_admin(user, space_id)
+    if not is_authorized:
+        raise HTTPException(status_code=403, detail="Only admins and space managers can unpin posts")
+    
+    # Verify post exists and belongs to this space
+    post = await db.posts.find_one({"id": post_id, "space_id": space_id}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found in this space")
+    
+    # Unpin the post
+    await db.posts.update_one(
+        {"id": post_id},
+        {"$set": {"is_pinned": False}}
+    )
+    
+    # Clear space's pinned_post_id if this was the pinned post
+    space = await db.spaces.find_one({"id": space_id}, {"_id": 0, "pinned_post_id": 1})
+    if space and space.get('pinned_post_id') == post_id:
+        await db.spaces.update_one(
+            {"id": space_id},
+            {"$set": {"pinned_post_id": None}}
+        )
+    
+    logger.info(f"Post {post_id} unpinned in space {space_id} by {user.name}")
+    
+    return {"message": "Post unpinned successfully", "post_id": post_id}
+
 @api_router.post("/posts/{post_id}/comments")
 async def add_comment(post_id: str, request: Request, user: User = Depends(require_auth)):
     """Add comment to post"""
