@@ -41,6 +41,7 @@ export default function MembersPage() {
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedMembers, setSelectedMembers] = useState(new Set());
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
+  const [bulkActionDialog, setBulkActionDialog] = useState({ open: false, action: null }); // archive or delete
 
   useEffect(() => {
     loadMembers();
