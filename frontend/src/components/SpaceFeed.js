@@ -481,7 +481,8 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
 
 
   const handleDeletePost = async (postId, authorId) => {
-    console.log('Delete clicked:', { postId, authorId, userId: user?.id, isAdmin, isAdminOrManager });
+    const isAdminUser = user?.role === 'admin';
+    console.log('Delete clicked:', { postId, authorId, userId: user?.id, isAdminUser, isAdminOrManager });
     
     if (deletingPost) {
       console.log('Already deleting a post');
@@ -490,7 +491,6 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     
     // Check if user can delete (post author, admin, or space manager)
     const isAuthor = user?.id === authorId;
-    const isAdminUser = user?.role === 'admin';
     const canDelete = isAuthor || isAdminUser || isAdminOrManager;
     
     console.log('Permission check:', { isAuthor, isAdminUser, isAdminOrManager, canDelete });
