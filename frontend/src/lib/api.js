@@ -60,6 +60,9 @@ export const spacesAPI = {
   getSpaceInvites: (spaceId) => api.get(`/spaces/${spaceId}/invites`),
   deactivateInvite: (inviteCode) => api.delete(`/invites/${inviteCode}`),
   joinViaInvite: (inviteCode) => api.post(`/join/${inviteCode}`),
+  // Pin posts
+  pinPost: (spaceId, postId) => api.put(`/spaces/${spaceId}/posts/${postId}/pin`),
+  unpinPost: (spaceId, postId) => api.delete(`/spaces/${spaceId}/posts/${postId}/pin`),
 };
 
 // Events API
