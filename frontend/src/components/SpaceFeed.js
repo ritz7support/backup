@@ -7,7 +7,7 @@ import { Button } from '../components/ui/button';
 import { Dialog, DialogContent } from '../components/ui/dialog';
 import RichTextEditor from '../components/RichTextEditor';
 import CommentEditor from '../components/CommentEditor';
-import { Heart, MessageCircle, Send, Loader2, Sparkles, Crown, Users, X, Maximize2, Bell } from 'lucide-react';
+import { Heart, MessageCircle, Send, Loader2, Sparkles, Crown, Users, X, Maximize2, Bell, Pin, MoreVertical } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 
