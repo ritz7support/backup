@@ -2572,6 +2572,45 @@ async def unpin_post(space_id: str, post_id: str, user: User = Depends(require_a
     
     return {"message": "Post unpinned successfully", "post_id": post_id}
 
+
+
+@api_router.delete("/spaces/{space_id}/posts/{post_id}")
+async def delete_post(space_id: str, post_id: str, user: User = Depends(require_auth)):
+    """Delete a post (Post author, Admin, or Space Manager only)"""
+    # Get the post
+    post = await db.posts.find_one({"id": post_id, "space_id": space_id}, {"_id": 0})
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found in this space")
+    
+    # Check authorization: post author OR admin OR space manager
+    is_author = post['author_id'] == user.id
+    is_admin = user.role == 'admin'
+    is_manager = await is_space_manager_or_admin(user, space_id)
+    
+    if not (is_author or is_admin or is_manager):
+        raise HTTPException(status_code=403, detail="Only the post author, admins, or space managers can delete this post")
+    
+    # Delete all comments associated with this post
+    comments_result = await db.comments.delete_many({"post_id": post_id})
+    
+    # If this post is pinned, unpin it from the space
+    if post.get('is_pinned', False):
+        await db.spaces.update_one(
+            {"id": space_id, "pinned_post_id": post_id},
+            {"$set": {"pinned_post_id": None}}
+        )
+    
+    # Delete the post
+    await db.posts.delete_one({"id": post_id})
+    
+    logger.info(f"Post {post_id} deleted by {user.name} (Author: {is_author}, Admin: {is_admin}, Manager: {is_manager})")
+    
+    return {
+        "message": "Post deleted successfully",
+        "post_id": post_id,
+        "comments_deleted": comments_result.deleted_count
+    }
+
 @api_router.post("/posts/{post_id}/comments")
 async def add_comment(post_id: str, request: Request, user: User = Depends(require_auth)):
     """Add comment to post"""
