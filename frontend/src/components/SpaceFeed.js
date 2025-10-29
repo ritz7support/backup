@@ -1303,6 +1303,50 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
           `}</style>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteConfirmation.open} onOpenChange={(open) => !open && cancelDeletePost()}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div className="rounded-full p-3" style={{ backgroundColor: '#FEE2E2' }}>
+              <Trash2 className="h-8 w-8" style={{ color: '#DC2626' }} />
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2" style={{ color: '#011328' }}>
+                Delete Post?
+              </h3>
+              <p className="text-sm" style={{ color: '#6B7280' }}>
+                Are you sure you want to delete this post? This action cannot be undone and all comments will be permanently removed.
+              </p>
+            </div>
+            <div className="flex gap-3 w-full mt-4">
+              <Button
+                variant="outline"
+                onClick={cancelDeletePost}
+                className="flex-1"
+                disabled={deletingPost}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={confirmDeletePost}
+                disabled={deletingPost}
+                className="flex-1"
+                style={{ backgroundColor: '#DC2626', color: 'white' }}
+              >
+                {deletingPost ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  'Delete Post'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
