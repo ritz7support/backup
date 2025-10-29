@@ -419,6 +419,65 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     }
   };
 
+
+  const togglePostExpanded = (postId) => {
+    setExpandedPosts(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
+  };
+
+  const truncateContent = (content, maxLength = 500) => {
+    // Strip HTML tags for length calculation
+    const textContent = content.replace(/<[^>]*>/g, '');
+    if (textContent.length <= maxLength) {
+      return { content, needsTruncation: false };
+    }
+    
+    // Find a good breaking point (end of sentence or word)
+    let truncateAt = maxLength;
+    const breakPoints = ['. ', '! ', '? ', '\n'];
+    for (const bp of breakPoints) {
+      const lastBreak = textContent.lastIndexOf(bp, maxLength);
+      if (lastBreak > maxLength * 0.7) {
+        truncateAt = lastBreak + bp.length;
+        break;
+      }
+    }
+    
+    // Truncate HTML content smartly
+    const truncated = content.substring(0, truncateAt) + '...';
+    return { content: truncated, needsTruncation: true };
+  };
+
+  const handlePinPost = async (postId, isPinned) => {
+    if (pinningPost) return; // Prevent multiple clicks
+    
+    setPinningPost(postId);
+    try {
+      if (isPinned) {
+        await spacesAPI.unpinPost(spaceId, postId);
+        toast.success('Post unpinned');
+      } else {
+        await spacesAPI.pinPost(spaceId, postId);
+        toast.success('Post pinned to top');
+      }
+      
+      // Refresh posts
+      await loadPosts();
+    } catch (error) {
+      toast.error(isPinned ? 'Failed to unpin post' : 'Failed to pin post');
+    } finally {
+      setPinningPost(null);
+    }
+  };
+
+
   const handleExpandToFullPage = () => {
     if (selectedPost) {
       // Pass space name to PostDetailPage via route state
