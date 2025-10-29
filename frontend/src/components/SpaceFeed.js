@@ -97,6 +97,7 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
   const [pinningPost, setPinningPost] = useState(null); // Track which post is being pinned/unpinned
   const [deletingPost, setDeletingPost] = useState(null); // Track which post is being deleted
   const [isSpaceManager, setIsSpaceManager] = useState(false); // Track if user is space manager
+  const [deleteConfirmation, setDeleteConfirmation] = useState({ open: false, postId: null, authorId: null }); // Confirmation dialog state
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const [pendingRequestId, setPendingRequestId] = useState(null);
   const [joinRequests, setJoinRequests] = useState([]);
