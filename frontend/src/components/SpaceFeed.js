@@ -1084,7 +1084,8 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
                 </button>
               </div>
             </div>
-          ))
+            );
+          })
         )}
         </div>
       )}
