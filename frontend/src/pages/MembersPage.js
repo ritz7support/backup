@@ -687,6 +687,67 @@ export default function MembersPage() {
           )}
         </div>
       </main>
+
+      {/* Bulk Action Confirmation Dialog */}
+      <Dialog open={bulkActionDialog.open} onOpenChange={(open) => !open && setBulkActionDialog({ open: false, action: null })}>
+        <DialogContent className="sm:max-w-md">
+          <div className="flex flex-col items-center gap-4 py-4">
+            <div className="rounded-full p-3" style={{ backgroundColor: bulkActionDialog.action === 'delete' ? '#FEE2E2' : '#FEF3C7' }}>
+              {bulkActionDialog.action === 'delete' ? (
+                <Trash2 className="h-8 w-8" style={{ color: '#DC2626' }} />
+              ) : (
+                <Archive className="h-8 w-8" style={{ color: '#F59E0B' }} />
+              )}
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold mb-2" style={{ color: '#011328' }}>
+                {bulkActionDialog.action === 'delete' ? 'Delete Members?' : 'Archive Members?'}
+              </h3>
+              <p className="text-sm" style={{ color: '#6B7280' }}>
+                {bulkActionDialog.action === 'delete' ? (
+                  <>
+                    Are you sure you want to <strong>permanently delete {selectedMembers.size} member(s)</strong>? 
+                    This action cannot be undone and will remove all their data.
+                  </>
+                ) : (
+                  <>
+                    Are you sure you want to archive {selectedMembers.size} member(s)? 
+                    They will no longer have access to the community.
+                  </>
+                )}
+              </p>
+            </div>
+            <div className="flex gap-3 w-full mt-4">
+              <Button
+                variant="outline"
+                onClick={() => setBulkActionDialog({ open: false, action: null })}
+                className="flex-1"
+                disabled={bulkActionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={executeBulkAction}
+                disabled={bulkActionLoading}
+                className="flex-1"
+                style={{ 
+                  backgroundColor: bulkActionDialog.action === 'delete' ? '#DC2626' : '#F59E0B', 
+                  color: 'white' 
+                }}
+              >
+                {bulkActionLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {bulkActionDialog.action === 'delete' ? 'Deleting...' : 'Archiving...'}
+                  </>
+                ) : (
+                  bulkActionDialog.action === 'delete' ? 'Delete Members' : 'Archive Members'
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
