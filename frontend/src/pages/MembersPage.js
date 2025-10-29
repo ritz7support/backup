@@ -189,36 +189,8 @@ export default function MembersPage() {
       return;
     }
 
-    if (!window.confirm(`Archive ${selectedMembers.size} member(s)?`)) {
-      return;
-    }
-
-    setBulkActionLoading(true);
-    let successCount = 0;
-    let failCount = 0;
-
-    for (const memberId of selectedMembers) {
-      try {
-        await membersAPI.archiveMember(memberId);
-        successCount++;
-      } catch (error) {
-        failCount++;
-        console.error(`Failed to archive member ${memberId}:`, error);
-      }
-    }
-
-    setBulkActionLoading(false);
-    
-    if (successCount > 0) {
-      toast.success(`Archived ${successCount} member(s)`);
-      loadMembers();
-    }
-    if (failCount > 0) {
-      toast.error(`Failed to archive ${failCount} member(s)`);
-    }
-
-    setSelectedMembers(new Set());
-    setSelectionMode(false);
+    // Show custom confirmation dialog
+    setBulkActionDialog({ open: true, action: 'archive' });
   };
 
   const handleBulkDelete = async () => {
@@ -227,32 +199,40 @@ export default function MembersPage() {
       return;
     }
 
-    if (!window.confirm(`⚠️ PERMANENTLY DELETE ${selectedMembers.size} member(s)? This cannot be undone!`)) {
-      return;
-    }
+    // Show custom confirmation dialog
+    setBulkActionDialog({ open: true, action: 'delete' });
+  };
 
+  const executeBulkAction = async () => {
+    const action = bulkActionDialog.action;
+    setBulkActionDialog({ open: false, action: null });
     setBulkActionLoading(true);
+    
     let successCount = 0;
     let failCount = 0;
 
     for (const memberId of selectedMembers) {
       try {
-        await membersAPI.deleteMember(memberId);
+        if (action === 'archive') {
+          await membersAPI.archiveMember(memberId);
+        } else if (action === 'delete') {
+          await membersAPI.deleteMember(memberId);
+        }
         successCount++;
       } catch (error) {
         failCount++;
-        console.error(`Failed to delete member ${memberId}:`, error);
+        console.error(`Failed to ${action} member ${memberId}:`, error);
       }
     }
 
     setBulkActionLoading(false);
     
     if (successCount > 0) {
-      toast.success(`Deleted ${successCount} member(s)`);
+      toast.success(`${action === 'archive' ? 'Archived' : 'Deleted'} ${successCount} member(s)`);
       loadMembers();
     }
     if (failCount > 0) {
-      toast.error(`Failed to delete ${failCount} member(s)`);
+      toast.error(`Failed to ${action} ${failCount} member(s)`);
     }
 
     setSelectedMembers(new Set());
