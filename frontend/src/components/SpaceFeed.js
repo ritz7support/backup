@@ -480,6 +480,45 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
   };
 
 
+  const handleDeletePost = async (postId, authorId) => {
+    if (deletingPost) return; // Prevent multiple clicks
+    
+    // Check if user can delete (post author, admin, or space manager)
+    const isAuthor = user?.id === authorId;
+    const isAdmin = user?.role === 'admin';
+    const canDelete = isAuthor || isAdmin || isAdminOrManager;
+    
+    if (!canDelete) {
+      toast.error('You do not have permission to delete this post');
+      return;
+    }
+    
+    if (!window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      return;
+    }
+    
+    setDeletingPost(postId);
+    try {
+      await postsAPI.deletePost(spaceId, postId);
+      toast.success('Post deleted successfully');
+      
+      // Remove from posts list
+      setPosts(prevPosts => prevPosts.filter(p => p.id !== postId));
+      
+      // Close dialog if this post was open
+      if (selectedPost?.id === postId) {
+        setSelectedPost(null);
+      }
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast.error(error.response?.data?.detail || 'Failed to delete post');
+    } finally {
+      setDeletingPost(null);
+    }
+  };
+
+
+
   const handleExpandToFullPage = () => {
     if (selectedPost) {
       // Pass space name to PostDetailPage via route state
