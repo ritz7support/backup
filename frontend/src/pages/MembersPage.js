@@ -121,6 +121,7 @@ export default function MembersPage() {
 
   const fallbackCopyInviteLink = () => {
     try {
+      console.log('Using fallback copy method');
       // Create temporary textarea
       const textarea = document.createElement('textarea');
       textarea.value = generatedInviteLink;
@@ -134,6 +135,8 @@ export default function MembersPage() {
       // Execute copy command
       const successful = document.execCommand('copy');
       document.body.removeChild(textarea);
+      
+      console.log('Fallback copy result:', successful);
       
       if (successful) {
         setLinkCopied(true);
