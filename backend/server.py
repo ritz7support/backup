@@ -2327,8 +2327,19 @@ async def configure_space(space_id: str, request: Request, user: User = Depends(
 
 @api_router.get("/spaces/{space_id}/posts")
 async def get_space_posts(space_id: str, skip: int = 0, limit: int = 20):
-    """Get posts in a space"""
-    posts = await db.posts.find({"space_id": space_id}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    """Get posts in a space, with pinned posts shown first"""
+    # Get all posts for this space
+    all_posts = await db.posts.find({"space_id": space_id}, {"_id": 0}).sort("created_at", -1).to_list(None)
+    
+    # Separate pinned and regular posts
+    pinned_posts = [p for p in all_posts if p.get('is_pinned', False)]
+    regular_posts = [p for p in all_posts if not p.get('is_pinned', False)]
+    
+    # Combine: pinned first, then regular posts
+    posts = pinned_posts + regular_posts
+    
+    # Apply pagination
+    posts = posts[skip:skip+limit]
     
     # Enrich with author info
     for post in posts:
