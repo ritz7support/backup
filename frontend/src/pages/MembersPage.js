@@ -90,6 +90,8 @@ export default function MembersPage() {
   };
 
   const handleCopyInviteLink = () => {
+    console.log('Copy clicked, generatedInviteLink:', generatedInviteLink);
+    
     if (!generatedInviteLink) {
       toast.error('Please generate a link first');
       return;
@@ -97,17 +99,21 @@ export default function MembersPage() {
     
     // Try modern Clipboard API first
     if (navigator.clipboard && window.isSecureContext) {
+      console.log('Using modern Clipboard API');
       navigator.clipboard.writeText(generatedInviteLink)
         .then(() => {
+          console.log('Copied successfully via Clipboard API');
           setLinkCopied(true);
           toast.success('Link copied to clipboard!');
           setTimeout(() => setLinkCopied(false), 2000);
         })
-        .catch(() => {
+        .catch((err) => {
+          console.error('Clipboard API failed:', err);
           // Fallback to legacy method
           fallbackCopyInviteLink();
         });
     } else {
+      console.log('Clipboard API not available, using fallback');
       // Use fallback method directly
       fallbackCopyInviteLink();
     }
