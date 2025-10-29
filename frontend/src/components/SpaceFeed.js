@@ -1043,24 +1043,46 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
                   </p>
                 </div>
                 
-                {/* Pin/Unpin Button for Admins */}
-                {isAdmin && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handlePinPost(post.id, isPinned)}
-                    disabled={pinningPost === post.id}
-                    className="h-8"
-                  >
-                    {pinningPost === post.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : isPinned ? (
-                      <Pin className="h-4 w-4" style={{ color: '#0462CB' }} />
-                    ) : (
-                      <Pin className="h-4 w-4" style={{ color: '#8E8E8E' }} />
-                    )}
-                  </Button>
-                )}
+                {/* Pin/Delete Buttons for Admins/Managers */}
+                <div className="flex items-center gap-1">
+                  {/* Pin Button - Admin only */}
+                  {isAdmin && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handlePinPost(post.id, isPinned)}
+                      disabled={pinningPost === post.id}
+                      className="h-8"
+                      title={isPinned ? "Unpin post" : "Pin post"}
+                    >
+                      {pinningPost === post.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : isPinned ? (
+                        <Pin className="h-4 w-4" style={{ color: '#0462CB' }} />
+                      ) : (
+                        <Pin className="h-4 w-4" style={{ color: '#8E8E8E' }} />
+                      )}
+                    </Button>
+                  )}
+                  
+                  {/* Delete Button - Author, Admin, or Space Manager */}
+                  {(user?.id === post.author_id || isAdmin || isAdminOrManager) && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleDeletePost(post.id, post.author_id)}
+                      disabled={deletingPost === post.id}
+                      className="h-8"
+                      title="Delete post"
+                    >
+                      {deletingPost === post.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" style={{ color: '#EF4444' }} />
+                      )}
+                    </Button>
+                  )}
+                </div>
               </div>
 
               {/* Post Content */}
