@@ -961,8 +961,22 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
           })
         ) : (
           // Standard Post Mode - Card View
-          posts.map((post) => (
-            <div key={post.id} className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow" style={{ borderColor: '#D1D5DB' }}>
+          posts.map((post) => {
+            const isExpanded = expandedPosts.has(post.id);
+            const { content, needsTruncation } = isExpanded ? { content: post.content, needsTruncation: false } : truncateContent(post.content);
+            const isAdmin = user?.role === 'admin';
+            const isPinned = post.is_pinned || false;
+            
+            return (
+            <div key={post.id} className="bg-white rounded-2xl p-6 shadow-sm border hover:shadow-md transition-shadow relative" style={{ borderColor: isPinned ? '#0462CB' : '#D1D5DB', borderWidth: isPinned ? '2px' : '1px' }}>
+              {/* Pinned Badge */}
+              {isPinned && (
+                <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium" style={{ backgroundColor: '#DBEAFE', color: '#1E40AF' }}>
+                  <Pin className="h-3 w-3" />
+                  Pinned
+                </div>
+              )}
+              
               {/* Post Header */}
               <div className="flex items-start gap-3 mb-4">
                 <Avatar className="h-12 w-12">
@@ -987,14 +1001,53 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
                     {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                   </p>
                 </div>
+                
+                {/* Pin/Unpin Button for Admins */}
+                {isAdmin && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handlePinPost(post.id, isPinned)}
+                    disabled={pinningPost === post.id}
+                    className="h-8"
+                  >
+                    {pinningPost === post.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : isPinned ? (
+                      <Pin className="h-4 w-4" style={{ color: '#0462CB' }} />
+                    ) : (
+                      <Pin className="h-4 w-4" style={{ color: '#8E8E8E' }} />
+                    )}
+                  </Button>
+                )}
               </div>
 
               {/* Post Content */}
               <div 
                 className="mb-4 prose max-w-none post-content" 
                 style={{ color: '#3B3B3B' }}
-                dangerouslySetInnerHTML={{ __html: post.content }}
+                dangerouslySetInnerHTML={{ __html: content }}
               />
+              
+              {/* Show More/Less Button */}
+              {needsTruncation && (
+                <button
+                  onClick={() => togglePostExpanded(post.id)}
+                  className="text-sm font-medium mb-4"
+                  style={{ color: '#0462CB' }}
+                >
+                  Show more
+                </button>
+              )}
+              {isExpanded && (
+                <button
+                  onClick={() => togglePostExpanded(post.id)}
+                  className="text-sm font-medium mb-4"
+                  style={{ color: '#0462CB' }}
+                >
+                  Show less
+                </button>
+              )}
 
               <style jsx>{`
                 .post-content img {
