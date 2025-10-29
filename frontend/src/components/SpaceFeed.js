@@ -481,12 +481,19 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
 
 
   const handleDeletePost = async (postId, authorId) => {
-    if (deletingPost) return; // Prevent multiple clicks
+    console.log('Delete clicked:', { postId, authorId, userId: user?.id, isAdmin, isAdminOrManager });
+    
+    if (deletingPost) {
+      console.log('Already deleting a post');
+      return; // Prevent multiple clicks
+    }
     
     // Check if user can delete (post author, admin, or space manager)
     const isAuthor = user?.id === authorId;
-    const isAdmin = user?.role === 'admin';
-    const canDelete = isAuthor || isAdmin || isAdminOrManager;
+    const isAdminUser = user?.role === 'admin';
+    const canDelete = isAuthor || isAdminUser || isAdminOrManager;
+    
+    console.log('Permission check:', { isAuthor, isAdminUser, isAdminOrManager, canDelete });
     
     if (!canDelete) {
       toast.error('You do not have permission to delete this post');
@@ -494,12 +501,16 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     }
     
     if (!window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
+      console.log('User cancelled deletion');
       return;
     }
     
     setDeletingPost(postId);
+    console.log('Starting deletion...');
+    
     try {
       await postsAPI.deletePost(spaceId, postId);
+      console.log('Post deleted successfully');
       toast.success('Post deleted successfully');
       
       // Remove from posts list
