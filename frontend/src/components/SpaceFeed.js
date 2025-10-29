@@ -501,12 +501,15 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
       return;
     }
     
-    if (!window.confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-      console.log('User cancelled deletion');
-      return;
-    }
+    // Show custom confirmation dialog
+    setDeleteConfirmation({ open: true, postId, authorId });
+  };
+
+  const confirmDeletePost = async () => {
+    const { postId, authorId } = deleteConfirmation;
     
     setDeletingPost(postId);
+    setDeleteConfirmation({ open: false, postId: null, authorId: null });
     console.log('Starting deletion...');
     
     try {
@@ -527,6 +530,10 @@ export default function SpaceFeed({ spaceId, isQAMode = false }) {
     } finally {
       setDeletingPost(null);
     }
+  };
+
+  const cancelDeletePost = () => {
+    setDeleteConfirmation({ open: false, postId: null, authorId: null });
   };
 
 
