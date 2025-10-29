@@ -210,6 +210,7 @@ export const postsAPI = {
   reactToPost: (postId, emoji) => api.post(`/posts/${postId}/react`, null, { params: { emoji } }),
   getComments: (postId) => api.get(`/posts/${postId}/comments`),
   addComment: (postId, content) => api.post(`/posts/${postId}/comments`, { content }),
+  deletePost: (spaceId, postId) => api.delete(`/spaces/${spaceId}/posts/${postId}`),
 };
 
 // Invites API
