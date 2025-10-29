@@ -216,7 +216,6 @@ export default function ProfilePage() {
   }
 
   const isAdmin = currentUser?.role === 'admin';
-  const isOwnProfile = currentUser?.id === userId;
   const isArchived = member?.archived;
 
   return (
