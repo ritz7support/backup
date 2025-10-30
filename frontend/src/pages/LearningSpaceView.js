@@ -4,7 +4,7 @@ import { learningAPI, spacesAPI } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
 import { ChevronDown, ChevronRight, CheckCircle, Circle, Play, Book, MessageSquare, StickyNote, ArrowLeft, ArrowRight } from 'lucide-react';
 import RichTextEditor from '../components/RichTextEditor';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function LearningSpaceView() {
   const { spaceId } = useParams();
