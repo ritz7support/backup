@@ -12,13 +12,31 @@ import EmojiPicker from 'emoji-picker-react';
 export default function RichTextEditor({ content, onChange, placeholder = "Share your thoughts..." }) {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showLinkInput, setShowLinkInput] = useState(false);
+  const [showYoutubeInput, setShowYoutubeInput] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
+  const [youtubeUrl, setYoutubeUrl] = useState('');
   const [uploadedImages, setUploadedImages] = useState([]);
   const fileInputRef = useRef(null);
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: {
+          HTMLAttributes: {
+            class: 'list-disc pl-5 my-2',
+          },
+        },
+        orderedList: {
+          HTMLAttributes: {
+            class: 'list-decimal pl-5 my-2',
+          },
+        },
+        listItem: {
+          HTMLAttributes: {
+            class: 'ml-2',
+          },
+        },
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -33,6 +51,15 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
           style: 'max-width: 100%; height: auto;',
         },
       }),
+      Youtube.configure({
+        controls: true,
+        nocookie: true,
+        width: 640,
+        height: 360,
+        HTMLAttributes: {
+          class: 'rounded-lg my-4',
+        },
+      }),
       Placeholder.configure({
         placeholder,
       }),
@@ -43,7 +70,25 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
     },
     editorProps: {
       attributes: {
-        class: 'prose max-w-none focus:outline-none min-h-[120px] p-4',
+        class: 'prose prose-sm max-w-none focus:outline-none min-h-[120px] p-4',
+      },
+      handlePaste: (view, event) => {
+        const text = event.clipboardData?.getData('text/plain');
+        if (text) {
+          // Check if the pasted text is a YouTube URL
+          const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/;
+          const match = text.match(youtubeRegex);
+          
+          if (match) {
+            event.preventDefault();
+            const videoId = match[4];
+            editor?.commands.setYoutubeVideo({
+              src: `https://www.youtube.com/watch?v=${videoId}`,
+            });
+            return true;
+          }
+        }
+        return false;
       },
     },
   });
