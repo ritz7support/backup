@@ -3090,7 +3090,7 @@ async def create_lesson(
 @api_router.get("/spaces/{space_id}/lessons")
 async def get_space_lessons(
     space_id: str,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Get all lessons for a learning space, grouped by sections"""
     # Verify space exists
@@ -3103,7 +3103,7 @@ async def get_space_lessons(
     lessons = await lessons_cursor.to_list(length=None)
     
     # Get user's progress for all lessons
-    progress_cursor = db.lesson_progress.find({"user_id": user['id']})
+    progress_cursor = db.lesson_progress.find({"user_id": user.id})
     progress_map = {p['lesson_id']: p async for p in progress_cursor}
     
     # Attach progress to each lesson
