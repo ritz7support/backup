@@ -20,6 +20,7 @@ export const authAPI = {
     return api.post('/auth/register', userData, { params });
   },
   login: (data) => api.post('/auth/login', data),
+  googleLogin: (token) => api.post('/auth/google', { token }),
   googleAuth: (redirectUrl) => api.get('/auth/google', { params: { redirect_url: redirectUrl } }),
   processSession: (sessionId) => api.post('/auth/session', {}, { headers: { 'X-Session-ID': sessionId } }),
   getMe: () => api.get('/auth/me'),
