@@ -668,6 +668,125 @@ export default function LearningSpaceView() {
           </div>
         )}
       </div>
+      
+      {/* Lesson Form Modal */}
+      {showLessonForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold">
+                {editingLesson ? 'Edit Lesson' : 'Create New Lesson'}
+              </h2>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              {/* Section Name */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Section Name (optional)</label>
+                <input
+                  type="text"
+                  value={lessonForm.section_name}
+                  onChange={(e) => setLessonForm({ ...lessonForm, section_name: e.target.value })}
+                  placeholder="e.g., Getting Started, Advanced Topics"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">Group lessons into sections for better organization</p>
+              </div>
+
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Lesson Title *</label>
+                <input
+                  type="text"
+                  value={lessonForm.title}
+                  onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })}
+                  placeholder="e.g., Introduction to React Hooks"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Description (optional)</label>
+                <textarea
+                  value={lessonForm.description}
+                  onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })}
+                  placeholder="Brief description of what students will learn"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
+                />
+              </div>
+
+              {/* YouTube URL */}
+              <div>
+                <label className="block text-sm font-medium mb-1">YouTube Video URL (optional)</label>
+                <input
+                  type="url"
+                  value={lessonForm.video_url}
+                  onChange={(e) => setLessonForm({ ...lessonForm, video_url: e.target.value })}
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Duration */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Duration (minutes, optional)</label>
+                <input
+                  type="number"
+                  value={lessonForm.duration || ''}
+                  onChange={(e) => setLessonForm({ ...lessonForm, duration: e.target.value ? parseInt(e.target.value) : null })}
+                  placeholder="e.g., 15"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min="1"
+                />
+              </div>
+
+              {/* Order */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Order</label>
+                <input
+                  type="number"
+                  value={lessonForm.order}
+                  onChange={(e) => setLessonForm({ ...lessonForm, order: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min="0"
+                />
+                <p className="text-xs text-gray-500 mt-1">Determines the lesson order (0 = first)</p>
+              </div>
+
+              {/* Content */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Lesson Content (optional)</label>
+                <RichTextEditor
+                  content={lessonForm.content}
+                  onChange={(content) => setLessonForm({ ...lessonForm, content })}
+                  placeholder="Add lesson content, notes, or instructions..."
+                />
+              </div>
+            </div>
+
+            {/* Form Actions */}
+            <div className="p-6 border-t border-gray-200 flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowLessonForm(false);
+                  setEditingLesson(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveLesson}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                {editingLesson ? 'Update Lesson' : 'Create Lesson'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
