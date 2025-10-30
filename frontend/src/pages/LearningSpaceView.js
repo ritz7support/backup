@@ -383,25 +383,55 @@ export default function LearningSpaceView() {
               {!collapsedSections[sectionName] && (
                 <div>
                   {sectionLessons.map((lesson) => (
-                    <button
+                    <div
                       key={lesson.id}
-                      onClick={() => handleLessonClick(lesson)}
-                      className={`w-full px-4 py-3 pl-8 flex items-start gap-3 hover:bg-gray-50 border-l-2 ${
+                      className={`group relative border-l-2 ${
                         selectedLesson?.id === lesson.id ? 'bg-blue-50 border-blue-600' : 'border-transparent'
                       }`}
                     >
-                      {lesson.completed ? (
-                        <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                      ) : (
-                        <Circle className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
-                      )}
-                      <div className="flex-1 text-left">
-                        <div className="text-sm font-medium">{lesson.title}</div>
-                        {lesson.duration && (
-                          <div className="text-xs text-gray-500">{lesson.duration} min</div>
+                      <button
+                        onClick={() => handleLessonClick(lesson)}
+                        className="w-full px-4 py-3 pl-8 flex items-start gap-3 hover:bg-gray-50"
+                      >
+                        {lesson.completed ? (
+                          <CheckCircle className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        ) : (
+                          <Circle className="h-5 w-5 text-gray-400 flex-shrink-0 mt-0.5" />
                         )}
-                      </div>
-                    </button>
+                        <div className="flex-1 text-left">
+                          <div className="text-sm font-medium">{lesson.title}</div>
+                          {lesson.duration && (
+                            <div className="text-xs text-gray-500">{lesson.duration} min</div>
+                          )}
+                        </div>
+                      </button>
+                      
+                      {/* Admin Controls */}
+                      {isAdmin && showAdminPanel && (
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEditLesson(lesson);
+                            }}
+                            className="p-1.5 bg-white hover:bg-blue-50 rounded border border-gray-200"
+                            title="Edit lesson"
+                          >
+                            <Edit className="h-3.5 w-3.5 text-blue-600" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteLesson(lesson.id);
+                            }}
+                            className="p-1.5 bg-white hover:bg-red-50 rounded border border-gray-200"
+                            title="Delete lesson"
+                          >
+                            <Trash2 className="h-3.5 w-3.5 text-red-600" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
