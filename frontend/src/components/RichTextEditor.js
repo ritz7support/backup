@@ -3,8 +3,9 @@ import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Image from '@tiptap/extension-image';
 import Placeholder from '@tiptap/extension-placeholder';
+import Youtube from '@tiptap/extension-youtube';
 import { Button } from './ui/button';
-import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Smile, X } from 'lucide-react';
+import { Bold, Italic, List, ListOrdered, Link as LinkIcon, Image as ImageIcon, Smile, X, Video } from 'lucide-react';
 import { useState, useRef } from 'react';
 import EmojiPicker from 'emoji-picker-react';
 
