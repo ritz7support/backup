@@ -291,6 +291,34 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
               </div>
             )}
           </div>
+          <div className="relative">
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={() => setShowYoutubeInput(!showYoutubeInput)}
+              title="Add YouTube Video"
+            >
+              <Video className="h-4 w-4" />
+            </Button>
+            {showYoutubeInput && (
+              <div className="absolute bottom-full left-0 mb-1 p-2 bg-white border rounded-lg shadow-lg z-10 flex gap-2" style={{ minWidth: '300px' }}>
+                <input
+                  type="url"
+                  placeholder="Enter YouTube URL..."
+                  value={youtubeUrl}
+                  onChange={(e) => setYoutubeUrl(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAddYoutube()}
+                  className="flex-1 px-2 py-1 border rounded text-sm"
+                  style={{ borderColor: '#D1D5DB' }}
+                />
+                <Button type="button" size="sm" onClick={handleAddYoutube}>
+                  Add
+                </Button>
+              </div>
+            )}
+          </div>
+          <div className="w-px h-6 bg-gray-300 mx-1" />
           <Button
             type="button"
             size="sm"
