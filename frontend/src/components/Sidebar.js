@@ -61,11 +61,14 @@ export default function Sidebar({ spaceGroups, spaces }) {
     const isSecretMember = space.visibility === 'secret' && space.is_member;
     const isPublicNotMember = space.visibility === 'public' && !space.is_member;
     const isPublicMember = space.visibility === 'public' && space.is_member;
+    
+    // Determine the correct route based on space type
+    const spaceRoute = space.space_type === 'learning' ? `/learning/${space.id}` : `/space/${space.id}`;
 
     return (
       <Link
         key={space.id}
-        to={isLocked ? '/pricing' : `/space/${space.id}`}
+        to={isLocked ? '/pricing' : spaceRoute}
         className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
           isActive
             ? 'text-white font-medium'
