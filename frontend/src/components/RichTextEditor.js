@@ -122,6 +122,24 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
     setShowEmojiPicker(false);
   };
 
+  const handleAddYoutube = () => {
+    if (youtubeUrl) {
+      // Extract video ID from various YouTube URL formats
+      const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/;
+      const match = youtubeUrl.match(youtubeRegex);
+      
+      if (match) {
+        editor?.commands.setYoutubeVideo({
+          src: youtubeUrl,
+        });
+        setYoutubeUrl('');
+        setShowYoutubeInput(false);
+      } else {
+        alert('Please enter a valid YouTube URL');
+      }
+    }
+  };
+
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
