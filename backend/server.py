@@ -259,6 +259,43 @@ class SpaceInvite(BaseModel):
     expires_at: Optional[datetime] = None  # Optional expiry
 
 
+# ==================== LEARNING SPACE MODELS ====================
+
+class Lesson(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    space_id: str
+    section_name: Optional[str] = None  # Optional grouping like "Starter Kit", "Base Camp Materials"
+    title: str
+    description: Optional[str] = None
+    video_url: Optional[str] = None  # YouTube URL
+    content: Optional[str] = None  # Rich text content (HTML)
+    order: int = 0  # Order within the space/section
+    duration: Optional[int] = None  # Duration in minutes (optional)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LessonProgress(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    lesson_id: str
+    completed: bool = False
+    watch_percentage: float = 0.0  # 0-100, for video tracking
+    last_watched_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+class LessonNote(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str
+    lesson_id: str
+    note_content: str  # Private notes
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
 # ==================== LEADERBOARD MODELS ====================
 
 class Level(BaseModel):
