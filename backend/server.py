@@ -3206,7 +3206,7 @@ async def update_lesson_progress(
         raise HTTPException(status_code=404, detail="Lesson not found")
     
     # Get or create progress record
-    progress = await db.lesson_progress.find_one({"user_id": user['id'], "lesson_id": lesson_id})
+    progress = await db.lesson_progress.find_one({"user_id": user.id, "lesson_id": lesson_id})
     
     completed = progress_data.get('completed', False)
     watch_percentage = progress_data.get('watch_percentage', 0.0)
@@ -3232,13 +3232,13 @@ async def update_lesson_progress(
                 update_data['completed_at'] = now
         
         await db.lesson_progress.update_one(
-            {"user_id": user['id'], "lesson_id": lesson_id},
+            {"user_id": user.id, "lesson_id": lesson_id},
             {"$set": update_data}
         )
     else:
         # Create new progress record
         new_progress = LessonProgress(
-            user_id=user['id'],
+            user_id=user.id,
             lesson_id=lesson_id,
             completed=completed,
             watch_percentage=watch_percentage,
@@ -3267,7 +3267,7 @@ async def get_my_progress(
     
     # Get user's completed lessons
     completed_count = await db.lesson_progress.count_documents({
-        "user_id": user['id'],
+        "user_id": user.id,
         "completed": True,
         "lesson_id": {"$in": [
             lesson['id'] async for lesson in db.lessons.find({"space_id": space_id}, {"id": 1})
