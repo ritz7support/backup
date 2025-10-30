@@ -3288,7 +3288,7 @@ async def get_lesson_notes(
     user: User = Depends(require_auth)
 ):
     """Get user's notes for a lesson"""
-    notes_cursor = db.lesson_notes.find({"user_id": user['id'], "lesson_id": lesson_id})
+    notes_cursor = db.lesson_notes.find({"user_id": user.id, "lesson_id": lesson_id})
     notes = await notes_cursor.to_list(length=None)
     
     for note in notes:
@@ -3310,7 +3310,7 @@ async def create_lesson_note(
     
     # Create note
     note = LessonNote(
-        user_id=user['id'],
+        user_id=user.id,
         lesson_id=lesson_id,
         note_content=note_data['note_content']
     )
@@ -3327,7 +3327,7 @@ async def update_lesson_note(
 ):
     """Update a lesson note"""
     result = await db.lesson_notes.update_one(
-        {"id": note_id, "user_id": user['id'], "lesson_id": lesson_id},
+        {"id": note_id, "user_id": user.id, "lesson_id": lesson_id},
         {"$set": {
             "note_content": note_data['note_content'],
             "updated_at": datetime.now(timezone.utc)
@@ -3347,7 +3347,7 @@ async def delete_lesson_note(
 ):
     """Delete a lesson note"""
     result = await db.lesson_notes.delete_one(
-        {"id": note_id, "user_id": user['id'], "lesson_id": lesson_id}
+        {"id": note_id, "user_id": user.id, "lesson_id": lesson_id}
     )
     
     if result.deleted_count == 0:
@@ -3401,7 +3401,7 @@ async def add_lesson_comment(
     # Create comment
     comment = Comment(
         lesson_id=lesson_id,
-        author_id=user['id'],
+        author_id=user.id,
         content=comment_data['content'],
         parent_comment_id=comment_data.get('parent_comment_id')
     )
@@ -3411,9 +3411,9 @@ async def add_lesson_comment(
     # Enrich with author details
     comment_dict = comment.model_dump()
     comment_dict['author'] = {
-        "id": user['id'],
-        "name": user['name'],
-        "email": user['email']
+        "id": user.id,
+        "name": user.name,
+        "email": user.email
     }
     comment_dict['replies'] = []
     
