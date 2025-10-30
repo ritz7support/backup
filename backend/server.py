@@ -1492,6 +1492,192 @@ async def login(credentials: UserLogin, response: Response):
     return {"user": user, "session_token": session_token}
 
 @api_router.get("/auth/google")
+
+
+@api_router.post("/auth/google")
+async def google_login(request: Request, response: Response):
+    """Handle Google OAuth login"""
+    try:
+        data = await request.json()
+        google_token = data.get('token')
+        
+        if not google_token:
+            raise HTTPException(status_code=400, detail="Google token required")
+        
+        logger.info("Processing Google OAuth login")
+        
+        # Verify Google token
+        try:
+            idinfo = id_token.verify_oauth2_token(
+                google_token,
+                google_requests.Request(),
+                os.environ.get('GOOGLE_CLIENT_ID')
+            )
+            
+            # Verify token is from correct app
+            if idinfo['aud'] != os.environ.get('GOOGLE_CLIENT_ID'):
+                raise ValueError('Invalid token audience')
+            
+            logger.info(f"Google token verified for {idinfo.get('email')}")
+            
+        except Exception as e:
+            logger.error(f"Google token verification failed: {e}")
+            raise HTTPException(status_code=401, detail="Invalid Google token")
+        
+        # Extract user info from Google
+        email = idinfo.get('email')
+        name = idinfo.get('name', email.split('@')[0])
+        picture = idinfo.get('picture', '')
+        google_id = idinfo.get('sub')
+        
+        # Check if user exists
+        user_doc = await db.users.find_one({"email": email})
+        
+        if user_doc:
+            # Existing user - just login
+            user_id = user_doc['id']
+            logger.info(f"Existing user logging in: {email}")
+            
+            # Check if user is archived
+            if user_doc.get('archived', False):
+                raise HTTPException(status_code=403, detail="Account has been archived. Please contact support.")
+        else:
+            # New user - create account
+            logger.info(f"Creating new user from Google: {email}")
+            
+            # Check if this is the first user
+            user_count = await db.users.count_documents({})
+            role = "admin" if user_count == 0 else "learner"
+            
+            if user_count == 0:
+                logger.info(f"First user registration - automatically assigning admin role to {email}")
+            
+            # Check founding member status (first 100 users)
+            is_founding = user_count < 100
+            
+            # Create new user
+            user_id = str(uuid.uuid4())
+            referral_code = await get_or_create_referral_code(user_id)
+            
+            user = User(
+                id=user_id,
+                email=email,
+                name=name,
+                picture=picture,
+                role=role,
+                skills=[],
+                interests=[],
+                badges=["🎉 Founding 100"] if is_founding else [],
+                bio="",
+                linkedin="",
+                total_points=0,
+                referral_code=referral_code,
+                google_id=google_id
+            )
+            
+            user_dict = user.model_dump()
+            user_dict['created_at'] = user_dict['created_at'].isoformat()
+            await db.users.insert_one(user_dict)
+            
+            # Auto-join auto_join spaces
+            auto_join_spaces = await db.spaces.find({"auto_join": True}, {"_id": 0}).to_list(100)
+            for space in auto_join_spaces:
+                membership = SpaceMembership(
+                    space_id=space['id'],
+                    user_id=user_id,
+                    role='member'
+                )
+                membership_dict = membership.model_dump()
+                membership_dict['joined_at'] = membership_dict['joined_at'].isoformat()
+                await db.space_memberships.insert_one(membership_dict)
+                
+                # Award 1 point for joining a space
+                await award_points(
+                    user_id=user_id,
+                    points=1,
+                    action_type="join_space",
+                    related_entity_type="space",
+                    related_entity_id=space['id'],
+                    description=f"Joined {space.get('name', 'space')}"
+                )
+                
+                # Update space member count
+                await db.spaces.update_one(
+                    {"id": space['id']},
+                    {"$inc": {"member_count": 1}}
+                )
+            
+            # Award completion profile points
+            await award_points(
+                user_id=user_id,
+                points=5,
+                action_type="complete_profile",
+                related_entity_type="user",
+                related_entity_id=user_id,
+                description="Completed profile setup"
+            )
+            
+            logger.info(f"New user {email} created successfully with ID {user_id}")
+            
+            # Send welcome email (don't fail if this fails)
+            try:
+                email_template = get_email_template(
+                    "welcome",
+                    user_name=name,
+                    dashboard_url=f"{os.environ.get('FRONTEND_URL', '')}/dashboard"
+                )
+                await send_email(
+                    to_email=email,
+                    subject=email_template["subject"],
+                    html_content=email_template["html"],
+                    user_id=user_id,
+                    check_preferences=False
+                )
+                logger.info(f"Welcome email sent to {email}")
+            except Exception as e:
+                logger.error(f"Failed to send welcome email: {e}")
+        
+        # Create session for both new and existing users
+        session_token = str(uuid.uuid4())
+        expires_at = datetime.now(timezone.utc) + timedelta(days=7)
+        session = UserSession(
+            user_id=user_id,
+            session_token=session_token,
+            expires_at=expires_at
+        )
+        session_dict = session.model_dump()
+        session_dict['created_at'] = session_dict['created_at'].isoformat()
+        session_dict['expires_at'] = session_dict['expires_at'].isoformat()
+        await db.user_sessions.insert_one(session_dict)
+        
+        # Set cookie
+        response.set_cookie(
+            key="session_token",
+            value=session_token,
+            httponly=True,
+            secure=True,
+            samesite="none",
+            max_age=7*24*60*60,
+            path="/"
+        )
+        
+        # Get full user data
+        user_doc = await db.users.find_one({"id": user_id}, {"_id": 0})
+        
+        logger.info(f"Google login successful for {email}")
+        
+        return {
+            "user": user_doc,
+            "session_token": session_token,
+            "message": "Login successful"
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Google login error: {e}")
+        raise HTTPException(status_code=500, detail="Google login failed")
+
 async def google_auth(redirect_url: str):
     """Redirect to Google OAuth"""
     auth_url = f"https://auth.emergentagent.com/?redirect={redirect_url}"
