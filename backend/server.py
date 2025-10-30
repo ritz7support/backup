@@ -215,7 +215,7 @@ class Space(BaseModel):
     requires_payment: bool = False
     subscription_tier_id: Optional[str] = None  # Link to subscription tier if requires_payment=True
     auto_join: bool = False  # Auto-join users when they register
-    space_type: str = "post"  # post, qa, announcement, resource, event
+    space_type: str = "post"  # post, qa, announcement, resource, event, learning
     pinned_post_id: Optional[str] = None  # ID of the pinned post in this space
     allow_member_posts: bool = True  # If False, only admins/managers can create posts
     welcome_title: Optional[str] = None  # Custom welcome title (defaults to "Welcome to {space name}!")
