@@ -2029,6 +2029,7 @@ export default function AdminPanel() {
                     <SelectItem value="announcement">📢 Announcement - Admin updates only</SelectItem>
                     <SelectItem value="resource">📚 Resource - Shared resources/links</SelectItem>
                     <SelectItem value="event">📅 Event - Event listings</SelectItem>
+                    <SelectItem value="learning">🎓 Learning - Course/Chapter based content</SelectItem>
                   </SelectContent>
                 </Select>
                 <p className="text-xs mt-1" style={{ color: '#8E8E8E' }}>
@@ -2037,6 +2038,7 @@ export default function AdminPanel() {
                   {spaceForm.space_type === 'announcement' && 'One-way communication for important updates'}
                   {spaceForm.space_type === 'resource' && 'Curated collection of resources and links'}
                   {spaceForm.space_type === 'event' && 'Event calendar and RSVP management'}
+                  {spaceForm.space_type === 'learning' && 'Structured learning with lessons, videos, progress tracking, and notes'}
                 </p>
               </div>
 
