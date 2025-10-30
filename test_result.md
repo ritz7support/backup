@@ -715,7 +715,7 @@ agent_communication:
     message: |
       **FINAL COMPREHENSIVE UI TESTING COMPLETE - Enhanced Member and Space Manager Management System ✅**
       
-      **Test URL:** https://teamspace-app-1.preview.emergentagent.com/admin/spaces
+      **Test URL:** https://collab-hub-48.preview.emergentagent.com/admin/spaces
       **Login:** admin@test.com / admin123 ✅ Successful
       
       **MEMBERS DIALOG TESTING (👥 Icons):**
@@ -1152,7 +1152,7 @@ agent_communication:
     message: |
       **MESSAGING SYSTEM FRONTEND TESTING COMPLETE - ALL TESTS PASSED ✅**
       
-      **Test URL:** https://teamspace-app-1.preview.emergentagent.com/messages
+      **Test URL:** https://collab-hub-48.preview.emergentagent.com/messages
       **Login:** admin@test.com / admin123 ✅ Successful
       
       **COMPREHENSIVE TEST RESULTS:**
@@ -1297,7 +1297,7 @@ agent_communication:
     message: |
       **REFERRAL/AFFILIATE PROGRAM SYSTEM TESTING COMPLETE - ALL TESTS PASSED ✅**
       
-      **Test URL:** https://teamspace-app-1.preview.emergentagent.com/api
+      **Test URL:** https://collab-hub-48.preview.emergentagent.com/api
       **Login:** admin@test.com / admin123 ✅ Successful
       
       **COMPREHENSIVE REFERRAL SYSTEM TESTING (8/8 tests passed - 100% success rate):**
@@ -1539,7 +1539,7 @@ agent_communication:
     message: |
       **MESSAGING SYSTEM BACKEND TESTING COMPLETE - ALL TESTS PASSED ✅**
       
-      **Test URL:** https://teamspace-app-1.preview.emergentagent.com/api
+      **Test URL:** https://collab-hub-48.preview.emergentagent.com/api
       **Login:** admin@test.com / admin123 ✅ Successful
       
       **COMPREHENSIVE MESSAGING SYSTEM TESTING (12/12 tests passed - 100% success rate):**
@@ -1773,7 +1773,7 @@ agent_communication:
     message: |
       **REACTION POINTS SYSTEM TESTING COMPLETE - ALL TESTS PASSED ✅**
       
-      **Test URL:** https://teamspace-app-1.preview.emergentagent.com/api
+      **Test URL:** https://collab-hub-48.preview.emergentagent.com/api
       **Login:** admin@test.com / admin123 ✅ Successful
       
       **COMPREHENSIVE REACTION POINTS TESTING (8/8 tests passed - 100% success rate):**
