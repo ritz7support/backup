@@ -222,6 +222,79 @@ export default function LearningSpaceView() {
     }
   };
 
+  // Admin Functions
+  const handleCreateLesson = () => {
+    setEditingLesson(null);
+    setLessonForm({
+      section_name: '',
+      title: '',
+      description: '',
+      video_url: '',
+      content: '',
+      order: allLessons.length,
+      duration: null
+    });
+    setShowLessonForm(true);
+  };
+
+  const handleEditLesson = (lesson) => {
+    setEditingLesson(lesson);
+    setLessonForm({
+      section_name: lesson.section_name || '',
+      title: lesson.title,
+      description: lesson.description || '',
+      video_url: lesson.video_url || '',
+      content: lesson.content || '',
+      order: lesson.order,
+      duration: lesson.duration || null
+    });
+    setShowLessonForm(true);
+  };
+
+  const handleSaveLesson = async () => {
+    if (!lessonForm.title.trim()) {
+      toast.error('Please enter a lesson title');
+      return;
+    }
+
+    try {
+      if (editingLesson) {
+        await learningAPI.updateLesson(spaceId, editingLesson.id, lessonForm);
+        toast.success('Lesson updated successfully!');
+      } else {
+        await learningAPI.createLesson(spaceId, lessonForm);
+        toast.success('Lesson created successfully!');
+      }
+      
+      setShowLessonForm(false);
+      setEditingLesson(null);
+      fetchLessons();
+    } catch (error) {
+      console.error('Error saving lesson:', error);
+      toast.error('Failed to save lesson');
+    }
+  };
+
+  const handleDeleteLesson = async (lessonId) => {
+    if (!window.confirm('Are you sure you want to delete this lesson? This will also delete all progress, notes, and comments.')) {
+      return;
+    }
+
+    try {
+      await learningAPI.deleteLesson(spaceId, lessonId);
+      toast.success('Lesson deleted successfully!');
+      
+      if (selectedLesson?.id === lessonId) {
+        setSelectedLesson(null);
+      }
+      
+      fetchLessons();
+    } catch (error) {
+      console.error('Error deleting lesson:', error);
+      toast.error('Failed to delete lesson');
+    }
+  };
+
   const extractYouTubeVideoId = (url) => {
     if (!url) return null;
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
