@@ -1128,6 +1128,30 @@ test_plan:
   test_priority: "high_first"
 
 frontend:
+  - task: "Rich Text Editor - Fix Bullet and Numbered Lists"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/RichTextEditor.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Fixed bullet points and numbered lists not rendering in TipTap editor. Configured StarterKit with proper Tailwind CSS classes for bulletList (list-disc pl-5 my-2), orderedList (list-decimal pl-5 my-2), and listItem (ml-2). Updated prose class to prose-sm for better rendering."
+
+  - task: "Rich Text Editor - YouTube Video Embedding"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/RichTextEditor.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Added YouTube video embedding functionality. Installed @tiptap/extension-youtube (v3.10.0). Configured YouTube extension with responsive iframe settings (640x360, controls enabled, nocookie mode). Added auto-detection on paste using regex to detect YouTube URLs and automatically convert to embeds. Added YouTube button (Video icon) to toolbar with popup input for manual insertion. Supports all YouTube URL formats (youtube.com/watch?v=, youtu.be/, youtube.com/embed/)."
+
   - task: "Logo Upload and Display System"
     implemented: true
     working: true
