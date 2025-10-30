@@ -315,7 +315,32 @@ export default function LearningSpaceView() {
       <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
         {/* Progress Bar */}
         <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-bold mb-2">{space.name}</h2>
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-bold">{space.name}</h2>
+            {isAdmin && (
+              <button
+                onClick={() => setShowAdminPanel(!showAdminPanel)}
+                className="p-2 hover:bg-gray-100 rounded-lg"
+                title="Admin Settings"
+              >
+                <Settings className="h-5 w-5 text-gray-600" />
+              </button>
+            )}
+          </div>
+          
+          {isAdmin && showAdminPanel && (
+            <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="text-xs font-semibold text-blue-900 mb-2">Admin Controls</div>
+              <button
+                onClick={handleCreateLesson}
+                className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-sm"
+              >
+                <Plus className="h-4 w-4" />
+                Add New Lesson
+              </button>
+            </div>
+          )}
+          
           <div className="text-sm text-gray-600 mb-2">
             Completed {progress.completed_lessons} of {progress.total_lessons} lessons
           </div>
@@ -330,6 +355,18 @@ export default function LearningSpaceView() {
 
         {/* Lessons by Section */}
         <div className="flex-1 overflow-y-auto">
+          {allLessons.length === 0 && isAdmin && (
+            <div className="p-4 text-center text-gray-500">
+              <p className="mb-2">No lessons yet</p>
+              <button
+                onClick={handleCreateLesson}
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Create your first lesson
+              </button>
+            </div>
+          )}
+          
           {Object.entries(sections).map(([sectionName, sectionLessons]) => (
             <div key={sectionName} className="border-b border-gray-200">
               <button
