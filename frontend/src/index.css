@@ -17,6 +17,24 @@ code {
         source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
+/* Responsive YouTube embeds in TipTap editor */
+.ProseMirror iframe[src*="youtube.com"],
+.ProseMirror iframe[src*="youtu.be"] {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+}
+
+/* For posted content (rendered HTML) */
+iframe[src*="youtube.com"],
+iframe[src*="youtu.be"] {
+    max-width: 100%;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+}
+
 @layer base {
     :root {
         --background: 0 0% 100%;
