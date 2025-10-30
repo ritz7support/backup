@@ -1380,14 +1380,22 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
     
     # Mark invite token as used
     if invite_token:
-        await db.invite_tokens.update_one(
-            {"token": invite_token},
-            {"$set": {"used": True, "used_by": user.id}}
-        )
+        try:
+            await db.invite_tokens.update_one(
+                {"token": invite_token},
+                {"$set": {"used": True, "used_by": user.id}}
+            )
+            logger.info(f"Invite token {invite_token} marked as used by {user.id}")
+        except Exception as e:
+            logger.error(f"Failed to mark invite token as used: {e}")
     
-    # Award referral points if user was referred
+    # Award referral points if user was referred (don't fail registration if this fails)
     if referrer_id:
-        await award_referral_points(referrer_id, user.id, user.name)
+        try:
+            await award_referral_points(referrer_id, user.id, user.name)
+            logger.info(f"Referral points awarded to {referrer_id} for {user.id}")
+        except Exception as e:
+            logger.error(f"Failed to award referral points: {e}")
     
     # Create session
     session_token = str(uuid.uuid4())
@@ -1413,7 +1421,9 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
         path="/"
     )
     
-    # Send welcome email
+    logger.info(f"User {user.email} registered successfully with ID {user.id}")
+    
+    # Send welcome email (don't fail registration if this fails)
     try:
         email_template = get_email_template(
             "welcome",
@@ -1427,8 +1437,10 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
             user_id=user.id,
             check_preferences=False  # Always send welcome email
         )
+        logger.info(f"Welcome email sent to {user.email}")
     except Exception as e:
         logger.error(f"Failed to send welcome email to {user.email}: {e}")
+        # Don't fail - user is already registered
     
     return {"user": user, "session_token": session_token}
 
