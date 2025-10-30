@@ -342,7 +342,8 @@ class Post(BaseModel):
 class Comment(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    post_id: str
+    post_id: Optional[str] = None  # For post comments
+    lesson_id: Optional[str] = None  # For lesson comments/questions
     author_id: str
     content: str
     parent_comment_id: Optional[str] = None
