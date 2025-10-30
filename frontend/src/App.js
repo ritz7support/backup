@@ -51,6 +51,7 @@ function App() {
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/leaderboard" element={<PrivateRoute><LeaderboardPage /></PrivateRoute>} />
             <Route path="/space/:spaceId" element={<PrivateRoute><SpaceView /></PrivateRoute>} />
+            <Route path="/learning/:spaceId" element={<PrivateRoute><LearningSpaceView /></PrivateRoute>} />
             <Route path="/space/:spaceId/post/:postId" element={<PrivateRoute><PostDetailPage /></PrivateRoute>} />
             <Route path="/events" element={<PrivateRoute><EventsPage /></PrivateRoute>} />
             <Route path="/members" element={<PrivateRoute><MembersPage /></PrivateRoute>} />
