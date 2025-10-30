@@ -54,10 +54,11 @@ export default function RichTextEditor({ content, onChange, placeholder = "Share
       Youtube.configure({
         controls: true,
         nocookie: true,
-        width: 640,
+        width: '100%',
         height: 360,
         HTMLAttributes: {
-          class: 'rounded-lg my-4',
+          class: 'rounded-lg my-4 max-w-full',
+          style: 'width: 100%; max-width: 640px; aspect-ratio: 16/9;',
         },
       }),
       Placeholder.configure({
