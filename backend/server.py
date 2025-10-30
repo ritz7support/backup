@@ -3058,11 +3058,11 @@ async def react_to_comment(comment_id: str, emoji: str, user: User = Depends(req
 async def create_lesson(
     space_id: str,
     lesson_data: dict,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Create a new lesson in a learning space (admin/manager only)"""
     # Check if user is admin or manager of this space
-    if not await is_space_manager_or_admin(user['id'], space_id):
+    if not await is_space_manager_or_admin(user.id, space_id):
         raise HTTPException(status_code=403, detail="Only admins and space managers can create lessons")
     
     # Verify space exists and is a learning space
