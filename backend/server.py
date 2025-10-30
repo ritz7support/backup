@@ -3136,7 +3136,7 @@ async def get_lesson(
     lesson['_id'] = str(lesson['_id'])
     
     # Get user's progress
-    progress = await db.lesson_progress.find_one({"user_id": user['id'], "lesson_id": lesson_id})
+    progress = await db.lesson_progress.find_one({"user_id": user.id, "lesson_id": lesson_id})
     if progress:
         progress['_id'] = str(progress['_id'])
         lesson['progress'] = progress
@@ -3157,7 +3157,7 @@ async def update_lesson(
 ):
     """Update a lesson (admin/manager only)"""
     # Check if user is admin or manager
-    if not await is_space_manager_or_admin(user['id'], space_id):
+    if not await is_space_manager_or_admin(user.id, space_id):
         raise HTTPException(status_code=403, detail="Only admins and space managers can update lessons")
     
     # Update lesson
@@ -3182,7 +3182,7 @@ async def delete_lesson(
 ):
     """Delete a lesson (admin/manager only)"""
     # Check if user is admin or manager
-    if not await is_space_manager_or_admin(user['id'], space_id):
+    if not await is_space_manager_or_admin(user.id, space_id):
         raise HTTPException(status_code=403, detail="Only admins and space managers can delete lessons")
     
     # Delete lesson and related data
