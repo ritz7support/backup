@@ -3052,6 +3052,374 @@ async def react_to_comment(comment_id: str, emoji: str, user: User = Depends(req
     return {"reactions": reactions}
 
 
+# ==================== LEARNING SPACE ENDPOINTS ====================
+
+@api_router.post("/spaces/{space_id}/lessons")
+async def create_lesson(
+    space_id: str,
+    lesson_data: dict,
+    user: dict = Depends(get_current_user)
+):
+    """Create a new lesson in a learning space (admin/manager only)"""
+    # Check if user is admin or manager of this space
+    if not await is_space_manager_or_admin(user['id'], space_id):
+        raise HTTPException(status_code=403, detail="Only admins and space managers can create lessons")
+    
+    # Verify space exists and is a learning space
+    space = await db.spaces.find_one({"id": space_id})
+    if not space:
+        raise HTTPException(status_code=404, detail="Space not found")
+    if space.get('space_type') != 'learning':
+        raise HTTPException(status_code=400, detail="This space is not a learning space")
+    
+    # Create lesson
+    lesson = Lesson(
+        space_id=space_id,
+        section_name=lesson_data.get('section_name'),
+        title=lesson_data['title'],
+        description=lesson_data.get('description'),
+        video_url=lesson_data.get('video_url'),
+        content=lesson_data.get('content'),
+        order=lesson_data.get('order', 0),
+        duration=lesson_data.get('duration')
+    )
+    
+    await db.lessons.insert_one(lesson.model_dump())
+    return lesson
+
+@api_router.get("/spaces/{space_id}/lessons")
+async def get_space_lessons(
+    space_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Get all lessons for a learning space, grouped by sections"""
+    # Verify space exists
+    space = await db.spaces.find_one({"id": space_id})
+    if not space:
+        raise HTTPException(status_code=404, detail="Space not found")
+    
+    # Get all lessons for this space, sorted by order
+    lessons_cursor = db.lessons.find({"space_id": space_id}).sort("order", 1)
+    lessons = await lessons_cursor.to_list(length=None)
+    
+    # Get user's progress for all lessons
+    progress_cursor = db.lesson_progress.find({"user_id": user['id']})
+    progress_map = {p['lesson_id']: p async for p in progress_cursor}
+    
+    # Attach progress to each lesson
+    for lesson in lessons:
+        lesson['_id'] = str(lesson['_id'])
+        progress = progress_map.get(lesson['id'], {})
+        lesson['completed'] = progress.get('completed', False)
+        lesson['watch_percentage'] = progress.get('watch_percentage', 0.0)
+    
+    # Group lessons by section
+    sections = {}
+    for lesson in lessons:
+        section = lesson.get('section_name') or 'General'
+        if section not in sections:
+            sections[section] = []
+        sections[section].append(lesson)
+    
+    return {"sections": sections, "lessons": lessons}
+
+@api_router.get("/lessons/{lesson_id}")
+async def get_lesson(
+    lesson_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Get a specific lesson with user's progress"""
+    lesson = await db.lessons.find_one({"id": lesson_id})
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    lesson['_id'] = str(lesson['_id'])
+    
+    # Get user's progress
+    progress = await db.lesson_progress.find_one({"user_id": user['id'], "lesson_id": lesson_id})
+    if progress:
+        progress['_id'] = str(progress['_id'])
+        lesson['progress'] = progress
+    else:
+        lesson['progress'] = {
+            "completed": False,
+            "watch_percentage": 0.0
+        }
+    
+    return lesson
+
+@api_router.put("/spaces/{space_id}/lessons/{lesson_id}")
+async def update_lesson(
+    space_id: str,
+    lesson_id: str,
+    lesson_data: dict,
+    user: dict = Depends(get_current_user)
+):
+    """Update a lesson (admin/manager only)"""
+    # Check if user is admin or manager
+    if not await is_space_manager_or_admin(user['id'], space_id):
+        raise HTTPException(status_code=403, detail="Only admins and space managers can update lessons")
+    
+    # Update lesson
+    update_data = {k: v for k, v in lesson_data.items() if v is not None}
+    update_data['updated_at'] = datetime.now(timezone.utc)
+    
+    result = await db.lessons.update_one(
+        {"id": lesson_id, "space_id": space_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    return {"message": "Lesson updated successfully"}
+
+@api_router.delete("/spaces/{space_id}/lessons/{lesson_id}")
+async def delete_lesson(
+    space_id: str,
+    lesson_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Delete a lesson (admin/manager only)"""
+    # Check if user is admin or manager
+    if not await is_space_manager_or_admin(user['id'], space_id):
+        raise HTTPException(status_code=403, detail="Only admins and space managers can delete lessons")
+    
+    # Delete lesson and related data
+    await db.lessons.delete_one({"id": lesson_id, "space_id": space_id})
+    await db.lesson_progress.delete_many({"lesson_id": lesson_id})
+    await db.lesson_notes.delete_many({"lesson_id": lesson_id})
+    await db.comments.delete_many({"lesson_id": lesson_id})
+    
+    return {"message": "Lesson deleted successfully"}
+
+@api_router.post("/lessons/{lesson_id}/progress")
+async def update_lesson_progress(
+    lesson_id: str,
+    progress_data: dict,
+    user: dict = Depends(get_current_user)
+):
+    """Update user's progress for a lesson"""
+    # Check if lesson exists
+    lesson = await db.lessons.find_one({"id": lesson_id})
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Get or create progress record
+    progress = await db.lesson_progress.find_one({"user_id": user['id'], "lesson_id": lesson_id})
+    
+    completed = progress_data.get('completed', False)
+    watch_percentage = progress_data.get('watch_percentage', 0.0)
+    
+    # Auto-complete if watch percentage >= 80%
+    if watch_percentage >= 80 and not completed:
+        completed = True
+    
+    now = datetime.now(timezone.utc)
+    
+    if progress:
+        # Update existing progress
+        update_data = {
+            "watch_percentage": watch_percentage,
+            "last_watched_at": now
+        }
+        if completed and not progress.get('completed'):
+            update_data['completed'] = True
+            update_data['completed_at'] = now
+        elif 'completed' in progress_data:
+            update_data['completed'] = completed
+            if completed:
+                update_data['completed_at'] = now
+        
+        await db.lesson_progress.update_one(
+            {"user_id": user['id'], "lesson_id": lesson_id},
+            {"$set": update_data}
+        )
+    else:
+        # Create new progress record
+        new_progress = LessonProgress(
+            user_id=user['id'],
+            lesson_id=lesson_id,
+            completed=completed,
+            watch_percentage=watch_percentage,
+            last_watched_at=now,
+            completed_at=now if completed else None
+        )
+        await db.lesson_progress.insert_one(new_progress.model_dump())
+    
+    return {"message": "Progress updated successfully", "completed": completed}
+
+@api_router.get("/spaces/{space_id}/my-progress")
+async def get_my_progress(
+    space_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Get user's overall progress in a learning space"""
+    # Get all lessons in this space
+    total_lessons = await db.lessons.count_documents({"space_id": space_id})
+    
+    if total_lessons == 0:
+        return {
+            "total_lessons": 0,
+            "completed_lessons": 0,
+            "progress_percentage": 0
+        }
+    
+    # Get user's completed lessons
+    completed_count = await db.lesson_progress.count_documents({
+        "user_id": user['id'],
+        "completed": True,
+        "lesson_id": {"$in": [
+            lesson['id'] async for lesson in db.lessons.find({"space_id": space_id}, {"id": 1})
+        ]}
+    })
+    
+    progress_percentage = round((completed_count / total_lessons) * 100, 1)
+    
+    return {
+        "total_lessons": total_lessons,
+        "completed_lessons": completed_count,
+        "progress_percentage": progress_percentage
+    }
+
+@api_router.get("/lessons/{lesson_id}/notes")
+async def get_lesson_notes(
+    lesson_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Get user's notes for a lesson"""
+    notes_cursor = db.lesson_notes.find({"user_id": user['id'], "lesson_id": lesson_id})
+    notes = await notes_cursor.to_list(length=None)
+    
+    for note in notes:
+        note['_id'] = str(note['_id'])
+    
+    return notes
+
+@api_router.post("/lessons/{lesson_id}/notes")
+async def create_lesson_note(
+    lesson_id: str,
+    note_data: dict,
+    user: dict = Depends(get_current_user)
+):
+    """Create a note for a lesson"""
+    # Check if lesson exists
+    lesson = await db.lessons.find_one({"id": lesson_id})
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Create note
+    note = LessonNote(
+        user_id=user['id'],
+        lesson_id=lesson_id,
+        note_content=note_data['note_content']
+    )
+    
+    await db.lesson_notes.insert_one(note.model_dump())
+    return note
+
+@api_router.put("/lessons/{lesson_id}/notes/{note_id}")
+async def update_lesson_note(
+    lesson_id: str,
+    note_id: str,
+    note_data: dict,
+    user: dict = Depends(get_current_user)
+):
+    """Update a lesson note"""
+    result = await db.lesson_notes.update_one(
+        {"id": note_id, "user_id": user['id'], "lesson_id": lesson_id},
+        {"$set": {
+            "note_content": note_data['note_content'],
+            "updated_at": datetime.now(timezone.utc)
+        }}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    return {"message": "Note updated successfully"}
+
+@api_router.delete("/lessons/{lesson_id}/notes/{note_id}")
+async def delete_lesson_note(
+    lesson_id: str,
+    note_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Delete a lesson note"""
+    result = await db.lesson_notes.delete_one(
+        {"id": note_id, "user_id": user['id'], "lesson_id": lesson_id}
+    )
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Note not found")
+    
+    return {"message": "Note deleted successfully"}
+
+@api_router.get("/lessons/{lesson_id}/comments")
+async def get_lesson_comments(
+    lesson_id: str,
+    user: dict = Depends(get_current_user)
+):
+    """Get comments/questions for a lesson"""
+    # Get all top-level comments for this lesson
+    comments_cursor = db.comments.find({"lesson_id": lesson_id, "parent_comment_id": None})
+    comments = await comments_cursor.to_list(length=None)
+    
+    # Enrich with author details
+    for comment in comments:
+        comment['_id'] = str(comment['_id'])
+        author = await db.users.find_one({"id": comment['author_id']}, {"password_hash": 0})
+        if author:
+            author['_id'] = str(author['_id'])
+            comment['author'] = author
+        
+        # Get replies
+        replies_cursor = db.comments.find({"parent_comment_id": comment['id']})
+        replies = await replies_cursor.to_list(length=None)
+        for reply in replies:
+            reply['_id'] = str(reply['_id'])
+            reply_author = await db.users.find_one({"id": reply['author_id']}, {"password_hash": 0})
+            if reply_author:
+                reply_author['_id'] = str(reply_author['_id'])
+                reply['author'] = reply_author
+        comment['replies'] = replies
+    
+    return comments
+
+@api_router.post("/lessons/{lesson_id}/comments")
+async def add_lesson_comment(
+    lesson_id: str,
+    comment_data: dict,
+    user: dict = Depends(get_current_user)
+):
+    """Add a comment/question to a lesson"""
+    # Check if lesson exists
+    lesson = await db.lessons.find_one({"id": lesson_id})
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Lesson not found")
+    
+    # Create comment
+    comment = Comment(
+        lesson_id=lesson_id,
+        author_id=user['id'],
+        content=comment_data['content'],
+        parent_comment_id=comment_data.get('parent_comment_id')
+    )
+    
+    await db.comments.insert_one(comment.model_dump())
+    
+    # Enrich with author details
+    comment_dict = comment.model_dump()
+    comment_dict['author'] = {
+        "id": user['id'],
+        "name": user['name'],
+        "email": user['email']
+    }
+    comment_dict['replies'] = []
+    
+    return comment_dict
+
+
 # ==================== EVENT ENDPOINTS ====================
 
 @api_router.get("/events")
