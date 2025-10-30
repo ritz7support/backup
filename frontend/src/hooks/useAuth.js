@@ -53,9 +53,28 @@ export const AuthProvider = ({ children }) => {
   };
 
   const loginWithGoogle = async () => {
-    const redirectUrl = `${window.location.origin}/dashboard`;
-    const { data } = await authAPI.googleAuth(redirectUrl);
-    window.location.href = data.auth_url;
+    return new Promise((resolve, reject) => {
+      // Initialize Google Sign-In
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: '682614969210-ljsimr1oabmnno484u3fu7nba4ai2bnp.apps.googleusercontent.com',
+          callback: async (response) => {
+            try {
+              const { data } = await authAPI.googleLogin(response.credential);
+              setUser(data.user);
+              resolve(data);
+            } catch (error) {
+              reject(error);
+            }
+          }
+        });
+        
+        // Trigger the One Tap UI or render button
+        window.google.accounts.id.prompt();
+      } else {
+        reject(new Error('Google Sign-In not loaded'));
+      }
+    });
   };
 
   const logout = async () => {
