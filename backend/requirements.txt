@@ -124,3 +124,12 @@ yarl==1.22.0
 zipp==3.23.0
 sendgrid==6.12.5
 sendgrid==6.12.5
+google-ai-generativelanguage==0.6.15
+google-api-core==2.26.0
+google-api-python-client==2.185.0
+google-auth==2.41.1
+google-auth-httplib2==0.2.0
+google-auth-oauthlib==1.2.2
+google-genai==1.45.0
+google-generativeai==0.8.5
+googleapis-common-protos==1.70.0
