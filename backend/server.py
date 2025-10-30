@@ -3126,7 +3126,7 @@ async def get_space_lessons(
 @api_router.get("/lessons/{lesson_id}")
 async def get_lesson(
     lesson_id: str,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Get a specific lesson with user's progress"""
     lesson = await db.lessons.find_one({"id": lesson_id})
@@ -3153,7 +3153,7 @@ async def update_lesson(
     space_id: str,
     lesson_id: str,
     lesson_data: dict,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Update a lesson (admin/manager only)"""
     # Check if user is admin or manager
@@ -3178,7 +3178,7 @@ async def update_lesson(
 async def delete_lesson(
     space_id: str,
     lesson_id: str,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Delete a lesson (admin/manager only)"""
     # Check if user is admin or manager
@@ -3197,7 +3197,7 @@ async def delete_lesson(
 async def update_lesson_progress(
     lesson_id: str,
     progress_data: dict,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Update user's progress for a lesson"""
     # Check if lesson exists
@@ -3252,7 +3252,7 @@ async def update_lesson_progress(
 @api_router.get("/spaces/{space_id}/my-progress")
 async def get_my_progress(
     space_id: str,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Get user's overall progress in a learning space"""
     # Get all lessons in this space
@@ -3285,7 +3285,7 @@ async def get_my_progress(
 @api_router.get("/lessons/{lesson_id}/notes")
 async def get_lesson_notes(
     lesson_id: str,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Get user's notes for a lesson"""
     notes_cursor = db.lesson_notes.find({"user_id": user['id'], "lesson_id": lesson_id})
@@ -3300,7 +3300,7 @@ async def get_lesson_notes(
 async def create_lesson_note(
     lesson_id: str,
     note_data: dict,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Create a note for a lesson"""
     # Check if lesson exists
@@ -3323,7 +3323,7 @@ async def update_lesson_note(
     lesson_id: str,
     note_id: str,
     note_data: dict,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Update a lesson note"""
     result = await db.lesson_notes.update_one(
@@ -3343,7 +3343,7 @@ async def update_lesson_note(
 async def delete_lesson_note(
     lesson_id: str,
     note_id: str,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Delete a lesson note"""
     result = await db.lesson_notes.delete_one(
@@ -3358,7 +3358,7 @@ async def delete_lesson_note(
 @api_router.get("/lessons/{lesson_id}/comments")
 async def get_lesson_comments(
     lesson_id: str,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Get comments/questions for a lesson"""
     # Get all top-level comments for this lesson
@@ -3390,7 +3390,7 @@ async def get_lesson_comments(
 async def add_lesson_comment(
     lesson_id: str,
     comment_data: dict,
-    user: dict = Depends(get_current_user)
+    user: User = Depends(require_auth)
 ):
     """Add a comment/question to a lesson"""
     # Check if lesson exists
