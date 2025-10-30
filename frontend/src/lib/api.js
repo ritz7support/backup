@@ -221,3 +221,27 @@ export const invitesAPI = {
   getInvites: () => api.get('/invites'),
   createUserDirectly: (data) => api.post('/invites/create-user', data),
 };
+
+// Learning Space API
+export const learningAPI = {
+  // Lesson Management
+  createLesson: (spaceId, lessonData) => api.post(`/spaces/${spaceId}/lessons`, lessonData),
+  getLessons: (spaceId) => api.get(`/spaces/${spaceId}/lessons`),
+  getLesson: (lessonId) => api.get(`/lessons/${lessonId}`),
+  updateLesson: (spaceId, lessonId, lessonData) => api.put(`/spaces/${spaceId}/lessons/${lessonId}`, lessonData),
+  deleteLesson: (spaceId, lessonId) => api.delete(`/spaces/${spaceId}/lessons/${lessonId}`),
+  
+  // Progress Tracking
+  updateProgress: (lessonId, progressData) => api.post(`/lessons/${lessonId}/progress`, progressData),
+  getMyProgress: (spaceId) => api.get(`/spaces/${spaceId}/my-progress`),
+  
+  // Notes
+  getNotes: (lessonId) => api.get(`/lessons/${lessonId}/notes`),
+  createNote: (lessonId, noteContent) => api.post(`/lessons/${lessonId}/notes`, { note_content: noteContent }),
+  updateNote: (lessonId, noteId, noteContent) => api.put(`/lessons/${lessonId}/notes/${noteId}`, { note_content: noteContent }),
+  deleteNote: (lessonId, noteId) => api.delete(`/lessons/${lessonId}/notes/${noteId}`),
+  
+  // Comments/Questions
+  getComments: (lessonId) => api.get(`/lessons/${lessonId}/comments`),
+  addComment: (lessonId, content, parentCommentId = null) => api.post(`/lessons/${lessonId}/comments`, { content, parent_comment_id: parentCommentId }),
+};
