@@ -1289,9 +1289,12 @@ async def get_user_leaderboard_stats(user_id: str):
 @api_router.post("/auth/register")
 async def register(user_data: UserCreate, response: Response, invite_token: Optional[str] = None, ref: Optional[str] = None):
     """Register new user with email/password and optional referral code"""
+    logger.info(f"Registration attempt: {user_data.email}, invite_token: {invite_token}, ref: {ref}")
+    
     # Check if user exists
     existing_user = await db.users.find_one({"email": user_data.email})
     if existing_user:
+        logger.warning(f"Registration failed: Email {user_data.email} already registered")
         raise HTTPException(status_code=400, detail="Email already registered")
     
     # Validate referral code if provided
@@ -1300,6 +1303,7 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
         referrer = await db.users.find_one({"referral_code": ref})
         if referrer:
             referrer_id = referrer['id']
+            logger.info(f"Valid referral code used: {ref} by {user_data.email}")
         else:
             # Don't fail registration if referral code is invalid, just ignore it
             logger.warning(f"Invalid referral code used: {ref}")
@@ -1307,6 +1311,7 @@ async def register(user_data: UserCreate, response: Response, invite_token: Opti
     # Handle invite token if provided
     role = user_data.role
     if invite_token:
+        logger.info(f"Checking invite token: {invite_token}")
         invite = await db.invite_tokens.find_one({"token": invite_token}, {"_id": 0})
         if not invite:
             raise HTTPException(status_code=400, detail="Invalid invite link")
