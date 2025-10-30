@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { learningAPI, spacesAPI } from '../lib/api';
 import { useAuth } from '../hooks/useAuth';
-import { ChevronDown, ChevronRight, CheckCircle, Circle, Play, Book, MessageSquare, StickyNote, ArrowLeft, ArrowRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, CheckCircle, Circle, Play, Book, MessageSquare, StickyNote, ArrowLeft, ArrowRight, Plus, Edit, Trash2, Settings } from 'lucide-react';
 import RichTextEditor from '../components/RichTextEditor';
 import { toast } from 'sonner';
 
@@ -23,6 +23,22 @@ export default function LearningSpaceView() {
   const [editingNote, setEditingNote] = useState(null);
   const [watchPercentage, setWatchPercentage] = useState(0);
   const videoRef = useRef(null);
+  
+  // Admin states
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showLessonForm, setShowLessonForm] = useState(false);
+  const [editingLesson, setEditingLesson] = useState(null);
+  const [lessonForm, setLessonForm] = useState({
+    section_name: '',
+    title: '',
+    description: '',
+    video_url: '',
+    content: '',
+    order: 0,
+    duration: null
+  });
+  
+  const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     fetchSpaceData();
