@@ -994,13 +994,27 @@ backend:
 
 
 user_problem_statement: |
-  Phase 4 (COMPLETED): Dynamic Subscription Tier System with Payment Gateway Integration:
-  1. Flexible Subscription Tiers - Admin can create tiers with one-time or recurring payment types
-  2. Multi-Currency Support - Each tier supports both INR (Razorpay) and USD (Stripe) pricing
-  3. Payment Gateway Mapping - For recurring: Razorpay Plan ID and Stripe Price ID; For one-time: Direct INR/USD pricing
-  4. Space-Tier Linking - Spaces can require specific subscription tiers for access
-  5. Location-based Currency Detection - Auto-detect user location to show appropriate currency
-  6. Dynamic Pricing Page - Fetches tiers from database instead of hardcoded plans
+  Phase 5 (IN PROGRESS): Rich Text Editor Fixes and Learning Space Feature:
+  
+  PHASE 1 (COMPLETED) - Rich Text Editor Fixes:
+  1. Fixed bullet points and numbered lists not rendering properly in TipTap editor
+  2. Added YouTube video embedding functionality with auto-detection on paste
+  3. Added YouTube button to toolbar for manual video insertion
+  
+  PHASE 2 (PENDING) - Learning Space Feature:
+  1. New space type: "Learning" for course/chapter-based content
+  2. Lesson/Chapter system with sections, ordering, and YouTube video embedding
+  3. Progress tracking: Mark lessons as complete, view percentage completed
+  4. Video watch tracking (80%+ auto-complete)
+  5. Private notes per lesson (user-specific)
+  6. Public comments/questions per lesson (space members)
+  7. Drag-drop reordering for lessons (admin feature)
+  
+  Previous Phases (COMPLETED):
+  Phase 4: Dynamic Subscription Tier System with Payment Gateway Integration
+  Phase 3: Enhanced User Management Features (Team Badge, Soft Block, Centralized Management)
+  Phase 2: Space Access Control and Member Management
+  Phase 1: Community Platform MVP
 
 backend:
   - task: "SubscriptionTier Model Enhancement"
