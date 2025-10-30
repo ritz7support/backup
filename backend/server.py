@@ -52,6 +52,7 @@ class User(BaseModel):
     name: str
     picture: Optional[str] = None
     password_hash: Optional[str] = None
+    google_id: Optional[str] = None  # Google OAuth user ID
     role: str = "learner"  # learner, mentor, business_owner, admin
     bio: Optional[str] = None
     skills: List[str] = []
