@@ -411,14 +411,21 @@ export default function LearningSpaceView() {
           </div>
           
           {isAdmin && showAdminPanel && (
-            <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200 space-y-2">
               <div className="text-xs font-semibold text-blue-900 mb-2">Admin Controls</div>
+              <button
+                onClick={handleCreateSection}
+                className="w-full px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center justify-center gap-2 text-sm"
+              >
+                <Plus className="h-4 w-4" />
+                Create Section
+              </button>
               <button
                 onClick={handleCreateLesson}
                 className="w-full px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 text-sm"
               >
                 <Plus className="h-4 w-4" />
-                Add New Lesson
+                Add Lesson
               </button>
             </div>
           )}
