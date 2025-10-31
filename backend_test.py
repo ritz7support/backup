@@ -624,21 +624,19 @@ def test_delete_lesson():
     
     print_success("Lesson deleted successfully")
     
-    # Verify deletion
+    # Verify deletion - we expect 404 which means make_request will return None
     print_info("Verifying lesson deletion...")
-    verify_response = make_request(
-        "GET",
-        f"/lessons/{lesson3_id}",
-        expected_status=404,
-        description="Verify lesson was deleted (should return 404)"
-    )
     
-    # For 404, the response will be None (expected - lesson not found means deleted successfully)
-    if verify_response is None:
+    # Make a direct request to check if lesson is gone
+    url = f"{BACKEND_URL}/lessons/{lesson3_id}"
+    headers = {"Authorization": f"Bearer {session_token}"}
+    verify_response = requests.get(url, headers=headers)
+    
+    if verify_response.status_code == 404:
         print_success("Lesson deletion verified (404 Not Found)")
         return True
     else:
-        print_error("Lesson still exists after deletion")
+        print_error(f"Lesson still exists after deletion. Status: {verify_response.status_code}")
         return False
 
 def test_delete_section_moves_lessons():
