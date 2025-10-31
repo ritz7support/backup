@@ -466,7 +466,8 @@ export default function LearningSpaceView() {
           {Object.entries(sections).map(([sectionName, sectionData]) => {
             // Extract section info from the new structure
             const sectionObj = sectionsList.find(s => s.id === sectionData.section_id);
-            const sectionLessons = sectionData.lessons || sectionData; // Handle both old and new format
+            // Handle both old format (array) and new format (object with lessons property)
+            const sectionLessons = Array.isArray(sectionData) ? sectionData : (sectionData?.lessons || []);
             
             return (
             <div key={sectionName} className="border-b border-gray-200">
@@ -477,7 +478,7 @@ export default function LearningSpaceView() {
                 >
                   <span className="font-semibold text-sm">{sectionName}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">{(Array.isArray(sectionLessons) ? sectionLessons : sectionData.lessons || []).length} lessons</span>
+                    <span className="text-xs text-gray-500">{sectionLessons.length} lessons</span>
                     {collapsedSections[sectionName] ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </div>
                 </button>
@@ -515,7 +516,7 @@ export default function LearningSpaceView() {
 
               {!collapsedSections[sectionName] && (
                 <div>
-                  {(Array.isArray(sectionLessons) ? sectionLessons : sectionData.lessons || []).map((lesson) => (
+                  {sectionLessons.map((lesson) => (
                     <div
                       key={lesson.id}
                       className={`group relative border-l-2 ${
