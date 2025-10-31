@@ -135,7 +135,8 @@ def test_create_learning_space():
     )
     
     if response:
-        spaces = response.get("spaces", [])
+        # Response is a list of spaces directly
+        spaces = response if isinstance(response, list) else response.get("spaces", [])
         for space in spaces:
             if space.get("space_type") == "learning":
                 test_space_id = space.get("id")
