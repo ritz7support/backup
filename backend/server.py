@@ -3157,7 +3157,7 @@ async def update_lesson(
 ):
     """Update a lesson (admin/manager only)"""
     # Check if user is admin or manager
-    if not await is_space_manager_or_admin(user.id, space_id):
+    if not await is_space_manager_or_admin(user, space_id):
         raise HTTPException(status_code=403, detail="Only admins and space managers can update lessons")
     
     # Update lesson
