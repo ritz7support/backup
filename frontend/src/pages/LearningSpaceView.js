@@ -562,7 +562,7 @@ export default function LearningSpaceView() {
                 </div>
               )}
             </div>
-            );
+          );
           })}
         </div>
       </div>
