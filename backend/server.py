@@ -3219,20 +3219,36 @@ async def get_space_lessons(
         progress = progress_map.get(lesson['id'], {})
         lesson['completed'] = progress.get('completed', False)
         lesson['watch_percentage'] = progress.get('watch_percentage', 0.0)
+        
+        # Attach section info if lesson has section_id
+        if lesson.get('section_id'):
+            section_info = next((s for s in sections_list if s['id'] == lesson['section_id']), None)
+            if section_info:
+                lesson['section_name'] = section_info['name']
     
     # Group lessons by section
     sections_dict = {}
     
-    # Add defined sections
+    # Add defined sections with their metadata
     for section in sections_list:
         section['_id'] = str(section['_id'])
         section_lessons = [l for l in lessons if l.get('section_id') == section['id']]
-        sections_dict[section['name']] = section_lessons
+        sections_dict[section['name']] = {
+            'section_id': section['id'],
+            'section_description': section.get('description'),
+            'section_order': section.get('order', 0),
+            'lessons': section_lessons
+        }
     
     # Add uncategorized lessons
     uncategorized = [l for l in lessons if not l.get('section_id')]
     if uncategorized:
-        sections_dict['Uncategorized'] = uncategorized
+        sections_dict['Uncategorized'] = {
+            'section_id': None,
+            'section_description': None,
+            'section_order': 999,
+            'lessons': uncategorized
+        }
     
     return {"sections": sections_dict, "lessons": lessons, "sections_list": sections_list}
 
