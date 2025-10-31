@@ -913,8 +913,80 @@ export default function LearningSpaceView() {
               <button
                 onClick={handleSaveLesson}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                disabled={!lessonForm.section_id}
               >
                 {editingLesson ? 'Update Lesson' : 'Create Lesson'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Section Form Modal */}
+      {showSectionForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full">
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-2xl font-bold">
+                {editingSection ? 'Edit Section' : 'Create New Section'}
+              </h2>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              {/* Section Name */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Section Name *</label>
+                <input
+                  type="text"
+                  value={sectionForm.name}
+                  onChange={(e) => setSectionForm({ ...sectionForm, name: e.target.value })}
+                  placeholder="e.g., Introduction, Advanced Topics"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Description (optional)</label>
+                <textarea
+                  value={sectionForm.description}
+                  onChange={(e) => setSectionForm({ ...sectionForm, description: e.target.value })}
+                  placeholder="Brief description of this section"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[80px]"
+                />
+              </div>
+
+              {/* Order */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Order</label>
+                <input
+                  type="number"
+                  value={sectionForm.order}
+                  onChange={(e) => setSectionForm({ ...sectionForm, order: parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min="0"
+                />
+                <p className="text-xs text-gray-500 mt-1">Determines the section order (0 = first)</p>
+              </div>
+            </div>
+
+            {/* Form Actions */}
+            <div className="p-6 border-t border-gray-200 flex gap-3 justify-end">
+              <button
+                onClick={() => {
+                  setShowSectionForm(false);
+                  setEditingSection(null);
+                }}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSection}
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+              >
+                {editingSection ? 'Update Section' : 'Create Section'}
               </button>
             </div>
           </div>
