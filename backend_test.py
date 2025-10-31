@@ -633,13 +633,13 @@ def test_delete_lesson():
         description="Verify lesson was deleted (should return 404)"
     )
     
-    # For 404, the response will be None (expected)
-    if verify_response is not None:
+    # For 404, the response will be None (expected - lesson not found means deleted successfully)
+    if verify_response is None:
+        print_success("Lesson deletion verified (404 Not Found)")
+        return True
+    else:
         print_error("Lesson still exists after deletion")
         return False
-    
-    print_success("Lesson deletion verified")
-    return True
 
 def test_delete_section_moves_lessons():
     """Test 13: Delete Section (Lessons Move to Uncategorized)"""
