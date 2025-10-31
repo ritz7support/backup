@@ -599,13 +599,13 @@ export default function LearningSpaceView() {
             </div>
 
             {/* Video Player */}
-            {selectedLesson.video_url && (
+            {selectedLesson?.video_url && extractYouTubeVideoId(selectedLesson.video_url) && (
               <div className="bg-black">
                 <div className="max-w-5xl mx-auto">
                   <iframe
                     ref={videoRef}
                     src={`https://www.youtube.com/embed/${extractYouTubeVideoId(selectedLesson.video_url)}?enablejsapi=1`}
-                    title={selectedLesson.title}
+                    title={selectedLesson.title || 'Lesson Video'}
                     className="w-full"
                     style={{ aspectRatio: '16/9' }}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
