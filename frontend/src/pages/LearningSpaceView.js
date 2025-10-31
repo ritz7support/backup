@@ -688,7 +688,7 @@ export default function LearningSpaceView() {
 
                     {/* Notes List */}
                     <div className="space-y-4">
-                      {notes.map((note) => (
+                      {Array.isArray(notes) && notes.map((note) => (
                         <div key={note.id} className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                           <p className="whitespace-pre-wrap">{note.note_content}</p>
                           <div className="mt-2 flex gap-2 text-sm">
@@ -710,7 +710,7 @@ export default function LearningSpaceView() {
                           </div>
                         </div>
                       ))}
-                      {notes.length === 0 && (
+                      {(!Array.isArray(notes) || notes.length === 0) && (
                         <p className="text-gray-500 text-center py-8">No notes yet. Start taking notes to remember key points!</p>
                       )}
                     </div>
