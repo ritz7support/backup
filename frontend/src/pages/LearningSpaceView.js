@@ -27,9 +27,12 @@ export default function LearningSpaceView() {
   // Admin states
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showLessonForm, setShowLessonForm] = useState(false);
+  const [showSectionForm, setShowSectionForm] = useState(false);
   const [editingLesson, setEditingLesson] = useState(null);
+  const [editingSection, setEditingSection] = useState(null);
+  const [sectionsList, setSectionsList] = useState([]);
   const [lessonForm, setLessonForm] = useState({
-    section_name: '',
+    section_id: '',
     title: '',
     description: '',
     video_url: '',
@@ -37,11 +40,17 @@ export default function LearningSpaceView() {
     order: 0,
     duration: null
   });
+  const [sectionForm, setSectionForm] = useState({
+    name: '',
+    description: '',
+    order: 0
+  });
   
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
     fetchSpaceData();
+    fetchSections();
     fetchLessons();
     fetchProgress();
   }, [spaceId]);
