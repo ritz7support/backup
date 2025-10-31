@@ -224,6 +224,12 @@ export const invitesAPI = {
 
 // Learning Space API
 export const learningAPI = {
+  // Section Management
+  createSection: (spaceId, sectionData) => api.post(`/spaces/${spaceId}/sections`, sectionData),
+  getSections: (spaceId) => api.get(`/spaces/${spaceId}/sections`),
+  updateSection: (spaceId, sectionId, sectionData) => api.put(`/spaces/${spaceId}/sections/${sectionId}`, sectionData),
+  deleteSection: (spaceId, sectionId) => api.delete(`/spaces/${spaceId}/sections/${sectionId}`),
+  
   // Lesson Management
   createLesson: (spaceId, lessonData) => api.post(`/spaces/${spaceId}/lessons`, lessonData),
   getLessons: (spaceId) => api.get(`/spaces/${spaceId}/lessons`),
