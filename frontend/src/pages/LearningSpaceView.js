@@ -739,7 +739,7 @@ export default function LearningSpaceView() {
 
                     {/* Comments List */}
                     <div className="space-y-4">
-                      {comments.map((comment) => (
+                      {Array.isArray(comments) && comments.map((comment) => (
                         <div key={comment.id} className="p-4 bg-gray-50 rounded-lg">
                           <div className="flex items-start gap-3">
                             <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-semibold">
@@ -749,13 +749,13 @@ export default function LearningSpaceView() {
                               <div className="font-semibold">{comment.author?.name || 'User'}</div>
                               <p className="mt-1 whitespace-pre-wrap">{comment.content}</p>
                               <div className="text-xs text-gray-500 mt-2">
-                                {new Date(comment.created_at).toLocaleDateString()}
+                                {comment.created_at ? new Date(comment.created_at).toLocaleDateString() : ''}
                               </div>
                             </div>
                           </div>
                         </div>
                       ))}
-                      {comments.length === 0 && (
+                      {(!Array.isArray(comments) || comments.length === 0) && (
                         <p className="text-gray-500 text-center py-8">No comments yet. Be the first to ask a question!</p>
                       )}
                     </div>
