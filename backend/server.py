@@ -261,16 +261,26 @@ class SpaceInvite(BaseModel):
 
 # ==================== LEARNING SPACE MODELS ====================
 
+class Section(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    space_id: str
+    name: str
+    description: Optional[str] = None
+    order: int = 0  # Order within the space
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 class Lesson(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     space_id: str
-    section_name: Optional[str] = None  # Optional grouping like "Starter Kit", "Base Camp Materials"
+    section_id: Optional[str] = None  # Link to Section
+    section_name: Optional[str] = None  # Deprecated - kept for backward compatibility
     title: str
     description: Optional[str] = None
     video_url: Optional[str] = None  # YouTube URL
     content: Optional[str] = None  # Rich text content (HTML)
-    order: int = 0  # Order within the space/section
+    order: int = 0  # Order within the section
     duration: Optional[int] = None  # Duration in minutes (optional)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
