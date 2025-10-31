@@ -137,9 +137,20 @@ export default function LearningSpaceView() {
   };
 
   const handleLessonClick = (lesson) => {
-    setSelectedLesson(lesson);
-    setActiveTab('overview');
-    setWatchPercentage(lesson.watch_percentage || 0);
+    try {
+      if (!lesson || !lesson.id) {
+        console.error('Invalid lesson data:', lesson);
+        toast.error('Invalid lesson data');
+        return;
+      }
+      console.log('Selecting lesson:', lesson.title, lesson.id);
+      setSelectedLesson(lesson);
+      setActiveTab('overview');
+      setWatchPercentage(lesson.watch_percentage || 0);
+    } catch (error) {
+      console.error('Error in handleLessonClick:', error);
+      toast.error('Failed to load lesson');
+    }
   };
 
   const handleMarkComplete = async () => {
