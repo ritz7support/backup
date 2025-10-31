@@ -113,17 +113,19 @@ export default function LearningSpaceView() {
     // Fetch notes
     try {
       const notesResponse = await learningAPI.getNotes(lessonId);
-      setNotes(notesResponse.data);
+      setNotes(notesResponse.data || []);
     } catch (error) {
       console.error('Error fetching notes:', error);
+      setNotes([]);
     }
 
     // Fetch comments
     try {
       const commentsResponse = await learningAPI.getComments(lessonId);
-      setComments(commentsResponse.data);
+      setComments(commentsResponse.data || []);
     } catch (error) {
       console.error('Error fetching comments:', error);
+      setComments([]);
     }
   };
 
