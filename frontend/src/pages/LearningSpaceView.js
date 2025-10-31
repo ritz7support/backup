@@ -72,11 +72,23 @@ export default function LearningSpaceView() {
     }
   };
 
+  const fetchSections = async () => {
+    try {
+      const response = await learningAPI.getSections(spaceId);
+      setSectionsList(response.data);
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+    }
+  };
+
   const fetchLessons = async () => {
     try {
       const response = await learningAPI.getLessons(spaceId);
       setSections(response.data.sections);
       setAllLessons(response.data.lessons);
+      if (response.data.sections_list) {
+        setSectionsList(response.data.sections_list);
+      }
       
       // Auto-select first lesson if available
       if (response.data.lessons.length > 0 && !selectedLesson) {
