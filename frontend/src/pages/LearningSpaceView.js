@@ -635,10 +635,14 @@ export default function LearningSpaceView() {
               <div className="flex-1 overflow-y-auto p-6">
                 {activeTab === 'overview' && (
                   <div className="max-w-3xl">
-                    <div
-                      className="prose max-w-none"
-                      dangerouslySetInnerHTML={{ __html: selectedLesson.content || '<p className="text-gray-500">No content available</p>' }}
-                    />
+                    {selectedLesson.content ? (
+                      <div
+                        className="prose max-w-none"
+                        dangerouslySetInnerHTML={{ __html: selectedLesson.content }}
+                      />
+                    ) : (
+                      <p className="text-gray-500">No content available for this lesson.</p>
+                    )}
                   </div>
                 )}
 
