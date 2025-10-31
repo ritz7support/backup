@@ -588,11 +588,11 @@ export default function LearningSpaceView() {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {selectedLesson ? (
+        {selectedLesson && selectedLesson.id ? (
           <>
             {/* Lesson Header */}
             <div className="bg-white border-b border-gray-200 px-6 py-4">
-              <h1 className="text-2xl font-bold mb-2">{selectedLesson.title}</h1>
+              <h1 className="text-2xl font-bold mb-2">{selectedLesson.title || 'Untitled Lesson'}</h1>
               {selectedLesson.description && (
                 <p className="text-gray-600">{selectedLesson.description}</p>
               )}
