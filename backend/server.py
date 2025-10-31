@@ -3177,7 +3177,8 @@ async def create_lesson(
     # Create lesson
     lesson = Lesson(
         space_id=space_id,
-        section_name=lesson_data.get('section_name'),
+        section_id=lesson_data.get('section_id'),
+        section_name=lesson_data.get('section_name'),  # Keep for backward compatibility
         title=lesson_data['title'],
         description=lesson_data.get('description'),
         video_url=lesson_data.get('video_url'),
