@@ -801,17 +801,29 @@ export default function LearningSpaceView() {
             </div>
             
             <div className="p-6 space-y-4">
-              {/* Section Name */}
+              {/* Section Selection */}
               <div>
-                <label className="block text-sm font-medium mb-1">Section Name (optional)</label>
-                <input
-                  type="text"
-                  value={lessonForm.section_name}
-                  onChange={(e) => setLessonForm({ ...lessonForm, section_name: e.target.value })}
-                  placeholder="e.g., Getting Started, Advanced Topics"
+                <label className="block text-sm font-medium mb-1">Section *</label>
+                <select
+                  value={lessonForm.section_id}
+                  onChange={(e) => setLessonForm({ ...lessonForm, section_id: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <p className="text-xs text-gray-500 mt-1">Group lessons into sections for better organization</p>
+                  required
+                >
+                  <option value="">Select a section</option>
+                  {sectionsList.map((section) => (
+                    <option key={section.id} value={section.id}>
+                      {section.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  {sectionsList.length === 0 ? (
+                    <span className="text-orange-600">Please create a section first using "Create Section" button</span>
+                  ) : (
+                    'Select which section this lesson belongs to'
+                  )}
+                </p>
               </div>
 
               {/* Title */}
