@@ -244,10 +244,71 @@ export default function LearningSpaceView() {
   };
 
   // Admin Functions
+  const handleCreateSection = () => {
+    setEditingSection(null);
+    setSectionForm({
+      name: '',
+      description: '',
+      order: sectionsList.length
+    });
+    setShowSectionForm(true);
+  };
+
+  const handleEditSection = (section) => {
+    setEditingSection(section);
+    setSectionForm({
+      name: section.name,
+      description: section.description || '',
+      order: section.order
+    });
+    setShowSectionForm(true);
+  };
+
+  const handleSaveSection = async () => {
+    if (!sectionForm.name.trim()) {
+      toast.error('Please enter a section name');
+      return;
+    }
+
+    try {
+      if (editingSection) {
+        await learningAPI.updateSection(spaceId, editingSection.id, sectionForm);
+        toast.success('Section updated successfully!');
+      } else {
+        await learningAPI.createSection(spaceId, sectionForm);
+        toast.success('Section created successfully!');
+      }
+      
+      setShowSectionForm(false);
+      setEditingSection(null);
+      fetchSections();
+      fetchLessons();
+    } catch (error) {
+      console.error('Error saving section:', error);
+      toast.error('Failed to save section');
+    }
+  };
+
+  const handleDeleteSection = async (sectionId) => {
+    if (!window.confirm('Are you sure you want to delete this section? Lessons will be moved to Uncategorized.')) {
+      return;
+    }
+
+    try {
+      await learningAPI.deleteSection(spaceId, sectionId);
+      toast.success('Section deleted successfully!');
+      fetchSections();
+      fetchLessons();
+    } catch (error) {
+      console.error('Error deleting section:', error);
+      toast.error('Failed to delete section');
+    }
+  };
+
   const handleCreateLesson = () => {
     setEditingLesson(null);
     setLessonForm({
-      section_name: '',
+      section_id: '',
       title: '',
       description: '',
       video_url: '',
@@ -261,7 +322,7 @@ export default function LearningSpaceView() {
   const handleEditLesson = (lesson) => {
     setEditingLesson(lesson);
     setLessonForm({
-      section_name: lesson.section_name || '',
+      section_id: lesson.section_id || '',
       title: lesson.title,
       description: lesson.description || '',
       video_url: lesson.video_url || '',
