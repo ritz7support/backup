@@ -3064,6 +3064,98 @@ async def react_to_comment(comment_id: str, emoji: str, user: User = Depends(req
 
 # ==================== LEARNING SPACE ENDPOINTS ====================
 
+@api_router.post("/spaces/{space_id}/sections")
+async def create_section(
+    space_id: str,
+    section_data: dict,
+    user: User = Depends(require_auth)
+):
+    """Create a new section in a learning space (admin/manager only)"""
+    if not await is_space_manager_or_admin(user, space_id):
+        raise HTTPException(status_code=403, detail="Only admins and space managers can create sections")
+    
+    # Verify space exists and is a learning space
+    space = await db.spaces.find_one({"id": space_id})
+    if not space:
+        raise HTTPException(status_code=404, detail="Space not found")
+    if space.get('space_type') != 'learning':
+        raise HTTPException(status_code=400, detail="This space is not a learning space")
+    
+    # Create section
+    section = Section(
+        space_id=space_id,
+        name=section_data['name'],
+        description=section_data.get('description'),
+        order=section_data.get('order', 0)
+    )
+    
+    await db.sections.insert_one(section.model_dump())
+    return section
+
+@api_router.get("/spaces/{space_id}/sections")
+async def get_space_sections(
+    space_id: str,
+    user: User = Depends(require_auth)
+):
+    """Get all sections for a learning space"""
+    sections_cursor = db.sections.find({"space_id": space_id}).sort("order", 1)
+    sections = await sections_cursor.to_list(length=None)
+    
+    for section in sections:
+        section['_id'] = str(section['_id'])
+        # Count lessons in this section
+        lesson_count = await db.lessons.count_documents({"section_id": section['id']})
+        section['lesson_count'] = lesson_count
+    
+    return sections
+
+@api_router.put("/spaces/{space_id}/sections/{section_id}")
+async def update_section(
+    space_id: str,
+    section_id: str,
+    section_data: dict,
+    user: User = Depends(require_auth)
+):
+    """Update a section (admin/manager only)"""
+    if not await is_space_manager_or_admin(user, space_id):
+        raise HTTPException(status_code=403, detail="Only admins and space managers can update sections")
+    
+    update_data = {k: v for k, v in section_data.items() if v is not None}
+    
+    result = await db.sections.update_one(
+        {"id": section_id, "space_id": space_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Section not found")
+    
+    return {"message": "Section updated successfully"}
+
+@api_router.delete("/spaces/{space_id}/sections/{section_id}")
+async def delete_section(
+    space_id: str,
+    section_id: str,
+    user: User = Depends(require_auth)
+):
+    """Delete a section (admin/manager only). Lessons in this section will be moved to 'Uncategorized'"""
+    if not await is_space_manager_or_admin(user, space_id):
+        raise HTTPException(status_code=403, detail="Only admins and space managers can delete sections")
+    
+    # Move lessons to null section_id (uncategorized)
+    await db.lessons.update_many(
+        {"section_id": section_id},
+        {"$set": {"section_id": None}}
+    )
+    
+    # Delete section
+    result = await db.sections.delete_one({"id": section_id, "space_id": space_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Section not found")
+    
+    return {"message": "Section deleted successfully. Lessons moved to Uncategorized."}
+
 @api_router.post("/spaces/{space_id}/lessons")
 async def create_lesson(
     space_id: str,
