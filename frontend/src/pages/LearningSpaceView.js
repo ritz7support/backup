@@ -463,9 +463,10 @@ export default function LearningSpaceView() {
             </div>
           )}
           
-          {Object.entries(sections).map(([sectionName, sectionLessons]) => {
-            // Find the section object to get its ID for edit/delete
-            const sectionObj = sectionsList.find(s => s.name === sectionName);
+          {Object.entries(sections).map(([sectionName, sectionData]) => {
+            // Extract section info from the new structure
+            const sectionObj = sectionsList.find(s => s.id === sectionData.section_id);
+            const sectionLessons = sectionData.lessons || sectionData; // Handle both old and new format
             
             return (
             <div key={sectionName} className="border-b border-gray-200">
@@ -476,18 +477,20 @@ export default function LearningSpaceView() {
                 >
                   <span className="font-semibold text-sm">{sectionName}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500">{sectionLessons.length} lessons</span>
+                    <span className="text-xs text-gray-500">{(Array.isArray(sectionLessons) ? sectionLessons : sectionData.lessons || []).length} lessons</span>
                     {collapsedSections[sectionName] ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </div>
                 </button>
                 
                 {/* Admin Controls for Sections */}
-                {isAdmin && showAdminPanel && sectionObj && sectionName !== 'Uncategorized' && (
+                {isAdmin && showAdminPanel && sectionData.section_id && (
                   <div className="absolute right-16 top-1/2 -translate-y-1/2 flex gap-1">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleEditSection(sectionObj);
+                        if (sectionObj) {
+                          handleEditSection(sectionObj);
+                        }
                       }}
                       className="p-1.5 bg-white hover:bg-purple-50 rounded border border-purple-200 shadow-sm"
                       title="Edit section"
@@ -497,7 +500,9 @@ export default function LearningSpaceView() {
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleDeleteSection(sectionObj.id);
+                        if (sectionData.section_id) {
+                          handleDeleteSection(sectionData.section_id);
+                        }
                       }}
                       className="p-1.5 bg-white hover:bg-red-50 rounded border border-red-200 shadow-sm"
                       title="Delete section"
@@ -510,7 +515,7 @@ export default function LearningSpaceView() {
 
               {!collapsedSections[sectionName] && (
                 <div>
-                  {sectionLessons.map((lesson) => (
+                  {(Array.isArray(sectionLessons) ? sectionLessons : sectionData.lessons || []).map((lesson) => (
                     <div
                       key={lesson.id}
                       className={`group relative border-l-2 ${
