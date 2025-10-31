@@ -735,32 +735,28 @@ def test_admin_only_access():
     
     print_info("Testing unauthenticated access...")
     
-    # Save current token
-    saved_token = session_token
+    # Make a direct request without auth token
+    url = f"{BACKEND_URL}/spaces/{test_space_id}/sections"
+    headers = {"Content-Type": "application/json"}
+    # No Authorization header
     
-    # Clear token to test unauthenticated access
-    session_token = None
-    
-    # Try to create a section without auth
-    response = make_request(
-        "POST",
-        f"/spaces/{test_space_id}/sections",
-        {
-            "name": "Unauthorized Section",
+    response = requests.post(
+        url,
+        headers=headers,
+        json={
+            "name": "Unauthorized Section Test",
             "description": "This should fail"
-        },
-        expected_status=401,
-        description="Attempt to create section without authentication (should fail)"
+        }
     )
     
-    # Restore token
-    session_token = saved_token
+    print_info(f"POST /spaces/{test_space_id}/sections - Status: {response.status_code}")
     
-    if response is None:
+    if response.status_code == 401:
         print_success("Unauthenticated access properly rejected (401 Unauthorized)")
         return True
     else:
-        print_error("Unauthenticated request should have failed with 401")
+        print_error(f"Expected 401 Unauthorized, got {response.status_code}")
+        print_error(f"Response: {response.text}")
         return False
 
 def run_all_tests():
