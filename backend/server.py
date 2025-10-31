@@ -3201,6 +3201,10 @@ async def get_space_lessons(
     if not space:
         raise HTTPException(status_code=404, detail="Space not found")
     
+    # Get all sections for this space
+    sections_cursor = db.sections.find({"space_id": space_id}).sort("order", 1)
+    sections_list = await sections_cursor.to_list(length=None)
+    
     # Get all lessons for this space, sorted by order
     lessons_cursor = db.lessons.find({"space_id": space_id}).sort("order", 1)
     lessons = await lessons_cursor.to_list(length=None)
@@ -3217,14 +3221,20 @@ async def get_space_lessons(
         lesson['watch_percentage'] = progress.get('watch_percentage', 0.0)
     
     # Group lessons by section
-    sections = {}
-    for lesson in lessons:
-        section = lesson.get('section_name') or 'General'
-        if section not in sections:
-            sections[section] = []
-        sections[section].append(lesson)
+    sections_dict = {}
     
-    return {"sections": sections, "lessons": lessons}
+    # Add defined sections
+    for section in sections_list:
+        section['_id'] = str(section['_id'])
+        section_lessons = [l for l in lessons if l.get('section_id') == section['id']]
+        sections_dict[section['name']] = section_lessons
+    
+    # Add uncategorized lessons
+    uncategorized = [l for l in lessons if not l.get('section_id')]
+    if uncategorized:
+        sections_dict['Uncategorized'] = uncategorized
+    
+    return {"sections": sections_dict, "lessons": lessons, "sections_list": sections_list}
 
 @api_router.get("/lessons/{lesson_id}")
 async def get_lesson(
