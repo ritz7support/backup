@@ -338,6 +338,11 @@ export default function LearningSpaceView() {
       toast.error('Please enter a lesson title');
       return;
     }
+    
+    if (!lessonForm.section_id) {
+      toast.error('Please select a section');
+      return;
+    }
 
     try {
       if (editingLesson) {
