@@ -56,10 +56,10 @@ export default function LearningSpaceView() {
   }, [spaceId]);
 
   useEffect(() => {
-    if (selectedLesson) {
+    if (selectedLesson && selectedLesson.id) {
       fetchLessonData(selectedLesson.id);
     }
-  }, [selectedLesson]);
+  }, [selectedLesson?.id]);
 
   const fetchSpaceData = async () => {
     try {
