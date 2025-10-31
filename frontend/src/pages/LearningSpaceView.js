@@ -456,18 +456,50 @@ export default function LearningSpaceView() {
             </div>
           )}
           
-          {Object.entries(sections).map(([sectionName, sectionLessons]) => (
+          {Object.entries(sections).map(([sectionName, sectionLessons]) => {
+            // Find the section object to get its ID for edit/delete
+            const sectionObj = sectionsList.find(s => s.name === sectionName);
+            
+            return (
             <div key={sectionName} className="border-b border-gray-200">
-              <button
-                onClick={() => toggleSection(sectionName)}
-                className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
-              >
-                <span className="font-semibold text-sm">{sectionName}</span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">{sectionLessons.length} lessons</span>
-                  {collapsedSections[sectionName] ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                </div>
-              </button>
+              <div className="group relative">
+                <button
+                  onClick={() => toggleSection(sectionName)}
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50"
+                >
+                  <span className="font-semibold text-sm">{sectionName}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">{sectionLessons.length} lessons</span>
+                    {collapsedSections[sectionName] ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </div>
+                </button>
+                
+                {/* Admin Controls for Sections */}
+                {isAdmin && showAdminPanel && sectionObj && sectionName !== 'Uncategorized' && (
+                  <div className="absolute right-16 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditSection(sectionObj);
+                      }}
+                      className="p-1.5 bg-white hover:bg-purple-50 rounded border border-gray-200"
+                      title="Edit section"
+                    >
+                      <Edit className="h-3.5 w-3.5 text-purple-600" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSection(sectionObj.id);
+                      }}
+                      className="p-1.5 bg-white hover:bg-red-50 rounded border border-gray-200"
+                      title="Delete section"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-red-600" />
+                    </button>
+                  </div>
+                )}
+              </div>
 
               {!collapsedSections[sectionName] && (
                 <div>
